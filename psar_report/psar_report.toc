@@ -13,3 +13,4 @@
 \contentsline {subsection}{\numberline {2.4}Théorèmes}{8}{subsection.2.4}%
 \contentsline {subsection}{\numberline {2.5}Algorithmes des nœuds}{9}{subsection.2.5}%
 \contentsline {subsection}{\numberline {2.6}Algorithmes de la Finger Table}{10}{subsection.2.6}%
+\contentsline {section}{\numberline {3}Pastry}{11}{section.3}%
