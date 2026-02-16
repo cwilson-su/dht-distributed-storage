@@ -1,16 +1,16 @@
 \babel@toc {french}{}\relax 
 \contentsline {section}{\numberline {1}Introduction aux DHTs : Résumé des notes de cours}{2}{section.1}%
 \contentsline {subsection}{\numberline {1.1}Introduction au problème du Lookup (ref. Section 7.1)}{2}{subsection.1.1}%
-\contentsline {subsection}{\numberline {1.2}Comparaison des stratégies de recherche (ref. Section 7.1.1 - 7.1.5)}{2}{subsection.1.2}%
-\contentsline {subsection}{\numberline {1.3}Fondamentaux des Distributed Hash Tables (ref. Section 7.2)}{3}{subsection.1.3}%
-\contentsline {subsection}{\numberline {1.4}Mécanismes des DHTs (ref. Section 7.3)}{4}{subsection.1.4}%
-\contentsline {subsection}{\numberline {1.5}Interfaces des DHTs (ref. Section 7.4)}{5}{subsection.1.5}%
-\contentsline {subsection}{\numberline {1.6}Conclusions (ref. Section 7.5)}{6}{subsection.1.6}%
-\contentsline {section}{\numberline {2}Chord}{7}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Design du système et philosophie}{7}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Consistent Hashing et l'Identifier Circle}{7}{subsection.2.2}%
-\contentsline {subsection}{\numberline {2.3}Localisation de clés scalable : Finger Tables}{7}{subsection.2.3}%
-\contentsline {subsection}{\numberline {2.4}Théorèmes}{8}{subsection.2.4}%
-\contentsline {subsection}{\numberline {2.5}Algorithmes des nœuds}{9}{subsection.2.5}%
-\contentsline {subsection}{\numberline {2.6}Algorithmes de la Finger Table}{10}{subsection.2.6}%
-\contentsline {section}{\numberline {3}Pastry}{11}{section.3}%
+\contentsline {subsection}{\numberline {1.2}Comparaison des stratégies de recherche (ref. Section 7.1.1 - 7.1.5)}{3}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Fondamentaux des Distributed Hash Tables (ref. Section 7.2)}{5}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Mécanismes des DHTs (ref. Section 7.3)}{7}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}Interfaces des DHTs (ref. Section 7.4)}{8}{subsection.1.5}%
+\contentsline {subsection}{\numberline {1.6}Conclusions (ref. Section 7.5)}{9}{subsection.1.6}%
+\contentsline {section}{\numberline {2}Chord}{10}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Design du système et philosophie}{10}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Consistent Hashing et l'Identifier Circle}{10}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Localisation de clés scalable : Finger Tables}{10}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Théorèmes}{11}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Algorithmes des nœuds}{12}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Algorithmes de la Finger Table}{14}{subsection.2.6}%
+\contentsline {section}{\numberline {3}Pastry}{15}{section.3}%

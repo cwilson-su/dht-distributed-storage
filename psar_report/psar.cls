@@ -103,6 +103,19 @@
   }
 }
 
+% Definition of the theorem box with a title
+\newtcolorbox{theorembox}[1]{
+  colback=gray!5,          % Body background (very light grey)
+  colframe=gray!50,        % Border and Title background (medium grey)
+  coltitle=black,          % Title text color
+  fonttitle=\bfseries,     % Title font weight
+  title={#1},              % The argument you pass (e.g., "Théorème 1")
+  arc=3mm,                 % Rounded corners
+  boxrule=0.5pt,           % Border thickness
+  left=6pt, right=6pt, top=6pt, bottom=6pt,
+  enhanced                 % Better drawing engine
+}
+
 % ----------- for links --------------
 %\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue]{hyperref}
 \usepackage[hidelinks]{hyperref}

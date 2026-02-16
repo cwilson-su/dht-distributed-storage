@@ -1,6 +1,6 @@
 \section{Introduction aux DHTs : Résumé des notes de cours}
 
-Je me suis largement inspiré de l'intégralité de ces notes pour fournir une vue d'ensemble complète du sujet. J'ai trouvé ces notes de cours particulièrement exhaustives car elles couvrent, à mon sens, tous les aspects : de l'histoire à l'adressage de bas niveau et au \emph{"content-based routing"}, jusqu'aux interfaces applicatives de haut niveau. Ce document offre une feuille de route complète pour comprendre comment les systèmes modernes massivement distribués restent stables sous une \emph{"heavy network load"}.
+Cette section s'appuie sur l'intégralité des notes de cours référencées afin de fournir une vue d'ensemble exhaustive du sujet. Ces notes sont considérées comme particulièrement complètes dans la mesure où elles couvrent l'ensemble du spectre technologique : de l'historique des systèmes distribués à l'adressage de bas niveau et au \emph{"content-based routing"}, jusqu'aux interfaces applicatives de haut niveau. Ce document offre une feuille de route permettant de comprendre comment les systèmes massivement distribués maintiennent leur stabilité sous une \emph{"heavy network load"}.
 
 \begin{tcolorbox}[bluebox]
 \textbf{Référence} : \fullcite{DBLP:conf/p2p/WehrleGR05}.
@@ -10,7 +10,7 @@ Je me suis largement inspiré de l'intégralité de ces notes pour fournir une v
 
 Le document débute en notant une transition des systèmes distribués vers des réseaux massifs comptant des millions de participants, tels que Skype et BitTorrent. Ces systèmes doivent gérer la \emph{"scalability, flexibility, and instant deployment"} sans aucun contrôle centralisé.
 
-Au cœur de ces réseaux se trouve le \textbf{lookup problem}. Je trouve intéressant la manière dont le document indique que ce problème peut être réduit à une seule question :
+Au cœur de ces réseaux réside le \textbf{lookup problem}. Il est intéressant de noter que le document réduit cette problématique à une question unique :
 
 \begin{quote}
 \emph{"Où stocker, et comment trouver un certain élément de donnée D dans un système distribué sans aucun contrôle ou coordination centralisés ?"}.
@@ -18,6 +18,14 @@ Au cœur de ces réseaux se trouve le \textbf{lookup problem}. Je trouve intére
 
 L'objectif est qu'un nœud puisse récupérer un élément de donnée D spécifique sans avoir de connaissance préalable de l'emplacement actuel de D.
 
+\begin{figure}[!ht]
+	\centering
+		\includegraphics[width=0.7\textwidth]{images/00_lookup_problem.png}
+	\caption{\textbf{Le problème du lookup} : le nœud A souhaite stocker un élément de donnée D dans le système distribué. Le nœud B souhaite récupérer D sans connaissance préalable de l'emplacement actuel de D. Comment le système distribué — notamment le placement et la récupération des données — doit-il être organisé (en particulier au regard de la \emph{scalability} et de l'efficacité) ?}
+	\label{fig:00_lookup_problem}
+\end{figure}
+
+\newpage
 \subsection{Comparaison des stratégies de recherche (ref. Section 7.1.1 - 7.1.5)}
 
 Pour justifier l'usage des DHTs, le texte compare trois méthodes principales de gestion et de récupération des données :
@@ -29,6 +37,14 @@ En termes de performance, elle est très rapide, avec une complexité de recherc
 
 Cependant, elle représente un \emph{"single point of failure"}. Si le serveur échoue ou est attaqué, l'ensemble du système devient inutilisable.
 
+\begin{figure}[!ht]
+	\centering
+		\includegraphics[width=0.7\textwidth]{images/01_central_server.png}
+	\caption{\textbf{Central Server} : (1) Le nœud A publie son contenu sur le serveur central S. (2) Un nœud B interroge le serveur central S pour obtenir la localisation réelle d'un élément de donnée D. (3) Si celui-ci existe, S répond en indiquant la localisation de D. (4) Le nœud demandeur B télécharge le contenu directement depuis le nœud A.}
+	\label{fig:01_central_server}
+\end{figure}
+
+
 \subsubsection*{2. Flooding Search}
 
 Utilisée par les systèmes de "deuxième génération" comme Gnutella, cette méthode supprime totalement le serveur.
@@ -37,18 +53,44 @@ Le mécanisme consiste en l'envoi par un nœud d'une requête à ses voisins, qu
 
 Sa scalabilité est médiocre car l'\emph{"communication overhead"} est extrêmement élevé. De plus, les résultats de recherche ne sont pas garantis car la recherche ne couvre qu'un nombre limité de \emph{hops}, n'offrant donc pas la fiabilité requise pour ces applications.
 
+
+\begin{figure}[!ht]
+	\centering
+		\includegraphics[width=0.7\textwidth]{images/02_flooding_search.png}
+	\caption{\textbf{Flooding Search} : Aucune information de routage n'est maintenue dans les nœuds intermédiaires. (1) Le nœud A envoie une requête pour l'élément D à ses "neighbours" au sein du système distribué. Ces derniers transmettent la requête aux nœuds suivants de manière récursive (\emph{flooding} / \emph{breadth-first search}). (2) Le ou les nœuds stockant D envoient une réponse à A, puis A télécharge D directement depuis le ou les nœuds ayant répondu.}
+	\label{fig:02_flooding_search}
+\end{figure}
+
+\newpage
 \subsubsection*{3. Distributed Hash Tables (DHTs)}
 
 Le document décrit les DHTs comme la \emph{"golden path"} évitant les inconvénients des deux autres méthodes.
 
 Elles sont souvent appelées \emph{"structured Peer-to-Peer systems"} car elles utilisent des procédures proactives pour organiser le réseau. Chaque nœud ne gère qu'un petit nombre de références (\(O(\log N)\)), et les données peuvent être localisées en \(O(\log N)\) \emph{hops}.
 
+\begin{figure}[!ht]
+	\centering
+		\includegraphics[width=0.7\textwidth]{images/04_dht_principle.png}
+	\caption{ \textbf{Distributed Hash Table} : Les nœuds du système distribué s'organisent en un \emph{structured overlay} et établissent une quantité restreinte d'informations de routage afin d'assurer un routage rapide et efficace vers les autres nœuds de l'\emph{overlay}. (1) Le nœud A envoie une requête pour l'élément D à un nœud arbitraire de la DHT. (2) La requête est transmise selon le routage de la DHT en $O(\log N)$ \emph{hops} vers le nœud cible. (3) Le nœud cible envoie D au nœud A.}
+	\label{fig:04_dht_principle}
+\end{figure}
+
+
 \par\null
 
 Réf : La Table 7.1 et la Figure 7.4 fournissent une comparaison directe de ces complexités, soulignant que les DHTs offrent le meilleur équilibre entre efficacité et robustesse.
 
+\begin{figure}[!ht]
+	\centering
+		\includegraphics[width=0.7\textwidth]{images/03_comparison_central_flooding_dht.png}
+	\caption{Comparaison de la complexité en termes d'effort de recherche (axe y) et de coût de stockage par nœud (axe x). Les goulots d'étranglement (\emph{bottlenecks}) ainsi que les caractéristiques spécifiques de chaque approche sont indiqués.}
+	\label{fig:03_comparison_central_flooding_dht}
+\end{figure}
+
+
 \par\null
 
+\newpage
 \subsection{Fondamentaux des Distributed Hash Tables (ref. Section 7.2)}
 
 Cette section explore la stratégie proactive utilisée par les DHTs pour gérer les données, garantissant que chaque nœud possède un rôle spécifique et prévisible dans le réseau. Les DHTs gèrent les données en les distribuant entre les nœuds et en utilisant un \emph{"deterministic routing scheme"}.
@@ -73,6 +115,22 @@ Les éléments de données reçoivent un \emph{"identifier ID"} unique dans le m
 
 Comme illustré dans la Figure 7.6, l'espace d'adressage est souvent interprété géométriquement comme un cercle ou un anneau.
 
+\begin{figure}[!ht]
+	\centering
+		\includegraphics[width=0.7\textwidth]{images/05_a_linear_address_space_in_dht.png}
+	\caption{Un espace d'adressage linéaire avec des valeurs entières allant de 0 à 65,535. L'espace d'adressage est partitionné entre huit pairs.}
+	\label{fig:05_a_linear_address_space_in_dht}
+\end{figure}
+
+
+\begin{figure}[!ht]
+	\centering
+		\includegraphics[width=0.7\textwidth]{images/06_underlay_view_of_dht.png}
+	\caption{Vue d'ensemble et vue du réseau sous-jacent (\emph{underlay}) d'une Distributed Hash Table.}
+	\label{fig:06_underlay_view_of_dht}
+\end{figure}
+
+
 \subsubsection*{Routage (ref. Section 7.2.3)}
 
 Le routage est la fonctionnalité centrale qui résout le \emph{lookup problem}. Les nœuds ne connaissent pas tous les autres nœuds ; ils ne stockent qu'un \emph{"bounded number of links"}.
@@ -82,6 +140,16 @@ Si un nœud reçoit un message pour un ID qu'il ne possède pas, il le transmet 
 \subsubsection*{Méthodes de stockage (ref. Section 7.2.4)}
 
 Il existe deux manières principales de stocker les données une fois le nœud responsable localisé, comme illustré dans la Figure 7.8 :
+
+
+\begin{figure}[!ht]
+	\centering
+		\includegraphics[width=0.7\textwidth]{images/07_direct_indirect_storage.png}
+	\caption{Comparaison des deux méthodes de stockage des données au sein des Distributed Hash Tables : le \emph{Direct Storage} et l'\emph{Indirect Storage}.}
+	\label{fig:07_direct_indirect_storage}
+\end{figure}
+
+
 
 \textbf{Direct Storage} : La donnée réelle est copiée sur le nœud responsable. C'est excellent pour la \emph{availability} mais consomme plus de bande passante et de stockage.
 
@@ -127,8 +195,16 @@ En cas d'échec d'un nœud, les données applicatives qu'il stockait sont perdue
 Bien que les nœuds puissent être traités comme des \emph{"failed nodes"} s'ils disparaissent, les DHTs préfèrent que les nœuds notifient le système avant de partir. Ce départ volontaire permet au système de copier immédiatement les données du nœud sortant vers son \emph{successor}, de mettre à jour le routage plus rapidement (améliorant l'\emph{"routing efficiency"}) et de garantir le bon fonctionnement des mécanismes de \emph{"replication and load-balancing"}.
 
 \par\null
-
+\newpage
 \subsection{Interfaces des DHTs (ref. Section 7.4)}
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[width=0.5\textwidth]{images/08_interface_of_a_dht.png}
+	\caption{Interface d'une Distributed Hash Table. À travers une simple interface \textsf{put}/\textsf{get}, la DHT fait abstraction de la distribution des données entre les nœuds.}
+	\label{fig:08_interface_of_a_dht}
+\end{figure}
+
 
 Les notes de cours mentionnent deux angles principaux pour considérer la fonctionnalité d'une DHT : comme un système de routage ou comme un système de stockage.
 
@@ -147,6 +223,7 @@ Cette couche ajoute de la complexité en gérant la persistance et la fiabilité
 \subsubsection*{Interface Client (ref. Section 7.4.3)}
 
 Le document note également que des nœuds peuvent agir comme de simples \emph{"clients"}. Cela permet à des hôtes non-participants d'utiliser les services de la DHT sans rejoindre le réseau \emph{overlay}, ce qui est utile pour la fiabilité ou l'\emph{"access control"}.
+
 
 \newpage
 \subsection{Conclusions (ref. Section 7.5)}

@@ -56,49 +56,72 @@ L'article présente 8 théorèmes servant à justifier l'usage du \emph{consiste
 
 \par\null
 
-\textbf{Théorème 1} : \textit{Pour tout ensemble de $N$ nœuds et $K$ keys, avec une probabilité élevée : chaque nœud est responsable d'au plus $(1 + \epsilon)K/N$ keys. Lorsqu'un $(N+1)$\up{ème} nœud rejoint ou quitte le réseau, seules $O(K/N)$ keys sont déplacées.}
+\begin{theorembox}{Théorème 1}
+\textit{Pour tout ensemble de $N$ nœuds et $K$ keys, avec une probabilité élevée : chaque nœud est responsable d'au plus $(1 + \epsilon)K/N$ keys. Lorsqu'un $(N+1)$\up{ème} nœud rejoint ou quitte le réseau, seules $O(K/N)$ keys sont déplacées.}
+\end{theorembox}
 
 Ce premier théorème traite de l'efficacité avec laquelle Chord répartit les données sur le réseau, réalisant un \emph{"natural load balance"}. Il garantit qu'aucune machine ne devienne un goulot d'étranglement.
 
 \par\null
 
-\textbf{Théorème 2} : \textit{Avec une probabilité élevée, le nombre de nœuds devant être contactés pour trouver un successor dans un réseau de $N$ nœuds est en $O(\log N)$.}
+\begin{theorembox}{Théorème 2}
+\textit{Avec une probabilité élevée, le nombre de nœuds devant être contactés pour trouver un successor dans un réseau de $N$ nœuds est en $O(\log N)$.}
+\end{theorembox}
 
 Ce théorème démontre l'efficacité des \emph{lookups}, même dans des systèmes comptant des millions de nœuds. Il justifie la structure de la \textbf{finger table}, où chaque \emph{hop} est conçu pour réduire de moitié la distance vers l'ID cible.
 
 \par\null
 
-\textbf{Théorème 3} : \textit{Avec une probabilité élevée, tout nœud rejoignant ou quittant un réseau Chord de $N$ nœuds utilisera $O(\log^2 N)$ messages pour rétablir les finger tables et les invariants de routage.}
+\begin{theorembox}{Théorème 3}
+\textit{Avec une probabilité élevée, tout nœud rejoignant ou quittant un réseau Chord de $N$ nœuds utilisera $O(\log^2 N)$ messages pour rétablir les finger tables et les invariants de routage.}
+\end{theorembox}
+
 
 Le troisième théorème quantifie le coût du maintien de la structure du réseau lors de l'arrivée ou du départ de participants. Il permet aux développeurs d'estimer le \emph{"management overhead"} du système. Il montre que bien qu'un \emph{join} soit plus coûteux qu'un simple \emph{lookup}, il reste très performant à mesure que le réseau croît.
 
 \par\null
 
-\textbf{Théorème 4} : \emph{Dès qu'un nœud peut résoudre avec succès une requête donnée, il sera toujours en mesure de le faire à l'avenir.}
+\begin{theorembox}{Théorème 4}
+\emph{Dès qu'un nœud peut résoudre avec succès une requête donnée, il sera toujours en mesure de le faire à l'avenir.}
+\end{theorembox}
+
 
 Cette propriété garantit qu'une fois que le réseau a atteint un état où un chemin vers une \emph{key} existe, les routines de maintenance du protocole ne briseront pas cette connectivité.
 
 \par\null
 
-\textbf{Théorème 5} : \emph{Passé un certain délai après le dernier join, tous les successor pointers seront corrects.}
+\begin{theorembox}{Théorème 5}
+\emph{Passé un certain délai après le dernier join, tous les successor pointers seront corrects.}
+\end{theorembox}
+
 
 Le protocole \texttt{stabilize} garantit la convergence, ramenant ainsi le réseau vers un état de cercle parfait une fois que le \emph{"churn"} des nœuds entrants s'arrête.
 
 \par\null
 
-\textbf{Théorème 6 :} \textit{Si nous prenons un réseau stable de $N$ nœuds, et qu'un autre ensemble allant jusqu'à $N$ nœuds rejoint le réseau sans finger pointers (mais avec des successor pointers corrects), alors les lookups prendront toujours un temps en $O(\log N)$ avec une probabilité élevée.}
+\begin{theorembox}{Théorème 6}
+\textit{Si nous prenons un réseau stable de $N$ nœuds, et qu'un autre ensemble allant jusqu'à $N$ nœuds rejoint le réseau sans finger pointers (mais avec des successor pointers corrects), alors les lookups prendront toujours un temps en $O(\log N)$ avec une probabilité élevée.}
+\end{theorembox}
+
 
 Cela prouve que Chord est extrêmement résilient lors de phases de croissance. Même si un nombre massif de nouveaux nœuds rejoint le réseau sans avoir encore construit leurs \textbf{finger tables}, l'infrastructure existante garantit que la vitesse de recherche ne se dégrade pas.
 
 \par\null
 
-\textbf{Théorème 7 :} \textit{Si nous utilisons une successor list de longueur $r = O(\log N)$ dans un réseau initialement stable, et que chaque nœud échoue avec une probabilité de $1/2$, alors avec une probabilité élevée \texttt{find\_successor} renvoie le successor vivant le plus proche de la key demandée.}
+\begin{theorembox}{Théorème 7}
+\textit{Si nous utilisons une successor list de longueur $r = O(\log N)$ dans un réseau initialement stable, et que chaque nœud échoue avec une probabilité de $1/2$, alors avec une probabilité élevée \texttt{find\_successor} renvoie le successor vivant le plus proche de la key demandée.}
+\end{theorembox}
+
 
 Ce théorème valide le mécanisme de \textbf{Successor List}. Il prouve qu'avec seulement une quantité logarithmique de redondance, le système peut localiser les données de manière fiable, même si la moitié des machines du réseau disparaissent simultanément.
 
 \par\null
 
-\textbf{Théorème 8 :} \textit{Si nous utilisons une successor list de longueur $r = O(\log N)$ dans un réseau initialement stable, et que chaque nœud échoue avec une probabilité de $1/2$, alors le temps attendu pour exécuter \texttt{find\_successor} dans le réseau défaillant est en $O(\log N)$.}
+
+\begin{theorembox}{Théorème 8}
+\textit{Si nous utilisons une successor list de longueur $r = O(\log N)$ dans un réseau initialement stable, et que chaque nœud échoue avec une probabilité de $1/2$, alors le temps attendu pour exécuter \texttt{find\_successor} dans le réseau défaillant est en $O(\log N)$.}
+\end{theorembox}
+
 
 Il s'agit du pendant de performance du Théorème 7. Il garantit que non seulement la recherche trouvera le nœud correct après une défaillance de 50\%, mais qu'elle le fera avec la même efficacité logarithmique.
 
