@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.15)  16 FEB 2026 09:39
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.15)  16 FEB 2026 10:11
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1355,7 +1355,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
 [2]
-<images/00_lookup_problem.png, id=158, 1076.22075pt x 495.0495pt>
+<images/00_lookup_problem.png, id=163, 1076.22075pt x 495.0495pt>
 File: images/00_lookup_problem.png Graphic file (type png)
 <use images/00_lookup_problem.png>
 Package pdftex.def Info: images/00_lookup_problem.png  used on input line 44.
@@ -1375,12 +1375,12 @@ Overfull \hbox (11.15504pt too wide) in paragraph at lines 52--53
  m[]ethodes prin-ci-pales de ges-tion et de r[]ecup[]eration
  []
 
-<images/01_central_server.png, id=167, 965.40675pt x 455.90324pt>
+<images/01_central_server.png, id=172, 965.40675pt x 455.90324pt>
 File: images/01_central_server.png Graphic file (type png)
 <use images/01_central_server.png>
 Package pdftex.def Info: images/01_central_server.png  used on input line 63.
 (pdftex.def)             Requested size: 338.58632pt x 159.89548pt.
-<images/02_flooding_search.png, id=168, 952.7595pt x 395.076pt>
+<images/02_flooding_search.png, id=173, 952.7595pt x 395.076pt>
 File: images/02_flooding_search.png Graphic file (type png)
 <use images/02_flooding_search.png>
 Package pdftex.def Info: images/02_flooding_search.png  used on input line 80.
@@ -1399,12 +1399,12 @@ g[]ere qu'un pe-tit nombre de r[]ef[]erences ($\OML/cmm/m/it/10.95 O\OT1/cmr/m/
 n/10.95 ([] \OML/cmm/m/it/10.95 N\OT1/cmr/m/n/10.95 )$\OT1/qhv/m/n/10.95 ),
  []
 
-<images/04_dht_principle.png, id=175, 820.86674pt x 497.4585pt>
+<images/04_dht_principle.png, id=182, 820.86674pt x 497.4585pt>
 File: images/04_dht_principle.png Graphic file (type png)
 <use images/04_dht_principle.png>
 Package pdftex.def Info: images/04_dht_principle.png  used on input line 94.
 (pdftex.def)             Requested size: 338.58632pt x 205.18898pt.
-<images/03_comparison_central_flooding_dht.png, id=176, 895.54575pt x 491.436pt
+<images/03_comparison_central_flooding_dht.png, id=183, 895.54575pt x 491.436pt
 >
 File: images/03_comparison_central_flooding_dht.png Graphic file (type png)
 <use images/03_comparison_central_flooding_dht.png>
@@ -1419,14 +1419,14 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
 [5 <./images/02_flooding_search.png> <./images/04_dht_principle.png>]
-<images/05_a_linear_address_space_in_dht.png, id=185, 1079.232pt x 377.61075pt>
+<images/05_a_linear_address_space_in_dht.png, id=193, 1079.232pt x 377.61075pt>
 
 File: images/05_a_linear_address_space_in_dht.png Graphic file (type png)
 <use images/05_a_linear_address_space_in_dht.png>
 Package pdftex.def Info: images/05_a_linear_address_space_in_dht.png  used on i
 nput line 141.
 (pdftex.def)             Requested size: 338.58632pt x 118.464pt.
-<images/06_underlay_view_of_dht.png, id=186, 898.557pt x 401.0985pt>
+<images/06_underlay_view_of_dht.png, id=194, 898.557pt x 401.0985pt>
 File: images/06_underlay_view_of_dht.png Graphic file (type png)
 <use images/06_underlay_view_of_dht.png>
 Package pdftex.def Info: images/06_underlay_view_of_dht.png  used on input line
@@ -1441,7 +1441,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
 [6 <./images/03_comparison_central_flooding_dht.png>]
-<images/07_direct_indirect_storage.png, id=195, 1075.6185pt x 330.033pt>
+<images/07_direct_indirect_storage.png, id=206, 1075.6185pt x 330.033pt>
 File: images/07_direct_indirect_storage.png Graphic file (type png)
 <use images/07_direct_indirect_storage.png>
 Package pdftex.def Info: images/07_direct_indirect_storage.png  used on input l
@@ -1470,7 +1470,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
 [8]
-<images/08_interface_of_a_dht.png, id=215, 1129.821pt x 431.211pt>
+<images/08_interface_of_a_dht.png, id=230, 1129.821pt x 431.211pt>
 File: images/08_interface_of_a_dht.png Graphic file (type png)
 <use images/08_interface_of_a_dht.png>
 Package pdftex.def Info: images/08_interface_of_a_dht.png  used on input line 2
@@ -1572,7 +1572,7 @@ L3 programming layer <2025-12-24>
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `psar_report.out' has not changed.
-(rerunfilecheck)             Checksum: 98AE300ED75884D6D4B780D7C857A51B;4699.
+(rerunfilecheck)             Checksum: C644833B111B56C13D1DECF48D4FF1AF;5369.
 
 Package biblatex Warning: Please (re)run Biber on the file:
 (biblatex)                psar_report
@@ -1583,10 +1583,10 @@ Package logreq Info: Writing requests to 'psar_report.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 37127 strings out of 467870
- 756935 string characters out of 5417871
- 1649735 words of memory out of 5000000
- 65407 multiletter control sequences out of 15000+600000
+ 37148 strings out of 467870
+ 757341 string characters out of 5417871
+ 1649742 words of memory out of 5000000
+ 65412 multiletter control sequences out of 15000+600000
  673678 words of font info for 68 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  131i,12n,135p,960b,2383s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1603,9 +1603,9 @@ C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/public/tex-gyre/qhvb.
 pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/public/tex-gyre/
 qhvr.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/public/tex-
 gyre/qhvri.pfb>
-Output written on psar_report.pdf (18 pages, 1410924 bytes).
+Output written on psar_report.pdf (18 pages, 1414780 bytes).
 PDF statistics:
- 333 PDF objects out of 1000 (max. 8388607)
- 59 named destinations out of 1000 (max. 500000)
- 362 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 357 PDF objects out of 1000 (max. 8388607)
+ 75 named destinations out of 1000 (max. 500000)
+ 370 words of extra memory for PDF output out of 10000 (max. 10000000)
 

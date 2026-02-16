@@ -121,6 +121,9 @@
 \usepackage[hidelinks]{hyperref}
 
 
+\newcommand{\subsubsubsection}[1]{\paragraph{#1}}
+
+
 
 
 

@@ -8,53 +8,69 @@
 \babel@aux{french}{}
 \abx@aux@cite{0}{DBLP:conf/p2p/WehrleGR05}
 \abx@aux@segm{0}{0}{DBLP:conf/p2p/WehrleGR05}
-\@writefile{toc}{\contentsline {section}{\numberline {1}État de l'art}{2}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}Analyse Comparative des Paradigmes Architecturaux de Stockage Distribué}{2}{section.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{1. L'architecture P2P structurée (Les DHTs)}{2}{paragraph*.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{2. L'architecture hiérarchisée orientée colonnes (Modèle HBase)}{2}{paragraph*.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Étude des approches P2P structurée: Les DHTs}{2}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Introduction au problème du Lookup (ref. Section 7.1)}{3}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Étude des approches P2P structurée: Les DHTs}{2}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.1}Introduction au problème du Lookup (ref. Section 7.1)}{3}{subsubsection.1.1.1}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {Le problème du lookup} : le nœud A souhaite stocker un élément de donnée D dans le système distribué. Le nœud B souhaite récupérer D sans connaissance préalable de l'emplacement actuel de D. Comment le système distribué — notamment le placement et la récupération des données — doit-il être organisé (en particulier au regard de la \emph  {scalability} et de l'efficacité) ?}}{3}{figure.1}\protected@file@percent }
 \newlabel{fig:00_lookup_problem}{{1}{3}{\textbf {Le problème du lookup} : le nœud A souhaite stocker un élément de donnée D dans le système distribué. Le nœud B souhaite récupérer D sans connaissance préalable de l'emplacement actuel de D. Comment le système distribué — notamment le placement et la récupération des données — doit-il être organisé (en particulier au regard de la \emph {scalability} et de l'efficacité) ?}{figure.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Comparaison des stratégies de recherche (ref. Section 7.1.1 - 7.1.5)}{4}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.2}Comparaison des stratégies de recherche (ref. Section 7.1.1 - 7.1.5)}{4}{subsubsection.1.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{*}{4}{paragraph*.3}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Central Server} : (1) Le nœud A publie son contenu sur le serveur central S. (2) Un nœud B interroge le serveur central S pour obtenir la localisation réelle d'un élément de donnée D. (3) Si celui-ci existe, S répond en indiquant la localisation de D. (4) Le nœud demandeur B télécharge le contenu directement depuis le nœud A.}}{4}{figure.2}\protected@file@percent }
 \newlabel{fig:01_central_server}{{2}{4}{\textbf {Central Server} : (1) Le nœud A publie son contenu sur le serveur central S. (2) Un nœud B interroge le serveur central S pour obtenir la localisation réelle d'un élément de donnée D. (3) Si celui-ci existe, S répond en indiquant la localisation de D. (4) Le nœud demandeur B télécharge le contenu directement depuis le nœud A}{figure.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{*}{4}{paragraph*.4}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {Flooding Search} : Aucune information de routage n'est maintenue dans les nœuds intermédiaires. (1) Le nœud A envoie une requête pour l'élément D à ses "neighbours" au sein du système distribué. Ces derniers transmettent la requête aux nœuds suivants de manière récursive (\emph  {flooding} / \emph  {breadth-first search}). (2) Le ou les nœuds stockant D envoient une réponse à A, puis A télécharge D directement depuis le ou les nœuds ayant répondu.}}{5}{figure.3}\protected@file@percent }
 \newlabel{fig:02_flooding_search}{{3}{5}{\textbf {Flooding Search} : Aucune information de routage n'est maintenue dans les nœuds intermédiaires. (1) Le nœud A envoie une requête pour l'élément D à ses "neighbours" au sein du système distribué. Ces derniers transmettent la requête aux nœuds suivants de manière récursive (\emph {flooding} / \emph {breadth-first search}). (2) Le ou les nœuds stockant D envoient une réponse à A, puis A télécharge D directement depuis le ou les nœuds ayant répondu}{figure.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{*}{5}{paragraph*.5}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces  \textbf  {Distributed Hash Table} : Les nœuds du système distribué s'organisent en un \emph  {structured overlay} et établissent une quantité restreinte d'informations de routage afin d'assurer un routage rapide et efficace vers les autres nœuds de l'\emph  {overlay}. (1) Le nœud A envoie une requête pour l'élément D à un nœud arbitraire de la DHT. (2) La requête est transmise selon le routage de la DHT en $O(\log N)$ \emph  {hops} vers le nœud cible. (3) Le nœud cible envoie D au nœud A.}}{5}{figure.4}\protected@file@percent }
 \newlabel{fig:04_dht_principle}{{4}{5}{\textbf {Distributed Hash Table} : Les nœuds du système distribué s'organisent en un \emph {structured overlay} et établissent une quantité restreinte d'informations de routage afin d'assurer un routage rapide et efficace vers les autres nœuds de l'\emph {overlay}. (1) Le nœud A envoie une requête pour l'élément D à un nœud arbitraire de la DHT. (2) La requête est transmise selon le routage de la DHT en $O(\log N)$ \emph {hops} vers le nœud cible. (3) Le nœud cible envoie D au nœud A}{figure.4}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Comparaison de la complexité en termes d'effort de recherche (axe y) et de coût de stockage par nœud (axe x). Les goulots d'étranglement (\emph  {bottlenecks}) ainsi que les caractéristiques spécifiques de chaque approche sont indiqués.}}{6}{figure.5}\protected@file@percent }
 \newlabel{fig:03_comparison_central_flooding_dht}{{5}{6}{Comparaison de la complexité en termes d'effort de recherche (axe y) et de coût de stockage par nœud (axe x). Les goulots d'étranglement (\emph {bottlenecks}) ainsi que les caractéristiques spécifiques de chaque approche sont indiqués}{figure.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Fondamentaux des Distributed Hash Tables (ref. Section 7.2)}{6}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.3}Fondamentaux des Distributed Hash Tables (ref. Section 7.2)}{6}{subsubsection.1.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{*}{6}{paragraph*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{*}{6}{paragraph*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{*}{6}{paragraph*.8}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Un espace d'adressage linéaire avec des valeurs entières allant de 0 à 65,535. L'espace d'adressage est partitionné entre huit pairs.}}{7}{figure.6}\protected@file@percent }
 \newlabel{fig:05_a_linear_address_space_in_dht}{{6}{7}{Un espace d'adressage linéaire avec des valeurs entières allant de 0 à 65,535. L'espace d'adressage est partitionné entre huit pairs}{figure.6}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Vue d'ensemble et vue du réseau sous-jacent (\emph  {underlay}) d'une Distributed Hash Table.}}{7}{figure.7}\protected@file@percent }
 \newlabel{fig:06_underlay_view_of_dht}{{7}{7}{Vue d'ensemble et vue du réseau sous-jacent (\emph {underlay}) d'une Distributed Hash Table}{figure.7}{}}
+\@writefile{toc}{\contentsline {paragraph}{*}{7}{paragraph*.9}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Comparaison des deux méthodes de stockage des données au sein des Distributed Hash Tables : le \emph  {Direct Storage} et l'\emph  {Indirect Storage}.}}{7}{figure.8}\protected@file@percent }
 \newlabel{fig:07_direct_indirect_storage}{{8}{7}{Comparaison des deux méthodes de stockage des données au sein des Distributed Hash Tables : le \emph {Direct Storage} et l'\emph {Indirect Storage}}{figure.8}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Mécanismes des DHTs (ref. Section 7.3)}{8}{subsection.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Interfaces des DHTs (ref. Section 7.4)}{9}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.4}Mécanismes des DHTs (ref. Section 7.3)}{8}{subsubsection.1.1.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{*}{8}{paragraph*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{*}{8}{paragraph*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{*}{8}{paragraph*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.5}Interfaces des DHTs (ref. Section 7.4)}{9}{subsubsection.1.1.5}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Interface d'une Distributed Hash Table. À travers une simple interface \textsf  {put}/\textsf  {get}, la DHT fait abstraction de la distribution des données entre les nœuds.}}{9}{figure.9}\protected@file@percent }
 \newlabel{fig:08_interface_of_a_dht}{{9}{9}{Interface d'une Distributed Hash Table. À travers une simple interface \textsf {put}/\textsf {get}, la DHT fait abstraction de la distribution des données entre les nœuds}{figure.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Conclusions (ref. Section 7.5)}{10}{subsection.2.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Étude de l'approche hiérarchisée : HBase}{11}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Partitionnement par plages de clés}{11}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Avantages et limites}{11}{subsection.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Positionnement par rapport aux DHT}{12}{subsection.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Chord}{12}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Design du système et philosophie}{12}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Consistent Hashing et l'Identifier Circle}{12}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Localisation de clés scalable : Finger Tables}{12}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Théorèmes}{14}{subsection.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Algorithmes des nœuds}{15}{subsection.4.5}\protected@file@percent }
-\newlabel{the-successor-resolution-algorithm}{{4.5}{15}{}{subsection.4.5}{}}
-\newlabel{dynamic-ring-maintenance-joining-and-stabilisation}{{4.5}{16}{}{subsection.4.5}{}}
-\newlabel{resilience-the-successor-list-mechanism}{{4.5}{16}{}{subsection.4.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Algorithmes de la Finger Table}{17}{subsection.4.6}\protected@file@percent }
-\newlabel{finger-table-entry-calculation}{{4.6}{17}{}{subsection.4.6}{}}
-\newlabel{finger-table-initialisation}{{4.6}{17}{}{subsection.4.6}{}}
-\newlabel{proactive-table-maintenance}{{4.6}{17}{}{subsection.4.6}{}}
-\newlabel{updating-other-nodes}{{4.6}{17}{}{subsection.4.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Pastry}{18}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{*}{9}{paragraph*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{*}{9}{paragraph*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{*}{9}{paragraph*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.6}Conclusions (ref. Section 7.5)}{10}{subsubsection.1.1.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{*}{10}{paragraph*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{*}{10}{paragraph*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Étude de l'approche hiérarchisée : HBase}{11}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.1}Partitionnement par plages de clés}{11}{subsubsection.1.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.2}Avantages et limites}{11}{subsubsection.1.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.3}Positionnement par rapport aux DHT}{12}{subsubsection.1.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Justification du choix architectural}{12}{subsection.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Chord}{12}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Design du système et philosophie}{12}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Consistent Hashing et l'Identifier Circle}{12}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Localisation de clés scalable : Finger Tables}{13}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Théorèmes}{14}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Algorithmes des nœuds}{15}{subsection.2.5}\protected@file@percent }
+\newlabel{the-successor-resolution-algorithm}{{2.5}{15}{}{subsection.2.5}{}}
+\newlabel{dynamic-ring-maintenance-joining-and-stabilisation}{{2.5}{16}{}{subsection.2.5}{}}
+\newlabel{resilience-the-successor-list-mechanism}{{2.5}{16}{}{subsection.2.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Algorithmes de la Finger Table}{17}{subsection.2.6}\protected@file@percent }
+\newlabel{finger-table-entry-calculation}{{2.6}{17}{}{subsection.2.6}{}}
+\newlabel{finger-table-initialisation}{{2.6}{17}{}{subsection.2.6}{}}
+\newlabel{proactive-table-maintenance}{{2.6}{17}{}{subsection.2.6}{}}
+\newlabel{updating-other-nodes}{{2.6}{17}{}{subsection.2.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Pastry}{18}{section.3}\protected@file@percent }
 \abx@aux@read@bbl@mdfivesum{nobblfile}
 \abx@aux@read@bblrerun
 \gdef \@abspage@last{18}
