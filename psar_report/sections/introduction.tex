@@ -51,7 +51,7 @@ L'objectif est qu'un nœud puisse récupérer un élément de donnée D spécifi
 
 Pour justifier l'usage des DHTs, le texte compare trois méthodes principales de gestion et de récupération des données :
 
-\subsubsubsection*{1. Central Server}
+\subsubsubsection{1. Central Server}
 Cette approche de "première génération" (ex: Napster) implique un serveur central qui garde trace de l'emplacement de chaque élément.
 
 En termes de performance, elle est très rapide, avec une complexité de recherche de \(O(1)\). De plus, elle permet des \emph{"fuzzy and complex queries"} car le serveur possède une vue globale.
@@ -66,7 +66,7 @@ Cependant, elle représente un \emph{"single point of failure"}. Si le serveur �
 \end{figure}
 
 
-\subsubsubsection*{2. Flooding Search}
+\subsubsubsection{2. Flooding Search}
 
 Utilisée par les systèmes de "deuxième génération" comme Gnutella, cette méthode supprime totalement le serveur.
 
@@ -83,7 +83,7 @@ Sa scalabilité est médiocre car l'\emph{"communication overhead"} est extrême
 \end{figure}
 
 \newpage
-\subsubsubsection*{3. Distributed Hash Tables (DHTs)}
+\subsubsubsection{3. Distributed Hash Tables (DHTs)}
 
 Le document décrit les DHTs comme la \emph{"golden path"} évitant les inconvénients des deux autres méthodes.
 
@@ -116,7 +116,7 @@ Réf : La Table 7.1 et la Figure 7.4 fournissent une comparaison directe de ces 
 
 Cette section explore la stratégie proactive utilisée par les DHTs pour gérer les données, garantissant que chaque nœud possède un rôle spécifique et prévisible dans le réseau. Les DHTs gèrent les données en les distribuant entre les nœuds et en utilisant un \emph{"deterministic routing scheme"}.
 
-\subsubsubsection*{Gestion distribuée des données (ref. Section 7.2.1)}
+\subsubsubsection{Gestion distribuée des données (ref. Section 7.2.1)}
 
 Contrairement aux systèmes non structurés qui reposent sur un \emph{"reactive flooding"} pour trouver des éléments, une DHT est "proactive".
 
@@ -124,7 +124,7 @@ Chaque nœud se voit assigner une \emph{"range of data items"} spécifique dont 
 
 Le processus de routage traverse plusieurs nœuds, se rapprochant de la destination à chaque \emph{hop} jusqu'à ce que la cible soit atteinte.
 
-\subsubsubsection*{Adressage dans les Distributed Hash Tables (ref. Section 7.2.2)}
+\subsubsubsection{Adressage dans les Distributed Hash Tables (ref. Section 7.2.2)}
 
 Les DHTs fonctionnent en créant un \emph{"address space"} virtuel qui existe indépendamment de la topologie physique du réseau.
 
@@ -152,7 +152,7 @@ Comme illustré dans la Figure 7.6, l'espace d'adressage est souvent interprét�
 \end{figure}
 
 
-\subsubsubsection*{Routage (ref. Section 7.2.3)}
+\subsubsubsection{Routage (ref. Section 7.2.3)}
 
 Le routage est la fonctionnalité centrale qui résout le \emph{lookup problem}. Les nœuds ne connaissent pas tous les autres nœuds ; ils ne stockent qu'un \emph{"bounded number of links"}.
 
@@ -184,7 +184,7 @@ Cette section se concentre sur la gestion des données et des nœuds, spécifiqu
 
 Avant qu'un nœud puisse interagir avec les données, il doit rejoindre le réseau. Cette arrivée déclenche des changements dans l'infrastructure, nécessitant la mise à jour des informations de routage et de la distribution des données. À l'inverse, le système doit détecter et s'adapter chaque fois qu'un nœud quitte le réseau ou échoue.
 
-\subsubsubsection*{Arrivée de nœuds (ref. Section 7.3.2)}
+\subsubsubsection{Arrivée de nœuds (ref. Section 7.3.2)}
 
 Le document spécifie un processus en quatre étapes pour qu'un nouveau nœud rejoigne la DHT :
 
@@ -199,7 +199,7 @@ Le document spécifie un processus en quatre étapes pour qu'un nouveau nœud re
   \textbf{Data Transfer} : Le nouveau nœud récupère les paires \emph{(key, value)} dont il est désormais responsable auprès du nœud qui les détenait précédemment.
 \end{enumerate}
 
-\subsubsubsection*{Défaillance de nœuds (ref. Section 7.3.3)}
+\subsubsubsection{Défaillance de nœuds (ref. Section 7.3.3)}
 
 Parce que les systèmes distribués consistent souvent en des machines de bureau peu fiables et mal connectées, les défaillances sont fréquentes. Les DHTs gèrent cela via deux types de récupération :
 
@@ -211,7 +211,7 @@ En cas d'échec d'un nœud, les données applicatives qu'il stockait sont perdue
 
 \par\null
 
-\subsubsubsection*{Départ de nœuds (ref. Section 7.3.4)}
+\subsubsubsection{Départ de nœuds (ref. Section 7.3.4)}
 
 Bien que les nœuds puissent être traités comme des \emph{"failed nodes"} s'ils disparaissent, les DHTs préfèrent que les nœuds notifient le système avant de partir. Ce départ volontaire permet au système de copier immédiatement les données du nœud sortant vers son \emph{successor}, de mettre à jour le routage plus rapidement (améliorant l'\emph{"routing efficiency"}) et de garantir le bon fonctionnement des mécanismes de \emph{"replication and load-balancing"}.
 
@@ -229,19 +229,19 @@ Bien que les nœuds puissent être traités comme des \emph{"failed nodes"} s'il
 
 Les notes de cours mentionnent deux angles principaux pour considérer la fonctionnalité d'une DHT : comme un système de routage ou comme un système de stockage.
 
-\subsubsubsection*{Interface de routage (ref. Section 7.4.1)}
+\subsubsubsection{Interface de routage (ref. Section 7.4.1)}
 
 Cette \emph{"stateless interface"} se concentre sur la livraison de paquets basés sur un ID de destination plutôt que sur une adresse IP physique.
 
 La primitive \emph{\texttt{send}} accepte un ID de destination et un message, le livrant au nœud responsable depuis n'importe quel point du réseau. La primitive \emph{\texttt{receive}} transmet les messages entrants et leurs identifiants à l'application sur le nœud récepteur. Cette interface étant générique, les développeurs peuvent implémenter leurs propres stratégies de stockage et de \emph{load-balancing}.
 
-\subsubsubsection*{Interface de stockage (ref. Section 7.4.2)}
+\subsubsubsection{Interface de stockage (ref. Section 7.4.2)}
 
 Cette couche ajoute de la complexité en gérant la persistance et la fiabilité des données. Comme le montre la Figure 7.9, elle imite une table de \emph{hash} standard.
 
 \texttt{put} prend une paire \emph{(key, value)} et la stocke sur le nœud responsable. \texttt{get} accepte un identifiant et renvoie la valeur associée. La couche de stockage doit gérer les \emph{"routing failures"}, prévenir la perte de données via la \emph{"replication"} et gérer l'\emph{"admission control"}.
 
-\subsubsubsection*{Interface Client (ref. Section 7.4.3)}
+\subsubsubsection{Interface Client (ref. Section 7.4.3)}
 
 Le document note également que des nœuds peuvent agir comme de simples \emph{"clients"}. Cela permet à des hôtes non-participants d'utiliser les services de la DHT sans rejoindre le réseau \emph{overlay}, ce qui est utile pour la fiabilité ou l'\emph{"access control"}.
 
@@ -251,7 +251,7 @@ Le document note également que des nœuds peuvent agir comme de simples \emph{"
 
 Le texte conclut en pesant les avantages significatifs des DHTs face à leurs défis persistants. Bien qu'elles résolvent les problèmes de \emph{scalability} des systèmes centralisés, elles ne constituent pas une solution universelle.
 
-\subsubsubsection*{Défis de conception}
+\subsubsubsection{Défis de conception}
 Les développeurs doivent naviguer entre plusieurs objectifs conflictuels :
 \begin{itemize}
 \item \textbf{Routing Efficiency} : Influencée par le nombre de références aux autres nœuds et la connaissance de la topologie au niveau IP.
@@ -259,7 +259,7 @@ Les développeurs doivent naviguer entre plusieurs objectifs conflictuels :
 \item \textbf{Churn} : Les taux élevés de \emph{joins} et \emph{leaves} simultanés exercent un stress particulier sur la stabilité globale, pouvant mener à des systèmes défectueux.
 \end{itemize}
 
-\subsubsubsection*{Limitations fondamentales}
+\subsubsubsection{Limitations fondamentales}
 Malgré leur efficacité, les DHTs font face à des défis liés au principe de l'indexation distribuée :
 \begin{itemize}
 \item \textbf{Untrusted Environments} : Difficulté d'opérer de manière fiable lorsque les nœuds sont malveillants (\emph{Byzantine faults}).
@@ -300,5 +300,4 @@ Autrement dit, HBase réalise un partitionnement déterminé et contrôlé avec 
 
 \subsection{Justification du choix architectural}
 
-\colorbox[rgb]{1,1,0}{SOMAYA ECRIT ICI!
-}
+\colorbox[rgb]{1,1,0}{SOMAYA ECRIT ICI!}

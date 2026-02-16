@@ -5,25 +5,10 @@
 \contentsline {subsection}{\numberline {1.1}Étude des approches P2P structurée: Les DHTs}{2}{subsection.1.1}%
 \contentsline {subsubsection}{\numberline {1.1.1}Introduction au problème du Lookup (ref. Section 7.1)}{3}{subsubsection.1.1.1}%
 \contentsline {subsubsection}{\numberline {1.1.2}Comparaison des stratégies de recherche (ref. Section 7.1.1 - 7.1.5)}{4}{subsubsection.1.1.2}%
-\contentsline {paragraph}{*}{4}{paragraph*.3}%
-\contentsline {paragraph}{*}{4}{paragraph*.4}%
-\contentsline {paragraph}{*}{5}{paragraph*.5}%
 \contentsline {subsubsection}{\numberline {1.1.3}Fondamentaux des Distributed Hash Tables (ref. Section 7.2)}{6}{subsubsection.1.1.3}%
-\contentsline {paragraph}{*}{6}{paragraph*.6}%
-\contentsline {paragraph}{*}{6}{paragraph*.7}%
-\contentsline {paragraph}{*}{6}{paragraph*.8}%
-\contentsline {paragraph}{*}{7}{paragraph*.9}%
 \contentsline {subsubsection}{\numberline {1.1.4}Mécanismes des DHTs (ref. Section 7.3)}{8}{subsubsection.1.1.4}%
-\contentsline {paragraph}{*}{8}{paragraph*.10}%
-\contentsline {paragraph}{*}{8}{paragraph*.11}%
-\contentsline {paragraph}{*}{8}{paragraph*.12}%
 \contentsline {subsubsection}{\numberline {1.1.5}Interfaces des DHTs (ref. Section 7.4)}{9}{subsubsection.1.1.5}%
-\contentsline {paragraph}{*}{9}{paragraph*.13}%
-\contentsline {paragraph}{*}{9}{paragraph*.14}%
-\contentsline {paragraph}{*}{9}{paragraph*.15}%
 \contentsline {subsubsection}{\numberline {1.1.6}Conclusions (ref. Section 7.5)}{10}{subsubsection.1.1.6}%
-\contentsline {paragraph}{*}{10}{paragraph*.16}%
-\contentsline {paragraph}{*}{10}{paragraph*.17}%
 \contentsline {subsection}{\numberline {1.2}Étude de l'approche hiérarchisée : HBase}{11}{subsection.1.2}%
 \contentsline {subsubsection}{\numberline {1.2.1}Partitionnement par plages de clés}{11}{subsubsection.1.2.1}%
 \contentsline {subsubsection}{\numberline {1.2.2}Avantages et limites}{11}{subsubsection.1.2.2}%

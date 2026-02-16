@@ -121,7 +121,18 @@
 \usepackage[hidelinks]{hyperref}
 
 
-\newcommand{\subsubsubsection}[1]{\paragraph{#1}}
+
+
+
+
+
+% ---------------------------- Sub-sub-subsection Configuration -------------------------
+
+\newcommand{\subsubsubsection}[1]{%
+  \par\addvspace{1em}      % Space above the header
+  \noindent\textbf{#1}     % The title in Bold, no indentation
+  \par\nobreak\vspace{0.3em} % New line, keep with next text, small space below
+}
 
 
 
