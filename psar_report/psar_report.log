@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.15)  16 FEB 2026 01:12
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.15)  16 FEB 2026 08:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1541,17 +1541,8 @@ L3 programming layer <2025-12-24>
 
 LaTeX Warning: There were undefined references.
 
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-
-Package rerunfilecheck Warning: File `psar_report.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `psar_report.out':
-(rerunfilecheck)             Before: F39B7FDE98C15E284F16379034BBEFD6;3712
-(rerunfilecheck)             After:  FAFF3A8D43BB26FCAFD29993637EDE3A;3697.
+Package rerunfilecheck Info: File `psar_report.out' has not changed.
+(rerunfilecheck)             Checksum: FAFF3A8D43BB26FCAFD29993637EDE3A;3697.
 
 Package biblatex Warning: Please (re)run Biber on the file:
 (biblatex)                psar_report
@@ -1564,7 +1555,7 @@ Package logreq Info: Writing requests to 'psar_report.run.xml'.
 Here is how much of TeX's memory you used:
  37109 strings out of 467870
  756718 string characters out of 5417871
- 1647107 words of memory out of 5000000
+ 1649735 words of memory out of 5000000
  65399 multiletter control sequences out of 15000+600000
  673678 words of font info for 68 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1582,7 +1573,7 @@ C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/public/tex-gyre/qhvb.
 pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/public/tex-gyre/
 qhvr.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/public/tex-
 gyre/qhvri.pfb>
-Output written on psar_report.pdf (15 pages, 1395884 bytes).
+Output written on psar_report.pdf (15 pages, 1395879 bytes).
 PDF statistics:
  293 PDF objects out of 1000 (max. 8388607)
  49 named destinations out of 1000 (max. 500000)
