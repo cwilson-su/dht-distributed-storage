@@ -1,0 +1,77 @@
+\section{Architecture du syst\`eme et cycle de vie d'une requ\^ete}
+
+\subsection{Choix architecturaux et probl\'ematique}
+
+Dans le cadre de notre projet, nous avons choisi d'impl\'ementer une architecture de stockage distribu\'ee reposant sur des protocoles de type Distributed Hash Table (DHT), et plus pr\'ecis\'ement sur Chord et Pastry. Ces deux protocoles partagent un objectif commun : organiser un ensemble de n\oe uds distribu\'es de mani\`ere totalement d\'ecentralis\'ee afin d'assurer le stockage et la localisation efficace de donn\'ees dans un espace d'identifiants partag\'e.
+
+Avant d'impl\'ementer ces protocoles, il est essentiel de comprendre pr\'ecis\'ement l'architecture que nous allons construire ainsi que le protocole applicatif qui s'appuiera dessus. Autrement dit, nous devons \^etre capables de r\'epondre aux questions suivantes :
+
+\begin{itemize}
+    \item \`A quel n\oe ud une requ\^ete est-elle envoy\'ee initialement ?
+    \item Comment est d\'etermin\'e le n\oe ud responsable d'une donn\'ee ?
+    \item Comment les n\oe uds communiquent-ils entre eux ?
+    \item Que se passe-t-il concr\`etement lors d'une op\'eration \'el\'ementaire telle que PUT ou GET ?
+    \item Quel est le cycle de vie complet d'une requ\^ete ?
+\end{itemize}
+
+Dans cette premi\`ere partie, nous d\'etaillons l'architecture retenue pour Chord, en analysant pr\'ecis\'ement la circulation des messages, la responsabilit\'e des n\oe uds et le traitement des requ\^etes. La m\^eme d\'emarche sera ensuite appliqu\'ee \`a Pastry.
+
+\subsubsection{Architecture g\'en\'erale bas\'ee sur Chord}
+
+R\'esumons l'architecture Chord vue pr\'ec\'edemment en indiquant les diff\'erentes variables qui nous seront indispensables lors de son impl\'ementation. L'architecture Chord repose sur un espace d'identifiants circulaire de taille $2^m$. Cet espace est partag\'e \`a la fois par les n\oe uds du syst\`eme et par les cl\'es des donn\'ees stock\'ees. Chaque n\oe ud re\c coit un identifiant unique calcul\'e via une fonction de hachage, et se positionne sur un anneau logique selon cet identifiant.
+
+Le principe fondamental de Chord est le suivant : une cl\'e est stock\'ee sur le premier n\oe ud dont l'identifiant est sup\'erieur ou \'egal \`a l'identifiant de la cl\'e dans le sens des aiguilles d'une montre. Ce n\oe ud est appel\'e le successeur de la cl\'e. Cette r\`egle garantit un placement d\'eterministe et uniforme des donn\'ees sans coordination centrale.
+
+Chaque n\oe ud maintient localement plusieurs structures essentielles :
+
+\begin{itemize}
+    \item son identifiant unique,
+    \item un pointeur vers son successeur,
+    \item un pointeur vers son pr\'ed\'ecesseur,
+    \item une table de routage appel\'ee finger table,
+    \item un stockage local des paires (cl\'e, valeur).
+\end{itemize}
+
+La finger table permet d'assurer un routage logarithmique. Chaque entr\'ee de cette table pointe vers un n\oe ud situ\'e exponentiellement plus loin sur l'anneau. Ainsi, lorsqu'un n\oe ud doit localiser le responsable d'une cl\'e, il peut se rapprocher de la destination en un nombre de sauts proportionnel \`a $O(\log N)$, o\`u $N$ est le nombre total de n\oe uds.
+
+\subsubsection{Couche Overlay et Couche applicative}
+
+Il est essentiel, dans notre impl\'ementation, de distinguer clairement deux niveaux fonctionnels qui coexistent au sein de chaque n\oe ud.
+
+Le premier niveau correspond \`a la couche overlay, c'est-\`a-dire le protocole Chord lui-m\^eme. Cette couche est responsable de l'organisation logique du r\'eseau en anneau, du maintien des pointeurs (successeur, pr\'ed\'ecesseur, finger table) et du routage des messages. Son r\^ole est exclusivement de r\'epondre \`a la question suivante : quel n\oe ud est responsable d'un identifiant donn\'e ? Autrement dit, Chord assure la localisation distribu\'ee des cl\'es.
+
+Le second niveau correspond \`a la couche applicative, que nous impl\'ementons au-dessus de Chord. Cette couche g\`ere concr\`etement le stockage des paires (cl\'e, valeur) sur le n\oe ud responsable. Elle impl\'emente les op\'erations \'el\'ementaires telles que PUT, GET ou DELETE, et d\'ecide \'eventuellement des m\'ecanismes de r\'eplication ou de gestion de la coh\'erence.
+
+Ainsi, Chord ne stocke pas directement les donn\'ees : il fournit un m\'ecanisme de routage d\'eterministe permettant d'identifier le bon n\oe ud. La gestion effective des donn\'ees repose sur la couche applicative locale de chaque n\oe ud.
+
+\subsubsection{Cycle de vie d'une requ\^ete}
+
+\subsubsubsection{Requ\^ete PUT}
+
+Lorsqu'un client souhaite ins\'erer une donn\'ee via PUT(key, value), la requ\^ete est envoy\'ee \`a un n\oe ud arbitraire du r\'eseau. Ce n\oe ud devient le point d'entr\'ee du syst\`eme, mais il n'est pas n\'ecessairement responsable de la cl\'e.
+
+Le n\oe ud calcule d'abord l'identifiant associ\'e \`a la cl\'e en appliquant la fonction de hachage. L'identifiant obtenu est positionn\'e dans le m\^eme espace circulaire que les n\oe uds.
+
+Le n\oe ud ex\'ecute alors la proc\'edure \texttt{find\_successor(id)}. Si l'identifiant appartient \`a l'intervalle compris entre le n\oe ud courant et son successeur, alors ce successeur est responsable. Sinon, le n\oe ud consulte sa finger table pour d\'eterminer le closest preceding node, c'est-\`a-dire le n\oe ud le plus proche pr\'ec\'edant la cible. La requ\^ete est alors transmise \`a ce n\oe ud. Ce processus se r\'ep\`ete r\'ecursivement jusqu'\`a atteindre le n\oe ud responsable.
+
+Une fois le n\oe ud responsable localis\'e, la paire (cl\'e, valeur) est stock\'ee localement. Pour assurer une tol\'erance aux pannes, cette donn\'ee peut \^etre r\'epliqu\'ee sur plusieurs successeurs afin d'assurer une redondance. Une r\'eponse de confirmation est ensuite renvoy\'ee au client.
+
+\subsubsubsection{Requ\^ete GET}
+
+Le traitement d'une requ\^ete GET(key) suit exactement la m\^eme logique de routage que PUT. La diff\'erence r\'eside uniquement dans l'op\'eration finale.
+
+Apr\`es avoir localis\'e le n\oe ud responsable via \texttt{find\_successor}, celui-ci consulte son stockage local pour r\'ecup\'erer la valeur associ\'ee \`a la cl\'e. Si la cl\'e est pr\'esente, la valeur est renvoy\'ee au client. Sinon, une r\'eponse d'absence est transmise au client.
+
+La latence globale d'une requ\^ete GET d\'epend principalement du nombre de sauts n\'ecessaires pour atteindre le n\oe ud responsable, ce qui reste logarithmique.
+
+\subsubsubsection{Requ\^ete DELETE}
+
+Le traitement d'une requ\^ete DELETE(key) suit le m\^eme m\'ecanisme de localisation que les op\'erations PUT et GET. Le n\oe ud qui re\c coit la requ\^ete commence par calculer l'identifiant associ\'e \`a la cl\'e via la fonction de hachage, puis ex\'ecute la proc\'edure \texttt{find\_successor} afin de d\'eterminer le n\oe ud responsable. Une fois ce n\oe ud atteint, la suppression est effectu\'ee localement dans le stockage cl\'e-valeur. Si un m\'ecanisme de r\'eplication est impl\'ement\'e, la suppression doit \'egalement \^etre propag\'ee aux n\oe uds r\'eplicas afin de maintenir la coh\'erence du syst\`eme. Une confirmation est ensuite renvoy\'ee au client. Comme pour les autres op\'erations, la complexit\'e de la localisation reste logarithmique, et la suppression ne n\'ecessite aucune coordination globale en dehors du routage vers le n\oe ud responsable.
+
+\subsubsection{Conclusion sur l'architecture Chord}
+
+L'architecture que nous mettons en place repose sur une s\'eparation entre le m\'ecanisme de localisation distribu\'e et la couche applicative de stockage. Cette structuration nous permet de construire un syst\`eme scalable et enti\`erement d\'ecentralis\'e, dans lequel chaque n\oe ud participe \`a la fois au routage et au stockage des donn\'ees.
+
+Cependant, si l'overlay garantit une localisation efficace des cl\'es, la robustesse r\'eelle du syst\`eme d\'ependra des choix que nous ferons au niveau applicatif, notamment en mati\`ere de r\'eplication, de gestion des pannes et de coh\'erence. La stabilit\'e dynamique de l'anneau, en particulier en pr\'esence de churn, influencera directement les performances et la fiabilit\'e du syst\`eme.
+
+Nous consid\'erons ainsi cette architecture comme une base solide et extensible, dont le comportement effectif d\'ependra de la rigueur de notre impl\'ementation et des m\'ecanismes compl\'ementaires que nous d\'eciderons d'y int\'egrer.
