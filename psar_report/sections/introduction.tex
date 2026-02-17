@@ -260,7 +260,7 @@ Les développeurs doivent naviguer entre plusieurs objectifs conflictuels :
 \end{itemize}
 
 \subsubsubsection{Limitations fondamentales}
-Malgré leur efficacité, les DHTs font face à des défis liés au principe de l'indexation distribuée :
+Malgré leur efficacité, les DHTs font face à des défis liés au principe de l'indexation distribuée : 
 \begin{itemize}
 \item \textbf{Untrusted Environments} : Difficulté d'opérer de manière fiable lorsque les nœuds sont malveillants (\emph{Byzantine faults}).
 \item \textbf{Query Constraints} : La récupération étant basée sur des identifiants numériques, effectuer des \emph{"fuzzy searches"} ou des requêtes textuelles complexes est extrêmement difficile à réaliser efficacement.
@@ -333,31 +333,38 @@ Cette section analyse les principaux atouts et contraintes de Apache HBase, en l
 
 \subsubsubsection{Avantages}
 
-\subsubsubsection{Cohérence forte}
+\subsubsubsection{1. Cohérence forte}
 
 L’un des principaux avantages de HBase réside dans sa cohérence forte au niveau de la ligne.
 
 Concrètement, lorsqu’une donnée est écrite avec succès, toute lecture ultérieure renvoie la version la plus récente. Cette propriété est essentielle pour les applications nécessitant une vision fiable et à jour des données, notamment dans des contextes analytiques ou transactionnels.
 
-\subsubsubsection{Performances accès séquentiels}
+\subsubsubsection{2.Performances accès séquentiels}
 
 Le partitionnement par plages de clés constitue un autre atout majeur. Les lignes étant stockées selon l’ordre lexicographique des row keys, HBase offre de très bonnes performances pour les requêtes par intervalle, les scans séquentiels et les analyses chronologiques.
 
 Cette organisation rend le système particulièrement adapté aux traitements massifs de données temporelles ou structurées, dans lesquels l’ordre des enregistrements joue un rôle central.
 
-\subsubsubsection{Scalabilité horizontale maîtrisée}
+\subsubsubsection{3. Scalabilité horizontale maîtrisée}
 
 Grâce au mécanisme de region splitting et à l’ajout dynamique de RegionServers, HBase permet une scalabilité horizontale efficace. L’augmentation du volume de données peut être absorbée par l’ajout de nouveaux nœuds sans modification majeure de l’architecture.
 
 \subsubsubsection{Limites}
 
-\subsubsubsection{Sensibilité au choix des clés}
+\subsubsubsection{1. Sensibilité au choix des clés et data skew}
 
-Le principal point faible de HBase réside dans sa dépendance au schéma de clés.
+Le principal point faible de Apache HBase réside dans sa dépendance au schéma de clés.
 
-Le partitionnement par plages implique que la distribution des données dépend directement de l’ordre des row keys. Si celles-ci sont mal conçues — par exemple strictement croissantes — un phénomène de hotspot peut apparaître : une seule région reçoit la majorité des écritures, créant un déséquilibre de charge.
+Le partitionnement par plages implique que la distribution des données dépend directement de l’ordre lexicographique des row keys. Si celles-ci sont mal conçues — par exemple strictement croissantes — un phénomène de hotspot peut apparaître : une seule région reçoit la majorité des écritures, créant un déséquilibre de charge temporaire.
 
-\subsubsubsection{Complexité opérationnelle}
+Ce phénomène constitue une forme de data skew, c’est-à-dire un déséquilibre dans la répartition des données ou des requêtes entre les nœuds d’un système distribué. Dans le cas de HBase, ce déséquilibre peut être :
+
+\textbf{un storage skew}, si certaines régions stockent significativement plus de données ;
+
+\textbf{un access skew}, si certaines régions reçoivent une proportion disproportionnée des requêtes.
+
+
+\subsubsubsection{2. Complexité opérationnelle}
 
 HBase est un système riche mais complexe à administrer. Il dépend de plusieurs composants de l’écosystème Hadoop, notamment HDFS et Apache ZooKeeper.
 
@@ -377,7 +384,18 @@ Chaque nœud participe activement au routage et les données sont réparties gr�
 
 Les données sont réparties selon des plages de clés et leur gestion est coordonnée. Cette organisation permet un contrôle précis des performances et une bonne prise en charge des requêtes séquentielles, mais suppose un environnement maîtrisé et relativement stable.
 
-\subsubsubsection{Motivation du choix}
+\subsubsubsection{Critère d’évaluation : gestion du data skew}
+
+Un critère déterminant dans l’évaluation de ces architectures concerne la gestion du data skew, c’est-à-dire le déséquilibre dans la répartition des données ou des requêtes entre les nœuds d’un système distribué.
+
+Dans une architecture à partitionnement par plages, comme HBase, la distribution dépend directement du schéma de clés. Une mauvaise conception peut engendrer des phénomènes de hotspot, conduisant à un déséquilibre significatif de charge (storage skew ou access skew).
+
+À l’inverse, les DHT utilisent un mécanisme de hachage cohérent produisant une distribution pseudo-aléatoire des identifiants. Ce choix réduit structurellement le risque de déséquilibre de stockage et favorise un équilibrage plus homogène sans configuration préalable complexe.
+
+Ainsi, du point de vue de la robustesse face au data skew, l’architecture DHT présente un avantage structurel dans des environnements dynamiques.
+
+
+\subsubsubsection{Motivation du choix}:;
 
 Dans le cadre de notre projet, l’objectif principal est d’implémenter un système pleinement décentralisé, organisé sous forme d’anneau logique. Cette orientation met l’accent sur : la compréhension des mécanismes de routage distribué, l’auto-organisation des nœuds, la gestion dynamique des entrées et sorties dans le réseau, et l’absence de coordination centrale.
 
