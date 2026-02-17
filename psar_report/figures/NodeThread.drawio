@@ -1,0 +1,307 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0" version="29.4.0">
+  <diagram name="Page-1" id="r5y_lMhCUrCD5oRp-pmu">
+    <mxGraphModel dx="2162" dy="1158" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="IEJE6GnitMOfj-iEeS57-40" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;size=40;" value="" vertex="1">
+          <mxGeometry height="570" width="440" x="240" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uFAsnEaAF1gFlFDF85If-3" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;size=17;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" value="&lt;div&gt;&lt;b&gt;Message&lt;/b&gt;&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;Type {PUT, GET}&lt;br&gt;&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(192, 28, 40), rgb(237, 237, 237));&quot;&gt;Key&lt;/span&gt;&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(28, 113, 216), rgb(237, 237, 237));&quot;&gt;Value&lt;/span&gt;&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;Origin&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;Hops&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="110" width="100" x="820" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="80" width="320" x="320" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-3" edge="1" parent="1" source="IEJE6GnitMOfj-iEeS57-2" style="endArrow=none;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="IEJE6GnitMOfj-iEeS57-2" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="340" y="159.5" as="sourcePoint" />
+            <mxPoint x="650" y="159.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-4" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="380" y="200" as="sourcePoint" />
+            <mxPoint x="380" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-5" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="420" y="200" as="sourcePoint" />
+            <mxPoint x="420" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-6" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="460" y="200" as="sourcePoint" />
+            <mxPoint x="460" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-7" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="500" y="200" as="sourcePoint" />
+            <mxPoint x="500" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-8" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="540" y="200" as="sourcePoint" />
+            <mxPoint x="540" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-9" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="579.86" y="200" as="sourcePoint" />
+            <mxPoint x="579.86" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-10" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="..." vertex="1">
+          <mxGeometry height="30" width="60" x="580" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="..." vertex="1">
+          <mxGeometry height="30" width="60" x="580" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;span style=&quot;color: light-dark(rgb(192, 28, 40), rgb(237, 237, 237));&quot;&gt;Key&lt;/span&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="320" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-13" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;span style=&quot;color: light-dark(rgb(28, 113, 216), rgb(237, 237, 237));&quot;&gt;Value&lt;/span&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="320" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-14" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;&lt;i&gt;ConcurrentHashMap&lt;/i&gt; localStore&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="320" x="320" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="40" width="320" x="320" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-16" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;&lt;i&gt;LinkedBlockingQueue&lt;/i&gt; mailbox&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="320" x="320" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-24" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;size=7;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" value="" vertex="1">
+          <mxGeometry height="30" width="25" x="325" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-25" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;size=7;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" value="" vertex="1">
+          <mxGeometry height="30" width="25" x="360" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-26" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;size=7;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" value="" vertex="1">
+          <mxGeometry height="30" width="25" x="400" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-27" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;size=7;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" value="" vertex="1">
+          <mxGeometry height="30" width="25" x="440" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-28" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="40" width="320" x="320" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-29" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;&lt;i&gt;CopyOnWriteArrayList&lt;/i&gt; peers&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="320" x="320" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-34" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;div&gt;&lt;b&gt;&lt;i&gt;long&lt;/i&gt; id&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;boolean running&lt;br&gt;&lt;/b&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="320" x="320" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-39" parent="1" style="dashed=0;labelPosition=right;align=left;shape=mxgraph.gmdl.checkbox;strokeColor=none;fillColor=#676767;strokeWidth=2;aspect=fixed;sketch=0;html=1;" value="" vertex="1">
+          <mxGeometry height="16" width="16" x="420" y="551" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-41" parent="1" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;" value="" vertex="1">
+          <mxGeometry height="30" width="20" x="327.5" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-42" parent="1" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;" value="" vertex="1">
+          <mxGeometry height="30" width="20" x="360" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-50" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;fillColor=#d0cee2;strokeColor=#56517e;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="474.37" y="620" as="sourcePoint" />
+            <mxPoint x="474" y="1250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-33" parent="1" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;" value="" vertex="1">
+          <mxGeometry height="70" width="50" x="450" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-44" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;&lt;i&gt;NodeThread&lt;/i&gt;&lt;br&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="320" x="315" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-51" parent="1" style="shape=mxgraph.basic.arc;html=1;startAngle=0.3;endAngle=0.1;endArrow=classic;endFill=1;" value="" vertex="1">
+          <mxGeometry height="50" width="50" x="420" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-52" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;div align=&quot;right&quot;&gt;&lt;b&gt;&lt;span style=&quot;color: light-dark(rgb(192, 28, 40), rgb(237, 237, 237));&quot;&gt;run()&lt;/span&gt;&lt;/b&gt;&lt;/div&gt;&lt;div align=&quot;right&quot;&gt;infinite sleep until a message arrives in mailbox.&lt;/div&gt;&lt;div align=&quot;right&quot;&gt;i.e. if mailbox empty, sleep&lt;/div&gt;&lt;div align=&quot;right&quot;&gt;i.e. if mailbox.poll()&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="290" x="135" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-53" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;div&gt;&lt;b&gt;&lt;span style=&quot;color: light-dark(rgb(192, 28, 40), rgb(237, 237, 237));&quot;&gt;processMessage(msg)&lt;/span&gt;&lt;/b&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="290" x="480" y="780" as="geometry" />
+        </mxCell>
+        <UserObject label="msg.type= &lt;b&gt;PUT&lt;/b&gt;" link="&lt;div align=&quot;left&quot;&gt;infinite sleep until a message arrives in mailbox.&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;i.e. if mailbox empty, sleep&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;i.e. if mailbox.poll()&lt;/div&gt;" id="IEJE6GnitMOfj-iEeS57-54">
+          <mxCell parent="1" style="text;whiteSpace=wrap;html=1;" vertex="1">
+            <mxGeometry height="23" width="110" x="670" y="757" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-55" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="620" y="790" as="sourcePoint" />
+            <mxPoint x="660" y="770" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-56" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="620" y="810" as="sourcePoint" />
+            <mxPoint x="660" y="830" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="msg.type= &lt;b&gt;GET&lt;/b&gt;" link="&lt;div align=&quot;left&quot;&gt;infinite sleep until a message arrives in mailbox.&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;i.e. if mailbox empty, sleep&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;i.e. if mailbox.poll()&lt;/div&gt;" id="IEJE6GnitMOfj-iEeS57-57">
+          <mxCell parent="1" style="text;whiteSpace=wrap;html=1;" vertex="1">
+            <mxGeometry height="23" width="90" x="670" y="816" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-59" edge="1" parent="1" style="curved=1;endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;dashed=1;dashPattern=8 8;" target="IEJE6GnitMOfj-iEeS57-2" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="800" y="740" />
+              <mxPoint x="740" y="430" />
+            </Array>
+            <mxPoint x="760" y="770" as="sourcePoint" />
+            <mxPoint x="760" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-60" connectable="0" parent="IEJE6GnitMOfj-iEeS57-59" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="write" vertex="1">
+          <mxGeometry relative="1" x="-0.527" y="3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-65" edge="1" parent="1" style="curved=1;endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;dashed=1;dashPattern=8 8;" target="IEJE6GnitMOfj-iEeS57-57" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="670" y="145" />
+              <mxPoint x="730" y="190" />
+              <mxPoint x="850" y="550" />
+              <mxPoint x="860" y="570" />
+              <mxPoint x="870" y="590" />
+              <mxPoint x="870" y="610" />
+              <mxPoint x="870" y="650" />
+              <mxPoint x="860" y="730" />
+              <mxPoint x="830" y="800" />
+            </Array>
+            <mxPoint x="640" y="155" as="sourcePoint" />
+            <mxPoint x="730" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-66" connectable="0" parent="IEJE6GnitMOfj-iEeS57-65" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="read" vertex="1">
+          <mxGeometry relative="1" x="0.1809" y="-5" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-67" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="760" y="839" as="sourcePoint" />
+            <mxPoint x="780" y="890" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-68" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="770" y="832.5" as="sourcePoint" />
+            <mxPoint x="840" y="840" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-70" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;(i)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="30" x="830" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-71" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;(ii)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="30" x="760" y="827" as="geometry" />
+        </mxCell>
+        <UserObject label="localStore.containsKey(msg.key) " link="&lt;div align=&quot;left&quot;&gt;infinite sleep until a message arrives in mailbox.&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;i.e. if mailbox empty, sleep&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;i.e. if mailbox.poll()&lt;/div&gt;" id="IEJE6GnitMOfj-iEeS57-72">
+          <mxCell parent="1" style="text;whiteSpace=wrap;html=1;" vertex="1">
+            <mxGeometry height="23" width="220" x="850" y="827" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;!&lt;/b&gt; localStore.containsKey(msg.key) " link="&lt;div align=&quot;left&quot;&gt;infinite sleep until a message arrives in mailbox.&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;i.e. if mailbox empty, sleep&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;i.e. if mailbox.poll()&lt;/div&gt;" id="IEJE6GnitMOfj-iEeS57-73">
+          <mxCell parent="1" style="text;whiteSpace=wrap;html=1;" vertex="1">
+            <mxGeometry height="23" width="220" x="790" y="880" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-74" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="sysout(&quot;Found&quot;)" vertex="1">
+          <mxGeometry height="30" width="90" x="1079" y="823.5" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-75" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" target="IEJE6GnitMOfj-iEeS57-72" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1030" y="838.24" as="sourcePoint" />
+            <mxPoint x="1050" y="838.24" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-76" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="980" y="891.48" as="sourcePoint" />
+            <mxPoint x="1020" y="891.24" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-77" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;&lt;span style=&quot;color: light-dark(rgb(192, 28, 40), rgb(237, 237, 237));&quot;&gt;forwardToPeers(msg)&lt;/span&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="130" x="1020" y="876.5" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-80" parent="1" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;" value="" vertex="1">
+          <mxGeometry height="15" width="10" x="1020" y="930" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-86" parent="1" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;" value="" vertex="1">
+          <mxGeometry height="15" width="10" x="1069" y="945" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-87" parent="1" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;" value="" vertex="1">
+          <mxGeometry height="15" width="10" x="1089" y="970" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-88" parent="1" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;" value="" vertex="1">
+          <mxGeometry height="15" width="10" x="1110" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-90" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;dashed=1;" value="" vertex="1">
+          <mxGeometry height="83.5" width="130" x="1010" y="906.5" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-92" parent="1" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;" value="" vertex="1">
+          <mxGeometry height="15" width="10" x="1038" y="966" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-93" edge="1" parent="1" source="IEJE6GnitMOfj-iEeS57-94" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0;exitDx=0;exitDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1050" y="925" as="sourcePoint" />
+            <mxPoint x="1030" y="945" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-94" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;self&lt;/font&gt;" vertex="1">
+          <mxGeometry height="10" width="20" x="1064" y="960" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-95" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;exitX=0.75;exitY=0;exitDx=0;exitDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1079" y="957.87" as="sourcePoint" />
+            <mxPoint x="1116" y="938.62" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-96" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;exitX=0.75;exitY=0;exitDx=0;exitDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1079" y="967.12" as="sourcePoint" />
+            <mxPoint x="1090" y="980" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-97" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1066" y="965" as="sourcePoint" />
+            <mxPoint x="1050" y="975" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-103" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="peers" vertex="1">
+          <mxGeometry height="30" width="40" x="1055" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-104" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;div align=&quot;left&quot;&gt;simply sends message to all peers in &lt;i&gt;peers ArrayList &lt;/i&gt;except self&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="190" x="1150" y="933.25" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-106" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;rounded=0;" value="&lt;div&gt;&lt;div&gt;&lt;b&gt;&lt;span style=&quot;color: light-dark(rgb(192, 28, 40), rgb(237, 237, 237));&quot;&gt;receiveMessage(msg)&lt;/span&gt;&lt;/b&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;adds a new message to the mailbox&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="290" x="175" y="955" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-109" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;rounded=0;" value="&lt;div&gt;&lt;div&gt;&lt;b&gt;&lt;span style=&quot;color: light-dark(rgb(192, 28, 40), rgb(237, 237, 237));&quot;&gt;addPeer(Node)&lt;/span&gt;&lt;/b&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;adds a new peers to the peers ArrayList&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="290" x="175" y="1060" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-110" parent="1" style="shape=mxgraph.basic.arc;html=1;startAngle=0.5256836465154535;endAngle=0.9863428722055277;endArrow=classic;endFill=1;dashed=1;dashPattern=8 8;" value="" vertex="1">
+          <mxGeometry height="660" width="400" x="110" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-111" parent="1" style="shape=mxgraph.basic.arc;html=1;startAngle=0.5256836465154535;endAngle=0.9863428722055277;endArrow=classic;endFill=1;dashed=1;" value="" vertex="1">
+          <mxGeometry height="660" width="400" x="120" y="306" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-112" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;autosize=1;resizable=0;" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;mailbox.offer(msg)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="110" x="170" y="839" as="geometry" />
+        </mxCell>
+        <mxCell id="IEJE6GnitMOfj-iEeS57-113" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;autosize=1;resizable=0;" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;peers.add(Node)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="110" x="70" y="960" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

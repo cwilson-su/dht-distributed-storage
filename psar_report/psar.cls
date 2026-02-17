@@ -136,6 +136,11 @@
 
 
 
+\usepackage[utf8]{inputenc} % Tells LaTeX the file is saved as UTF-8
+
+\usepackage{subcaption}
+\usepackage{float}
+
 
 
 
