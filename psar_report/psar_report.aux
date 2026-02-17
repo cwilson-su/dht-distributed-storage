@@ -37,31 +37,32 @@
 \newlabel{fig:08_interface_of_a_dht}{{9}{9}{Interface d'une Distributed Hash Table. À travers une simple interface \textsf {put}/\textsf {get}, la DHT fait abstraction de la distribution des données entre les nœuds}{figure.9}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.6}Conclusions (ref. Section 7.5)}{10}{subsubsection.1.1.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Étude de l'approche hiérarchisée : HBase}{11}{subsection.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.1}Partitionnement par plages de clés}{11}{subsubsection.1.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.2}Avantages et limites}{11}{subsubsection.1.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.3}Positionnement par rapport aux DHT}{12}{subsubsection.1.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Justification du choix architectural}{12}{subsection.1.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Méthode de répartition des données}{12}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Motivation et définition de la répartition des données}{12}{subsection.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Les différentes méthodes de répartitions des données}{13}{subsection.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}hachage classique}{13}{subsubsection.2.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}Hachage cohérent (Consistent Hashing)}{15}{subsubsection.2.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Conclusion sur les méthodes de répartitions des données}{19}{subsection.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Chord}{19}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Design du système et philosophie}{19}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Consistent Hashing et l'Identifier Circle}{20}{subsection.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Localisation de clés scalable : Finger Tables}{20}{subsection.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Théorèmes}{21}{subsection.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Algorithmes des nœuds}{22}{subsection.3.5}\protected@file@percent }
-\newlabel{the-successor-resolution-algorithm}{{3.5}{22}{}{subsection.3.5}{}}
-\newlabel{dynamic-ring-maintenance-joining-and-stabilisation}{{3.5}{23}{}{subsection.3.5}{}}
-\newlabel{resilience-the-successor-list-mechanism}{{3.5}{23}{}{subsection.3.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Algorithmes de la Finger Table}{24}{subsection.3.6}\protected@file@percent }
-\newlabel{finger-table-entry-calculation}{{3.6}{24}{}{subsection.3.6}{}}
-\newlabel{finger-table-initialisation}{{3.6}{24}{}{subsection.3.6}{}}
-\newlabel{proactive-table-maintenance}{{3.6}{24}{}{subsection.3.6}{}}
-\newlabel{updating-other-nodes}{{3.6}{24}{}{subsection.3.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Pastry}{25}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.1}Introduction au modèle hiérarchisé}{11}{subsubsection.1.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.2}Fondamentaux architecturaux de HBase}{11}{subsubsection.1.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.3}Mécanismes internes : partitionnement et gestion des pannes}{12}{subsubsection.1.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.4}Avantages et limites}{12}{subsubsection.1.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Conclusion et justification du choix architectural}{13}{subsection.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Méthode de répartition des données}{14}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Motivation et définition de la répartition des données}{14}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Les différentes méthodes de répartitions des données}{15}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}hachage classique}{15}{subsubsection.2.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}Hachage cohérent (Consistent Hashing)}{17}{subsubsection.2.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Conclusion sur les méthodes de répartitions des données}{21}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Chord}{21}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Design du système et philosophie}{21}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Consistent Hashing et l'Identifier Circle}{22}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Localisation de clés scalable : Finger Tables}{22}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Théorèmes}{23}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Algorithmes des nœuds}{24}{subsection.3.5}\protected@file@percent }
+\newlabel{the-successor-resolution-algorithm}{{3.5}{24}{}{subsection.3.5}{}}
+\newlabel{dynamic-ring-maintenance-joining-and-stabilisation}{{3.5}{25}{}{subsection.3.5}{}}
+\newlabel{resilience-the-successor-list-mechanism}{{3.5}{25}{}{subsection.3.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Algorithmes de la Finger Table}{26}{subsection.3.6}\protected@file@percent }
+\newlabel{finger-table-entry-calculation}{{3.6}{26}{}{subsection.3.6}{}}
+\newlabel{finger-table-initialisation}{{3.6}{26}{}{subsection.3.6}{}}
+\newlabel{proactive-table-maintenance}{{3.6}{26}{}{subsection.3.6}{}}
+\newlabel{updating-other-nodes}{{3.6}{26}{}{subsection.3.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Pastry}{27}{section.4}\protected@file@percent }
 \abx@aux@read@bbl@mdfivesum{nobblfile}
 \abx@aux@read@bblrerun
-\gdef \@abspage@last{25}
+\gdef \@abspage@last{27}
