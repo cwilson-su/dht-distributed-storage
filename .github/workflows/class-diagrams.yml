@@ -53,7 +53,10 @@ jobs:
         git config user.email "actions@github.com"
         git add diagrams/
         git commit -m "Auto-generated UML diagrams" || echo "No changes to commit"
+        # Use the GITHUB_TOKEN in the remote URL for authentication
+        git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
         git push origin main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
