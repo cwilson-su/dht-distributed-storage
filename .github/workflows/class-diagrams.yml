@@ -9,31 +9,64 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # Step 1: Checkout the repo
     - uses: actions/checkout@v3
 
-    - name: Set up Java
-      uses: actions/setup-java@v3
+    # Step 2: Set up Java
+    - uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
         java-version: '17'
 
+    # Step 3: Download PlantUML
     - name: Download PlantUML
       run: |
         curl -L -o plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2023.9/plantuml.jar
 
-    - name: Set up Maven
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-
-    - name: Install JavaParser
+    # Step 4: Compile UML Generator Java program
+    - name: Compile UMLGenerator
       run: |
         mkdir -p tools
-        cd tools
-        curl -L -o javaparser-core.jar https://repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.25.4/javaparser-core-3.25.4.jar
+        curl -L -o tools/javaparser-core.jar https://repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.25.4/javaparser-core-3.25.4.jar
+        cat <<'EOF' > UMLGenerator.java
+import com.github.javaparser.*;
+import com.github.javaparser.ast.body.*;
+import com.github.javaparser.ast.*;
+import java.nio.file.*;
+import java.util.stream.*;
+public class UMLGenerator {
+    public static void main(String[] args) throws Exception {
+        Path folder = Paths.get(args[0]);
+        Files.walk(folder)
+             .filter(p -> p.toString().endsWith(".java"))
+             .forEach(p -> {
+                 try {
+                     CompilationUnit cu = StaticJavaParser.parse(p);
+                     cu.getTypes().forEach(t -> {
+                         String type = t.isInterface() ? "interface" : "class";
+                         System.out.println(type + " " + t.getName());
+                         t.getExtendedTypes().forEach(e -> System.out.println(t.getName() + " --|> " + e));
+                         t.getImplementedTypes().forEach(i -> System.out.println(t.getName() + " ..|> " + i));
+                         t.getMembers().forEach(m -> {
+                             if (m instanceof FieldDeclaration) {
+                                 ((FieldDeclaration)m).getVariables().forEach(v ->
+                                     System.out.println(t.getName() + " : " + v.getName())
+                                 );
+                             } else if (m instanceof MethodDeclaration) {
+                                 MethodDeclaration md = (MethodDeclaration)m;
+                                 System.out.println(t.getName() + " : " + md.getName() + "()");
+                             }
+                         });
+                     });
+                 } catch(Exception e) { e.printStackTrace(); }
+             });
+    }
+}
+EOF
+        javac -cp tools/javaparser-core.jar UMLGenerator.java
 
-    - name: Generate UML diagrams with JavaParser
+    # Step 5: Generate PlantUML files per folder
+    - name: Generate PlantUML
       run: |
         mkdir -p diagrams
         for folder in src/*/; do
@@ -41,28 +74,24 @@ jobs:
           outfile="diagrams/$foldername.puml"
           echo "@startuml" > $outfile
           echo "skinparam classAttributeIconSize 0" >> $outfile
-
-          # Loop through Java files and parse class structure
-          for file in "$folder"*.java; do
-            java -cp tools/javaparser-core.jar com.github.javaparser.utils.SourceRoot "$folder" \
-              | while read class_line; do
-                # Example: we can just append the class name
-                echo "$class_line" >> $outfile
-              done
-          done
-
+          java -cp .:tools/javaparser-core.jar UMLGenerator "$folder" >> $outfile
           echo "@enduml" >> $outfile
         done
 
+    # Step 6: Render diagrams as PNG
     - name: Render diagrams
       run: |
         for puml in diagrams/*.puml; do
           java -jar plantuml.jar -tpng $puml
         done
 
+    # Step 7: Commit diagrams back to main
     - name: Commit diagrams
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: "Auto-generated UML diagrams"
         commit_user_name: "github-actions"
         commit_user_email: "actions@github.com"
+        push: true
+        branch: main
+        token: ${{ secrets.GITHUB_TOKEN }}
