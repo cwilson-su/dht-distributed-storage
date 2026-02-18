@@ -54,6 +54,3 @@ jobs:
         branch: main
         force: true
 
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
