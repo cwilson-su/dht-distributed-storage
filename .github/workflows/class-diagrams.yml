@@ -1,0 +1,55 @@
+name: Auto Generate Class Diagrams
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  generate-diagrams:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repo
+    - uses: actions/checkout@v3
+
+    # Step 2: Set up Java
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    # Step 3: Download PlantUML jar
+    - name: Download PlantUML
+      run: |
+        curl -L -o plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2023.9/plantuml.jar
+
+    # Step 4: Generate .puml files for each subfolder in src/
+    - name: Generate PlantUML files
+      run: |
+        mkdir -p diagrams
+        for folder in src/*/; do
+          foldername=$(basename "$folder")
+          echo "@startuml" > diagrams/$foldername.puml
+          # Include all .java files in the folder
+          for file in "$folder"*.java; do
+            class=$(basename "$file" .java)
+            echo "class $class" >> diagrams/$foldername.puml
+          done
+          echo "@enduml" >> diagrams/$foldername.puml
+        done
+
+    # Step 5: Render diagrams as PNG
+    - name: Render UML diagrams
+      run: |
+        for puml in diagrams/*.puml; do
+          java -jar plantuml.jar -tpng $puml
+        done
+
+    # Step 6: Commit diagrams back to repo
+    - name: Commit diagrams
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: "Auto-generated class diagrams"
+        commit_user_name: "github-actions"
+        commit_user_email: "actions@github.com"
