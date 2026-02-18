@@ -9,67 +9,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout repo
     - uses: actions/checkout@v3
 
-    # Step 2: Set up Java
     - uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
         java-version: '17'
 
-    # Step 3: Download PlantUML
     - name: Download PlantUML
       run: |
         curl -L -o plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2023.9/plantuml.jar
 
-    # Step 4: Compile UMLGenerator Java program
-    - name: Compile UMLGenerator
+    - name: Download JavaParser
       run: |
         mkdir -p tools
         curl -L -o tools/javaparser-core.jar https://repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.25.4/javaparser-core-3.25.4.jar
 
-        # Write UMLGenerator.java from YAML into a file
-        cat <<'EOF' > UMLGenerator.java
-import com.github.javaparser.*;
-import com.github.javaparser.ast.*;
-import com.github.javaparser.ast.body.*;
-import java.nio.file.*;
-import java.util.stream.*;
-public class UMLGenerator {
-    public static void main(String[] args) throws Exception {
-        Path folder = Paths.get(args[0]);
-        Files.walk(folder)
-             .filter(p -> p.toString().endsWith(".java"))
-             .forEach(p -> {
-                 try {
-                     CompilationUnit cu = StaticJavaParser.parse(p);
-                     cu.getTypes().forEach(t -> {
-                         String type = t.isInterface() ? "interface" : "class";
-                         System.out.println(type + " " + t.getName());
-                         t.getExtendedTypes().forEach(e -> System.out.println(t.getName() + " --|> " + e));
-                         t.getImplementedTypes().forEach(i -> System.out.println(t.getName() + " ..|> " + i));
-                         t.getMembers().forEach(m -> {
-                             if (m instanceof FieldDeclaration) {
-                                 ((FieldDeclaration)m).getVariables().forEach(v ->
-                                     System.out.println(t.getName() + " : " + v.getName())
-                                 );
-                             } else if (m instanceof MethodDeclaration) {
-                                 MethodDeclaration md = (MethodDeclaration)m;
-                                 System.out.println(t.getName() + " : " + md.getName() + "()");
-                             }
-                         });
-                     });
-                 } catch(Exception e) { e.printStackTrace(); }
-             });
-    }
-}
-EOF
+    - name: Compile UMLGenerator
+      run: |
+        javac -cp tools/javaparser-core.jar tools/UMLGenerator.java
 
-        # Compile
-        javac -cp tools/javaparser-core.jar UMLGenerator.java
-
-    # Step 5: Generate PlantUML files per folder
     - name: Generate PlantUML diagrams
       run: |
         mkdir -p diagrams
@@ -78,18 +37,16 @@ EOF
           outfile="diagrams/$foldername.puml"
           echo "@startuml" > $outfile
           echo "skinparam classAttributeIconSize 0" >> $outfile
-          java -cp .:tools/javaparser-core.jar UMLGenerator "$folder" >> $outfile
+          java -cp .:tools/javaparser-core.jar tools.UMLGenerator "$folder" >> $outfile
           echo "@enduml" >> $outfile
         done
 
-    # Step 6: Render diagrams as PNG
-    - name: Render UML diagrams
+    - name: Render diagrams
       run: |
         for puml in diagrams/*.puml; do
           java -jar plantuml.jar -tpng $puml
         done
 
-    # Step 7: Commit diagrams back to main
     - name: Commit diagrams
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
