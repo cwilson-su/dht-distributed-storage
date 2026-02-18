@@ -47,10 +47,11 @@ jobs:
           java -jar plantuml.jar -tpng $puml
         done
 
-    - name: Commit and push diagrams
-      uses: ad-m/github-push-action@v0.6.0
+    - name: Auto-commit diagrams
+      uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        commit_message: "Auto-generated UML diagrams"
+        commit_user_name: github-actions
+        commit_user_email: actions@github.com
         branch: main
-        force: true
 
