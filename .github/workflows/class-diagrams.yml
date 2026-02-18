@@ -9,48 +9,59 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      # Step 1: Checkout using SSH deploy key
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
 
-    - uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      # Step 2: Set up Java
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-    - name: Download PlantUML
-      run: |
-        curl -L -o plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2023.9/plantuml.jar
+      # Step 3: Download PlantUML
+      - name: Download PlantUML
+        run: |
+          curl -L -o plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2023.9/plantuml.jar
 
-    - name: Download JavaParser
-      run: |
-        mkdir -p tools
-        curl -L -o tools/javaparser-core.jar https://repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.25.4/javaparser-core-3.25.4.jar
+      # Step 4: Download JavaParser
+      - name: Download JavaParser
+        run: |
+          mkdir -p tools
+          curl -L -o tools/javaparser-core.jar https://repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.25.4/javaparser-core-3.25.4.jar
 
-    - name: Compile UMLGenerator
-      run: |
-        javac -cp tools/javaparser-core.jar tools/UMLGenerator.java
+      # Step 5: Compile UMLGenerator
+      - name: Compile UMLGenerator
+        run: javac -cp tools/javaparser-core.jar tools/UMLGenerator.java
 
-    - name: Generate PlantUML diagrams
-      run: |
-        mkdir -p diagrams
-        for folder in src/*/; do
-          foldername=$(basename "$folder")
-          outfile="diagrams/$foldername.puml"
-          echo "@startuml" > $outfile
-          echo "skinparam classAttributeIconSize 0" >> $outfile
-          java -cp .:tools/javaparser-core.jar tools.UMLGenerator "$folder" >> $outfile
-          echo "@enduml" >> $outfile
-        done
+      # Step 6: Generate PlantUML files per folder
+      - name: Generate PlantUML diagrams
+        run: |
+          mkdir -p diagrams
+          for folder in src/*/; do
+            foldername=$(basename "$folder")
+            outfile="diagrams/$foldername.puml"
+            echo "@startuml" > $outfile
+            echo "skinparam classAttributeIconSize 0" >> $outfile
+            java -cp .:tools/javaparser-core.jar tools.UMLGenerator "$folder" >> $outfile
+            echo "@enduml" >> $outfile
+          done
 
-    - name: Render diagrams
-      run: |
-        for puml in diagrams/*.puml; do
-          java -jar plantuml.jar -tpng $puml
-        done
+      # Step 7: Render diagrams as PNG
+      - name: Render UML diagrams
+        run: |
+          for puml in diagrams/*.puml; do
+            java -jar plantuml.jar -tpng $puml
+          done
 
-    - name: Push diagrams
-      uses: ad-m/github-push-action@v0.6.0
-      with:
-        branch: main
-        force: true
-        github_token: ${{ secrets.PAT_TOKEN }}
-
+      # Step 8: Commit and push diagrams using SSH
+      - name: Commit and push diagrams
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add diagrams/
+          git commit -m "Auto-generated UML diagrams" || echo "No changes to commit"
+          git push origin main
