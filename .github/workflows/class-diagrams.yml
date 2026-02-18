@@ -47,11 +47,13 @@ jobs:
           java -jar plantuml.jar -tpng $puml
         done
 
-    - name: Auto-commit diagrams
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        commit_message: "Auto-generated UML diagrams"
-        commit_user_name: github-actions
-        commit_user_email: actions@github.com
-        branch: main
+    - name: Commit and push diagrams
+      run: |
+        git config user.name "github-actions"
+        git config user.email "actions@github.com"
+        git add diagrams/
+        git commit -m "Auto-generated UML diagrams" || echo "No changes to commit"
+        # Set the remote URL to use the PAT for authentication
+        git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
+        git push origin main
 
