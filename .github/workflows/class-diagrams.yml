@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the repo
+    # Step 1: Checkout repo
     - uses: actions/checkout@v3
 
     # Step 2: Set up Java
@@ -23,15 +23,17 @@ jobs:
       run: |
         curl -L -o plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2023.9/plantuml.jar
 
-    # Step 4: Compile UML Generator Java program
+    # Step 4: Compile UMLGenerator Java program
     - name: Compile UMLGenerator
       run: |
         mkdir -p tools
         curl -L -o tools/javaparser-core.jar https://repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.25.4/javaparser-core-3.25.4.jar
+
+        # Write UMLGenerator.java from YAML into a file
         cat <<'EOF' > UMLGenerator.java
 import com.github.javaparser.*;
-import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.*;
+import com.github.javaparser.ast.body.*;
 import java.nio.file.*;
 import java.util.stream.*;
 public class UMLGenerator {
@@ -63,10 +65,12 @@ public class UMLGenerator {
     }
 }
 EOF
+
+        # Compile
         javac -cp tools/javaparser-core.jar UMLGenerator.java
 
     # Step 5: Generate PlantUML files per folder
-    - name: Generate PlantUML
+    - name: Generate PlantUML diagrams
       run: |
         mkdir -p diagrams
         for folder in src/*/; do
@@ -79,7 +83,7 @@ EOF
         done
 
     # Step 6: Render diagrams as PNG
-    - name: Render diagrams
+    - name: Render UML diagrams
       run: |
         for puml in diagrams/*.puml; do
           java -jar plantuml.jar -tpng $puml
