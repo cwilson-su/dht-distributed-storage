@@ -15,22 +15,32 @@ public class UMLGenerator {
                  try {
                      CompilationUnit cu = StaticJavaParser.parse(p);
                      cu.getTypes().forEach(t -> {
-                         String type = t.isInterface() ? "interface" : "class";
-                         System.out.println(type + " " + t.getName());
-                         t.getExtendedTypes().forEach(e -> System.out.println(t.getName() + " --|> " + e));
-                         t.getImplementedTypes().forEach(i -> System.out.println(t.getName() + " ..|> " + i));
-                         t.getMembers().forEach(m -> {
-                             if (m instanceof FieldDeclaration) {
-                                 ((FieldDeclaration)m).getVariables().forEach(v ->
-                                     System.out.println(t.getName() + " : " + v.getName())
-                                 );
-                             } else if (m instanceof MethodDeclaration) {
-                                 MethodDeclaration md = (MethodDeclaration)m;
-                                 System.out.println(t.getName() + " : " + md.getName() + "()");
-                             }
-                         });
+                         // Only handle classes or interfaces
+                         if (t instanceof ClassOrInterfaceDeclaration c) {
+                             String type = c.isInterface() ? "interface" : "class";
+                             System.out.println(type + " " + c.getName());
+
+                             c.getExtendedTypes().forEach(e -> 
+                                 System.out.println(c.getName() + " --|> " + e.getName())
+                             );
+                             c.getImplementedTypes().forEach(i -> 
+                                 System.out.println(c.getName() + " ..|> " + i.getName())
+                             );
+
+                             c.getMembers().forEach(m -> {
+                                 if (m instanceof FieldDeclaration fd) {
+                                     fd.getVariables().forEach(v ->
+                                         System.out.println(c.getName() + " : " + v.getName())
+                                     );
+                                 } else if (m instanceof MethodDeclaration md) {
+                                     System.out.println(c.getName() + " : " + md.getName() + "()");
+                                 }
+                             });
+                         }
                      });
-                 } catch(Exception e) { e.printStackTrace(); }
+                 } catch(Exception e) {
+                     e.printStackTrace();
+                 }
              });
     }
 }
