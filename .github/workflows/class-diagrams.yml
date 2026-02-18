@@ -1,55 +1,68 @@
-name: Auto Generate Class Diagrams
+name: Auto Generate UML Diagrams
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  generate-diagrams:
+  generate-uml:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the repo
     - uses: actions/checkout@v3
 
-    # Step 2: Set up Java
     - name: Set up Java
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
         java-version: '17'
 
-    # Step 3: Download PlantUML jar
     - name: Download PlantUML
       run: |
         curl -L -o plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2023.9/plantuml.jar
 
-    # Step 4: Generate .puml files for each subfolder in src/
-    - name: Generate PlantUML files
+    - name: Set up Maven
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Install JavaParser
+      run: |
+        mkdir -p tools
+        cd tools
+        curl -L -o javaparser-core.jar https://repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.25.4/javaparser-core-3.25.4.jar
+
+    - name: Generate UML diagrams with JavaParser
       run: |
         mkdir -p diagrams
         for folder in src/*/; do
           foldername=$(basename "$folder")
-          echo "@startuml" > diagrams/$foldername.puml
-          # Include all .java files in the folder
+          outfile="diagrams/$foldername.puml"
+          echo "@startuml" > $outfile
+          echo "skinparam classAttributeIconSize 0" >> $outfile
+
+          # Loop through Java files and parse class structure
           for file in "$folder"*.java; do
-            class=$(basename "$file" .java)
-            echo "class $class" >> diagrams/$foldername.puml
+            java -cp tools/javaparser-core.jar com.github.javaparser.utils.SourceRoot "$folder" \
+              | while read class_line; do
+                # Example: we can just append the class name
+                echo "$class_line" >> $outfile
+              done
           done
-          echo "@enduml" >> diagrams/$foldername.puml
+
+          echo "@enduml" >> $outfile
         done
 
-    # Step 5: Render diagrams as PNG
-    - name: Render UML diagrams
+    - name: Render diagrams
       run: |
         for puml in diagrams/*.puml; do
           java -jar plantuml.jar -tpng $puml
         done
 
-    # Step 6: Commit diagrams back to repo
     - name: Commit diagrams
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        commit_message: "Auto-generated class diagrams"
+        commit_message: "Auto-generated UML diagrams"
         commit_user_name: "github-actions"
         commit_user_email: "actions@github.com"
