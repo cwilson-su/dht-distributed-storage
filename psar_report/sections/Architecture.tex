@@ -1,3 +1,4 @@
+\newpage
 \section{Architecture du syst\`eme et cycle de vie d'une requ\^ete}
 
 \subsection{Choix architecturaux et probl\'ematique}
@@ -16,7 +17,7 @@ Avant d'impl\'ementer ces protocoles, il est essentiel de comprendre pr\'ecis\'e
 
 Dans cette premi\`ere partie, nous d\'etaillons l'architecture retenue pour Chord, en analysant pr\'ecis\'ement la circulation des messages, la responsabilit\'e des n\oe uds et le traitement des requ\^etes. La m\^eme d\'emarche sera ensuite appliqu\'ee \`a Pastry.
 
-\subsubsection{Architecture g\'en\'erale bas\'ee sur Chord}
+\subsection{Architecture g\'en\'erale bas\'ee sur Chord}
 
 R\'esumons l'architecture Chord vue pr\'ec\'edemment en indiquant les diff\'erentes variables qui nous seront indispensables lors de son impl\'ementation. L'architecture Chord repose sur un espace d'identifiants circulaire de taille $2^m$. Cet espace est partag\'e \`a la fois par les n\oe uds du syst\`eme et par les cl\'es des donn\'ees stock\'ees. Chaque n\oe ud re\c coit un identifiant unique calcul\'e via une fonction de hachage, et se positionne sur un anneau logique selon cet identifiant.
 
@@ -75,3 +76,65 @@ L'architecture que nous mettons en place repose sur une s\'eparation entre le m\
 Cependant, si l'overlay garantit une localisation efficace des cl\'es, la robustesse r\'eelle du syst\`eme d\'ependra des choix que nous ferons au niveau applicatif, notamment en mati\`ere de r\'eplication, de gestion des pannes et de coh\'erence. La stabilit\'e dynamique de l'anneau, en particulier en pr\'esence de churn, influencera directement les performances et la fiabilit\'e du syst\`eme.
 
 Nous consid\'erons ainsi cette architecture comme une base solide et extensible, dont le comportement effectif d\'ependra de la rigueur de notre impl\'ementation et des m\'ecanismes compl\'ementaires que nous d\'eciderons d'y int\'egrer.
+
+\subsection{Architecture g\'en\'erale bas\'ee sur Pastry}
+
+Contrairement \`a Chord, dont l'organisation repose sur un anneau circulaire strict et un routage bas\'e sur des sauts exponentiels via la finger table, Pastry adopte une structure fond\'ee sur le routage par pr\'efixes dans un espace d'identifiants structur\'e en base $2^b$.
+
+Chaque n\oe ud poss\`ede un identifiant unique appel\'e \emph{nodeId}, g\'en\'eralement cod\'e sur 128 bits, issu d'une fonction de hachage cryptographique. De la m\^eme mani\`ere, chaque cl\'e associ\'ee \`a une donn\'ee est transform\'ee en identifiant dans le m\^eme espace. L'objectif du protocole est d'acheminer toute requ\^ete vers le n\oe ud dont l'identifiant est num\'eriquement le plus proche de la cl\'e cible.
+
+L'architecture Pastry repose sur trois structures fondamentales maintenues localement par chaque n\oe ud :
+
+\begin{itemize}
+    \item une Routing Table, organis\'ee par longueur de pr\'efixes communs,
+    \item un Leaf Set, contenant les identifiants imm\'ediatement sup\'erieurs et inf\'erieurs,
+    \item un Neighbor Set, optimisant la proximit\'e r\'eseau physique.
+\end{itemize}
+
+\subsubsection{Couche overlay et couche applicative dans Pastry}
+
+Comme pour Chord, il est essentiel de distinguer deux niveaux fonctionnels.
+
+La couche overlay correspond ici au protocole Pastry lui-m\^eme. Elle est responsable de la gestion des identifiants, du maintien des trois structures de routage et du routage progressif des messages vers le n\oe ud cible.
+
+Le routage s'effectue en augmentant \`a chaque \'etape la longueur du pr\'efixe commun entre l'identifiant du n\oe ud courant et celui de la cl\'e recherch\'ee. Si la cl\'e se situe dans l'intervalle couvert par le Leaf Set, la r\'esolution est imm\'ediate. Sinon, la Routing Table est utilis\'ee pour effectuer un saut vers un n\oe ud partageant un pr\'efixe plus long.
+
+La couche applicative, quant \`a elle, impl\'emente le stockage cl\'e-valeur sur le n\oe ud responsable. Comme dans Chord, Pastry ne d\'efinit pas directement la politique de stockage : il fournit uniquement un m\'ecanisme de localisation distribu\'ee.
+
+
+\subsubsection{Cycle de vie d'une requ\^ete dans Pastry}
+
+\subsubsubsection{Requ\^ete PUT}
+
+Lorsqu'un client envoie une requ\^ete PUT(key, value), celle-ci est transmise \`a un n\oe ud d'entr\'ee arbitraire du r\'eseau.
+
+Le n\oe ud calcule l'identifiant de la cl\'e via la fonction de hachage. Il compare ensuite cet identifiant \`a son Leaf Set. Si la cl\'e se trouve dans l'intervalle couvert, il route directement vers le n\oe ud num\'eriquement le plus proche. Sinon, il consulte sa Routing Table afin de trouver un n\oe ud partageant un pr\'efixe plus long avec la cl\'e.
+
+Le message progresse ainsi de proche en proche. Chaque saut augmente la longueur du pr\'efixe commun. Ce m\'ecanisme garantit une compl\'exit\'e en $O(\log N)$.
+
+Une fois le n\oe ud le plus proche atteint, la paire (cl\'e, valeur) est stock\'ee localement. 
+Comme pour Chord, un m\'ecanisme de r\'eplication peut \^etre appliqu\'e sur les n\oe uds du Leaf Set afin d'assurer la tol\'erance aux pannes.
+
+Une confirmation est renvoy\'ee au client.
+
+\subsubsubsection{Requ\^ete GET}
+
+La requ\^ete GET(key) suit exactement le m\^eme processus de routage que PUT.
+
+Une fois le n\oe ud responsable atteint, celui-ci consulte son stockage local. Si la cl\'e existe, la valeur est renvoy\'ee au client. Sinon, une r\'eponse n\'egative est envoy\'ee.
+
+La latence d\'epend du nombre de sauts n\'ecessaires pour aligner progressivement les pr\'efixes, ce qui reste en $O(\log N)$.
+
+\subsubsubsection{Requ\^ete DELETE}
+
+Le traitement de DELETE(key) reprend le m\^eme m\'ecanisme de localisation.
+
+Apr\`es calcul de l'identifiant, le message est rout\'e selon la logique Leaf Set et Routing Table. Une fois le n\oe ud cible atteint, la cl\'e est supprim\'ee du stockage local. Si une r\'eplication existe, la suppression est propag\'ee aux r\'eplicas du Leaf Set.
+
+\subsubsection{Conclusion sur l'architecture Pastry}
+
+L'architecture Pastry repose sur un routage par pr\'efixes qui permet d'atteindre efficacement le n\oe ud le plus proche d'une cl\'e tout en tenant compte de la proximit\'e r\'eseau. Cette approche garantit une complexit\'e logarithmique et peut am\'eliorer la latence r\'eelle des communications.
+
+Cependant, la maintenance simultan\'ee de plusieurs structures de routage (Routing Table, Leaf Set, Neighbor Set) rend le protocole plus complexe que Chord et plus sensible aux ph\'enom\`enes de churn. L'efficacit\'e globale du syst\`eme d\'ependra donc directement de notre impl\'ementation.
+
+

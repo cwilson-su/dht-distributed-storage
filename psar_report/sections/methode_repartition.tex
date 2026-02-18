@@ -1,3 +1,4 @@
+\newpage
 \section{Méthode de répartition des données}
 
 \subsection{Motivation et définition de la répartition des données}
@@ -13,7 +14,6 @@ Avec l’augmentation continue du volume de données et du nombre d’utilisateu
 
 Une solution pour pallier à ces limitations consiste à répartir les données et les requêtes sur plusieurs bases de données, afin de distribuer la charge de stockage et de traitement, et d’éviter la surcharge d’une base de données unique.
 
-\newpage
 
 \IfFileExists{images/10_distributed_architecture.png}{
 \begin{figure}[!ht]
@@ -38,7 +38,7 @@ Dans les exemples suivant nous allons utiliser le termes nœud qui fait référe
 
 Une première approche naïve appelée hachage classique (naive hashing ou modulo hashing) consiste à utiliser une fonction de hachage afin de faire la correspondance entre la clé d’une donnée et la base de données dans laquelle nous allons la stocker.
 
-\newpage
+
 \subsubsection*{Association d’une clé à un nœud}
 
 Cette méthode repose sur les étapes suivantes :
@@ -90,7 +90,7 @@ Event \#1234 → hash(1234) \% 3 = 1 → Database 2     hash(1234) \% 4 = 0 → 
 
 L'événement n° 1234 était mappé à la base de données 2, mais avec l’ajout de la nouvelle base de données, ces données doivent donc être déplacées vers la base de données 1.
 
-\newpage
+
 \IfFileExists{images/12_hash_resize_problem.png}{
 \begin{figure}[!ht]
 \centering
