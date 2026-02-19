@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.16)  19 FEB 2026 00:25
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.16)  19 FEB 2026 10:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1903,9 +1903,6 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 LaTeX Warning: There were undefined references.
 
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package rerunfilecheck Info: File `psar_report.out' has not changed.
 (rerunfilecheck)             Checksum: 0CA0AFB5255392515242EF81EEC1ED6D;14149.
 
@@ -1920,7 +1917,7 @@ Package logreq Info: Writing requests to 'psar_report.run.xml'.
 Here is how much of TeX's memory you used:
  38871 strings out of 467871
  792131 string characters out of 5418376
- 1682928 words of memory out of 5000000
+ 1682930 words of memory out of 5000000
  67039 multiletter control sequences out of 15000+600000
  683474 words of font info for 75 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1940,7 +1937,7 @@ fb><C:/Users/safag/AppData/Local/Programs/MiKTeX/fonts/type1/public/tex-gyre/qh
 vbi.pfb><C:/Users/safag/AppData/Local/Programs/MiKTeX/fonts/type1/public/tex-gy
 re/qhvr.pfb><C:/Users/safag/AppData/Local/Programs/MiKTeX/fonts/type1/public/te
 x-gyre/qhvri.pfb>
-Output written on psar_report.pdf (37 pages, 2618920 bytes).
+Output written on psar_report.pdf (37 pages, 2616138 bytes).
 PDF statistics:
  773 PDF objects out of 1000 (max. 8388607)
  141 named destinations out of 1000 (max. 500000)

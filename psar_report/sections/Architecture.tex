@@ -19,21 +19,6 @@ Dans cette premi\`ere partie, nous d\'etaillons l'architecture retenue pour Chor
 
 \subsection{Architecture g\'en\'erale bas\'ee sur Chord}
 
-R\'esumons l'architecture Chord vue pr\'ec\'edemment en indiquant les diff\'erentes variables qui nous seront indispensables lors de son impl\'ementation. L'architecture Chord repose sur un espace d'identifiants circulaire de taille $2^m$. Cet espace est partag\'e \`a la fois par les n\oe uds du syst\`eme et par les cl\'es des donn\'ees stock\'ees. Chaque n\oe ud re\c coit un identifiant unique calcul\'e via une fonction de hachage, et se positionne sur un anneau logique selon cet identifiant.
-
-Le principe fondamental de Chord est le suivant : une cl\'e est stock\'ee sur le premier n\oe ud dont l'identifiant est sup\'erieur ou \'egal \`a l'identifiant de la cl\'e dans le sens des aiguilles d'une montre. Ce n\oe ud est appel\'e le successeur de la cl\'e. Cette r\`egle garantit un placement d\'eterministe et uniforme des donn\'ees sans coordination centrale.
-
-Chaque n\oe ud maintient localement plusieurs structures essentielles :
-
-\begin{itemize}
-    \item son identifiant unique,
-    \item un pointeur vers son successeur,
-    \item un pointeur vers son pr\'ed\'ecesseur,
-    \item une table de routage appel\'ee finger table,
-    \item un stockage local des paires (cl\'e, valeur).
-\end{itemize}
-
-La finger table permet d'assurer un routage logarithmique. Chaque entr\'ee de cette table pointe vers un n\oe ud situ\'e exponentiellement plus loin sur l'anneau. Ainsi, lorsqu'un n\oe ud doit localiser le responsable d'une cl\'e, il peut se rapprocher de la destination en un nombre de sauts proportionnel \`a $O(\log N)$, o\`u $N$ est le nombre total de n\oe uds.
 
 \subsubsection{Couche Overlay et Couche applicative}
 
@@ -78,18 +63,6 @@ Cependant, si l'overlay garantit une localisation efficace des cl\'es, la robust
 Nous consid\'erons ainsi cette architecture comme une base solide et extensible, dont le comportement effectif d\'ependra de la rigueur de notre impl\'ementation et des m\'ecanismes compl\'ementaires que nous d\'eciderons d'y int\'egrer.
 
 \subsection{Architecture g\'en\'erale bas\'ee sur Pastry}
-
-Contrairement \`a Chord, dont l'organisation repose sur un anneau circulaire strict et un routage bas\'e sur des sauts exponentiels via la finger table, Pastry adopte une structure fond\'ee sur le routage par pr\'efixes dans un espace d'identifiants structur\'e en base $2^b$.
-
-Chaque n\oe ud poss\`ede un identifiant unique appel\'e \emph{nodeId}, g\'en\'eralement cod\'e sur 128 bits, issu d'une fonction de hachage cryptographique. De la m\^eme mani\`ere, chaque cl\'e associ\'ee \`a une donn\'ee est transform\'ee en identifiant dans le m\^eme espace. L'objectif du protocole est d'acheminer toute requ\^ete vers le n\oe ud dont l'identifiant est num\'eriquement le plus proche de la cl\'e cible.
-
-L'architecture Pastry repose sur trois structures fondamentales maintenues localement par chaque n\oe ud :
-
-\begin{itemize}
-    \item une Routing Table, organis\'ee par longueur de pr\'efixes communs,
-    \item un Leaf Set, contenant les identifiants imm\'ediatement sup\'erieurs et inf\'erieurs,
-    \item un Neighbor Set, optimisant la proximit\'e r\'eseau physique.
-\end{itemize}
 
 \subsubsection{Couche overlay et couche applicative dans Pastry}
 
