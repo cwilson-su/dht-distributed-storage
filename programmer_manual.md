@@ -108,13 +108,7 @@ We are using a local copy of LaTeX. Below are common issues and solutions.
 * **Solution:** Close the PDF viewer before hitting "Build" or "Compile." (Some lightweight viewers like SumatraPDF do not lock files and do not cause this error).
 
 ---
-## 5. 
-
-Here is a comprehensive **README.md** file that explains the environment requirements, configuration, and the workflow for keeping your diagrams synchronised with your Java code.
-
----
-
-### Automated UML Documentation
+## 5. Automated UML Documentation
 
 This project includes an automation suite to generate UML class diagrams directly from your Java source code. These diagrams are produced as PDFs, perfect for inclusion in technical reports or LaTeX documents.
 
@@ -141,8 +135,6 @@ sudo apt-get install default-jre python3 graphviz librsvg2-bin
 
 ```
 
----
-
 #### Configuration
 
 The script `generate_all_diagrams.sh` contains two primary configuration variables at the top of the file:
@@ -153,9 +145,6 @@ The script `generate_all_diagrams.sh` contains two primary configuration variabl
 
 2. **`ROOT_DIAGRAMS_DIR`**: The folder where the generated PDFs will be stored.
 * *Default*: `diagrams`
-
-
----
 
 #### Features of the Generated UML
 
@@ -171,7 +160,6 @@ The script performs a "Deep Parse" of your code to ensure academic-grade documen
 
 * **Logic Filtering**: Strictly excludes method implementation details (e.g., `break`, `if` statements, or `System.out.println`) to keep the focus on architecture.
 
----
 
 #### Workflow Recommendation
 
