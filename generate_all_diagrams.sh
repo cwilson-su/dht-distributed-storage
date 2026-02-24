@@ -14,16 +14,21 @@ rm -rf "$ROOT_DIAGRAMS_DIR"
 
 echo "Scanning for Java packages..."
 
-# Find only directories that actually contain .java files
+# Find only directories containing .java files
 find src -name "*.java" -not -path '*/.*' | xargs -n1 dirname | sort -u | while read -r java_dir; do
     
+    # NEW CHECK: Skip if the directory has no .java files (failsafe for find results)
+    if ! ls "$java_dir"/*.java &> /dev/null; then
+        continue
+    fi
+
     target_dir="$ROOT_DIAGRAMS_DIR/$java_dir"
     mkdir -p "$target_dir"
     
     package_name=$(basename "$java_dir")
     TEMP_PUML="generic_relational.puml"
     
-    echo "Generating Clean Relational UML for package: $package_name..."
+    echo "Generating UML for package: $package_name..."
     
     python3 - <<EOF > "$TEMP_PUML"
 import os, re
@@ -45,7 +50,7 @@ print("set namespaceSeparator none")
 classes = []
 relationships = set()
 
-# Pass 1: Catalog types (File check added)
+# Pass 1: Catalog types
 for filename in sorted(os.listdir('$java_dir')):
     filepath = os.path.join('$java_dir', filename)
     if os.path.isfile(filepath) and filename.endswith('.java'):
@@ -55,7 +60,7 @@ for filename in sorted(os.listdir('$java_dir')):
             if match:
                 classes.append(match.group(2))
 
-# Pass 2: Extract and Build (File check added)
+# Pass 2: Build UML
 for filename in sorted(os.listdir('$java_dir')):
     filepath = os.path.join('$java_dir', filename)
     if not os.path.isfile(filepath) or not filename.endswith('.java'):
@@ -126,13 +131,16 @@ for rel in sorted(relationships):
 print("@enduml")
 EOF
 
-    java -jar "$PLANTUML_JAR" -tsvg -o "$PWD/$target_dir" "$TEMP_PUML"
-    
-    if [ -f "$target_dir/generic_relational.svg" ]; then
-        rsvg-convert -f pdf -o "$target_dir/${package_name}.pdf" "$target_dir/generic_relational.svg"
-        rm "$target_dir/generic_relational.svg"
+    # Only run PlantUML if the generated .puml has actual content beyond the header
+    if grep -q "class\|interface\|enum" "$TEMP_PUML"; then
+        java -jar "$PLANTUML_JAR" -tsvg -o "$PWD/$target_dir" "$TEMP_PUML"
+        
+        if [ -f "$target_dir/generic_relational.svg" ]; then
+            rsvg-convert -f pdf -o "$target_dir/${package_name}.pdf" "$target_dir/generic_relational.svg"
+            rm "$target_dir/generic_relational.svg"
+        fi
     fi
     rm "$TEMP_PUML"
 done
 
-echo "Process complete. Relational PDFs generated in ./$ROOT_DIAGRAMS_DIR"
+echo "Process complete. No empty diagrams were generated."
