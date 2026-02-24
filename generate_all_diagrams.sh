@@ -20,11 +20,10 @@ find src -name "*.java" -not -path '*/.*' | xargs -n1 dirname | sort -u | while 
     mkdir -p "$target_dir"
     
     package_name=$(basename "$java_dir")
-    TEMP_PUML="clean_structure.puml"
+    TEMP_PUML="pure_structure.puml"
     
-    echo "Generating PDF for package: $package_name..."
+    echo "Generating Clean PDF for package: $package_name..."
     
-    # Use Python to precisely extract class headers and member signatures
     python3 - <<EOF > "$TEMP_PUML"
 import os, re
 
@@ -32,46 +31,54 @@ print("@startuml")
 print("skinparam classAttributeIconSize 0")
 print("set namespaceSeparator none")
 
-# Patterns to match class/interface and member signatures
-class_pattern = re.compile(r'(class|interface|enum)\s+(\w+)')
-member_pattern = re.compile(r'^\s*(public|private|protected|static|final|\w+)\s+[\w<>, ]+\s+\w+(\(.*\))?\s*[;{]')
+# Regex to find class/interface/enum headers
+head_pat = re.compile(r'(class|interface|enum)\s+(\w+)')
 
 for filename in sorted(os.listdir('$java_dir')):
     if filename.endswith('.java') and filename != 'module-info.java':
         with open(os.path.join('$java_dir', filename), 'r') as f:
             content = f.read()
-            # Find the class name
-            class_match = class_pattern.search(content)
-            if class_match:
-                kind, name = class_match.groups()
+            
+            header = head_pat.search(content)
+            if header:
+                kind, name = header.groups()
                 print(f"{kind} {name} {{")
                 
-                # Extract members line by line
+                # Split content and look for member declarations
                 lines = content.split('\n')
                 for line in lines:
                     line = line.strip()
-                    # Only keep lines that look like a field or method signature
-                    if member_pattern.match(line):
-                        # Filter out common logic keywords that look like signatures
-                        if not any(k in line for k in ['return', 'if', 'for', 'while', 'switch', 'throw', 'package', 'import', 'break']):
-                            # Clean the line: remove 'public/private' and trailing '{' or ';'
-                            clean = line.replace('public ', '').replace('private ', '').replace('protected ', '').split('{')[0].strip()
+                    
+                    # VALID MEMBER RULE:
+                    # 1. Ends in ; (field) OR ends in { (method start)
+                    # 2. Does NOT contain logic symbols: =, +, ", break, if, while, switch, log
+                    # 3. Must have a type and a name
+                    if (line.endswith(';') or line.endswith('{')) and '(' in line:
+                        # This is likely a method signature
+                        if not any(x in line for x in ['=', '"', '+', 'break', 'if', 'while', 'log', 'return']):
+                            clean = line.replace('{', '').replace('public ', '').replace('private ', '').strip()
                             if clean and clean != name and not clean.startswith('class'):
-                                print(f"  {clean.rstrip(';')}")
+                                print(f"  {clean}")
+                    elif line.endswith(';') and not '(' in line:
+                        # This is likely a field declaration
+                        if not any(x in line for x in ['=', '"', '+', 'break', 'new']):
+                            clean = line.rstrip(';').replace('public ', '').replace('private ', '').strip()
+                            if clean:
+                                print(f"  {clean}")
                 print("}")
 print("@enduml")
 EOF
 
-    # Generate SVG (native support) to bypass missing Batik libraries in Fedora
+    # Generate SVG
     java -jar "$PLANTUML_JAR" -tsvg -o "$PWD/$target_dir" "$TEMP_PUML"
     
-    # Convert SVG to PDF using Fedora's librsvg tool
-    if [ -f "$target_dir/clean_structure.svg" ]; then
-        rsvg-convert -f pdf -o "$target_dir/${package_name}.pdf" "$target_dir/clean_structure.svg"
-        rm "$target_dir/clean_structure.svg"
+    # Convert to PDF
+    if [ -f "$target_dir/pure_structure.svg" ]; then
+        rsvg-convert -f pdf -o "$target_dir/${package_name}.pdf" "$target_dir/pure_structure.svg"
+        rm "$target_dir/pure_structure.svg"
     fi
 
     rm "$TEMP_PUML"
 done
 
-echo "Process complete. Check ./$ROOT_DIAGRAMS_DIR for clean, professional PDFs."
+echo "Process complete. Check ./$ROOT_DIAGRAMS_DIR for clean PDFs."
