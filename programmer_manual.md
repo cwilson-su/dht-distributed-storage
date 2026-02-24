@@ -23,11 +23,6 @@ The project follows an iterative development structure. Source code packages and
 * **dht1**: Refers to the first functional iteration (introduction of Origin tracking, Hops counting, etc).
 * **dht2**: (Future) Refers to the stabilized version with TTL and response handling.
 
----
-
-Here is the specific section regarding Git usage and `.gitignore` policy for your manual.
-
----
 
 ## 2. VERSION CONTROL AND REPOSITORY MANAGEMENT
 
@@ -49,7 +44,7 @@ When pushing changes from Eclipse:
 1. **Only commit the `src/` folder.** This contains the actual `.java` files.
 2. Do **not** commit the entire Eclipse Workspace.
 3. If you add external libraries (`.jar`), place them in a `lib/` folder and commit that folder, but do not commit the absolute paths in `.classpath`.
-   
+
 ---
 
 ## 3. FIGURE INTEGRATION WORKFLOW
@@ -111,4 +106,84 @@ We are using a local copy of LaTeX. Below are common issues and solutions.
 ### 3.4 "I can't write on file..." or "Permission Denied"
 * **Cause:** You are trying to compile the LaTeX document while the previous version of the PDF is still open in your PDF viewer (Adobe Reader, etc.). Windows, for instance, locks the file, preventing the compiler from overwriting it.
 * **Solution:** Close the PDF viewer before hitting "Build" or "Compile." (Some lightweight viewers like SumatraPDF do not lock files and do not cause this error).
+
+---
+## 5. 
+
+Here is a comprehensive **README.md** file that explains the environment requirements, configuration, and the workflow for keeping your diagrams synchronised with your Java code.
+
+---
+
+### Automated UML Documentation
+
+This project includes an automation suite to generate UML class diagrams directly from your Java source code. These diagrams are produced as PDFs, perfect for inclusion in technical reports or LaTeX documents.
+
+#### Prerequisites
+
+Before running the script, ensure your Linux environment has the following dependencies installed:
+
+* **Java Runtime (JRE/JDK)**: Required to execute the PlantUML engine.
+* **Python 3**: Used for the structural analysis and extraction of Java members.
+* **Graphviz**: Essential for calculating relational layouts and arrows.
+* **librsvg2-tools**: Provides the `rsvg-convert` utility to transform diagrams into PDFs.
+
+#### Installation on Fedora
+```bash
+sudo dnf install java-latest-openjdk python3 graphviz librsvg2-tools
+
+```
+
+#### Installation on Ubuntu/Debian
+
+```bash
+sudo apt-get update
+sudo apt-get install default-jre python3 graphviz librsvg2-bin
+
+```
+
+---
+
+#### Configuration
+
+The script `generate_all_diagrams.sh` contains two primary configuration variables at the top of the file:
+
+1. **`PLANTUML_JAR`**: The absolute path to your `plantuml.jar` file.
+* *Default*: `/usr/local/bin/plantuml/plantuml.jar`
+
+
+2. **`ROOT_DIAGRAMS_DIR`**: The folder where the generated PDFs will be stored.
+* *Default*: `diagrams`
+
+
+---
+
+#### Features of the Generated UML
+
+The script performs a "Deep Parse" of your code to ensure academic-grade documentation:
+
+* **Visibility Modifiers**: Automatically maps Java keywords to UML symbols: `+` (public), `-` (private), `#` (protected), and `~` (package-private).
+* **Enum Extraction**: Fully documents internal structures, such as the `Type` enum in the `Message` class, including constants like `PUT` and `GET`.
+* **Generic Relationships**: Dynamically detects and draws:
+* **Implementation**: Dashed arrows (`..|>`) between `NodeThread` and the `Node` interface.
+* **Association**: Solid arrows (`-->`) between classes based on field declarations.
+* **Dependency**: Dashed arrows (`..>`) for method parameters.
+
+
+* **Logic Filtering**: Strictly excludes method implementation details (e.g., `break`, `if` statements, or `System.out.println`) to keep the focus on architecture.
+
+---
+
+#### Workflow Recommendation
+
+To ensure your documentation always reflects the current state of your architecture:
+
+> **Please run the generation script whenever you modify the Java source code, specifically before performing a `git commit` or `git push`.**
+
+#### Quick Command:
+
+```bash
+chmod +x generate_all_diagrams.sh
+./generate_all_diagrams.sh
+
+```
 

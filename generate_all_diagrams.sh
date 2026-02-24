@@ -4,10 +4,37 @@
 PLANTUML_JAR="/usr/local/bin/plantuml/plantuml.jar"
 ROOT_DIAGRAMS_DIR="diagrams"
 
+# --- 1. ENVIRONMENT CHECK ---
+echo "Checking dependencies..."
+
+MISSING_DEPS=0
+
+if ! command -v python3 &> /dev/null; then
+    echo "Error: python3 is not installed."
+    MISSING_DEPS=1
+fi
+
+if ! command -v java &> /dev/null; then
+    echo "Error: java (JRE) is not installed."
+    MISSING_DEPS=1
+fi
+
+if ! command -v rsvg-convert &> /dev/null; then
+    echo "Error: rsvg-convert is not installed (package: librsvg2-tools)."
+    MISSING_DEPS=1
+fi
+
 if [ ! -f "$PLANTUML_JAR" ]; then
-    echo "Error: plantuml.jar not found at $PLANTUML_JAR"
+    echo "Error: plantuml.jar not found at $PLANTUML_JAR."
+    MISSING_DEPS=1
+fi
+
+if [ $MISSING_DEPS -eq 1 ]; then
+    echo "Please install missing dependencies and try again."
     exit 1
 fi
+
+echo "All dependencies found. Proceeding..."
 
 echo "Cleaning old diagrams..."
 rm -rf "$ROOT_DIAGRAMS_DIR"
