@@ -1,10 +1,11 @@
 package dht;
 
-class Message {
-    enum Type { PUT, GET }
-    Type type;
-    String key;
-    String value;
-    Node origin; 
-    int hops = 0; 
+import java.io.Serializable;
+
+public class Message implements Serializable {
+    public enum Type { PUT, GET }
+    public Type type;
+    public String k, v; // key, value
+    public int port;    // sender port
+    public int hops = 0;
 }
