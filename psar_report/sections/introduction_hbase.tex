@@ -1,0 +1,37 @@
+\subsection{\'Etude de l'approche hi\'erarchis\'ee : HBase}
+
+Les DHT repondent bien au \emph{lookup} en environnement dynamique, mais certaines applications exigent davantage de controle sur la coherence, la persistance et les performances de scan/ecriture. L'approche hi\'erarchis\'ee d'Apache HBase repond a ce besoin.
+
+\subsubsection{Introduction au modele hierarchise}
+
+HBase, construit sur HDFS (\emph{Hadoop Distributed File System}), est une base NoSQL distribu\'ee orient\'ee grands volumes. Contrairement aux DHT decentralisees, HBase suit un modele \emph{master-worker} avec \emph{range partitioning} : adressage d\'eterministe par \emph{row key}, scans sequentiels efficaces et coherence forte au niveau ligne.
+
+\subsubsection{Fondamentaux architecturaux de HBase}
+
+Le \emph{HBase Master} g\`ere le cluster (allocation des regions, equilibrage, d\'etection de pannes), tandis que les \emph{RegionServers} stockent les donn\'ees et executent les lectures/ecritures. Cette separation simplifie l'administration et le controle operationnel.
+
+\subsubsection*{Mod\`ele de donn\'ees et espace d'adressage}
+
+Le modele est oriente colonnes (tables, \emph{rows}, familles de colonnes). Les \emph{row keys} ordonnees lexicographiquement definissent l'espace d'adressage : excellent pour les scans et les requ\^etes par plages, mais sensible au design des cles.
+
+
+\subsubsection{M\'ecanismes internes : partitionnement et gestion des pannes}
+
+Deux mecanismes portent la scalabilite et la durabilite : partitionnement par regions et reaffectation apres panne.
+
+\subsubsection*{Partitionnement horizontal par plages de cles}
+
+Les tables sont decoupees en regions couvrant des plages continues de \emph{row keys}. Avec la croissance des donn\'ees, \emph{region splitting} repartit la charge entre RegionServers. Limite cl\'e : des cles monotones (ex.~timestamps) creent des \emph{hotspots} et du \emph{data skew} (\emph{storage skew}/\emph{access skew}).
+
+Par rapport au \emph{consistent hashing} des DHT (distribution pseudo-aleatoire), HBase choisit un partitionnement d\'eterministe par ordre de cles.
+
+\subsubsection*{Gestion des pannes et reaffectation}
+
+En cas de panne d'un RegionServer, le Master (avec ZooKeeper) reassigne les regions. Avec le \emph{WAL} et HDFS, la reconstruction est robuste. Ce modele est centralise, contrairement a la reorganisation incrementale des DHT.
+
+
+\subsubsection{Avantages et limites}
+
+\textbf{Avantages.} Coherence forte en lecture/ecriture, tr\`es bonnes performances de scans sequentiels, et bonne scalabilite horizontale via \emph{region splitting} + ajout de RegionServers.
+
+\textbf{Limites.} Forte sensibilite au schema de cles (risque de \emph{hotspot} et \emph{data skew}) et complexit\'e operationnelle elevee (HDFS, ZooKeeper, tuning et supervision du cluster).

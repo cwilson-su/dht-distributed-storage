@@ -1,247 +1,37 @@
-\section{Analyse Comparative des Paradigmes Architecturaux de Stockage Distribué}
+\section{Analyse Comparative des Paradigmes Architecturaux de Stockage Distribu\'e}
 
 \setlength{\parskip}{3pt}
 
-La croissance du volume de données a rendu les architectures centralisées insuffisantes. Les systèmes distribués sont devenus la norme, mais posent un défi central : garantir un \emph{lookup} efficace, la \emph{consistency} et la \emph{fault tolerance} dans un environnement de nœuds peu fiables.
+La croissance du volume de donn\'ees a rendu les architectures centralisees insuffisantes. Les systemes distribues sont devenus la norme, mais posent un defi central : garantir un \emph{lookup} efficace, la \emph{consistency} et la \emph{fault tolerance} dans un environnement de n\oe uds peu fiables.
 
-Dans ce projet Master, nous comparons deux architectures de référence pour le stockage distribué, basées sur des paradigmes différents :
+Dans ce projet Master, nous comparons deux architectures de reference pour le stockage distribue, basees sur des paradigmes differents :
 
-\paragraph{1. L'architecture P2P structurée (Les DHTs)}
-Paradigme décentralisé (architecture \emph{symmetric}) : les nœuds ont un rôle homogène et s'auto-organisent dans un \emph{overlay} structuré. Nous considérons plusieurs DHT (Chord, CAN, Pastry, Kademlia) qui résolvent le \emph{lookup} en général en $O(\log N)$, avec des compromis différents entre topologie logique, latence de routage, taille des tables d'état et résilience au \emph{churn}.
+\paragraph{1. L'architecture P2P structur\'ee (Les DHTs)}
+Paradigme decentralise (architecture \emph{symmetric}) : les n\oe uds ont un role homogene et s'auto-organisent dans un \emph{overlay} structure. Nous considerons plusieurs DHT (Chord, CAN, Pastry, Kademlia) qui resolvent le \emph{lookup} en general en $O(\log N)$, avec des compromis differents entre topologie logique, latence de routage, taille des tables d'etat et r\'esilience au \emph{churn}.
 
-\paragraph{2. L'architecture hiérarchisée orientée colonnes (Modèle HBase)}
-À l'opposé du P2P pur, ce paradigme suit une architecture \emph{master-worker} inspirée de Bigtable. HBase vise une cohérence forte, un modèle orienté colonnes/versionné, et conserve une centralisation partielle (HMaster) pour la gestion des métadonnées et des transactions, en échange de meilleures performances d'écriture et de scan.
+\paragraph{2. L'architecture hi\'erarchis\'ee orient\'ee colonnes (Mod\`ele HBase)}
+A l'oppose du P2P pur, ce paradigme suit une architecture \emph{master-worker} inspiree de Bigtable. HBase vise une coherence forte, un modele oriente colonnes/versionne, et conserve une centralisation partielle (HMaster) pour la gestion des metadonnees et des transactions, en echange de meilleures performances d'ecriture et de scan.
 
-La suite du document présente d'abord le routage et la maintenance des DHTs, puis l'architecture interne de HBase et ses mécanismes de persistance.
+La suite du document presente d'abord le routage et la maintenance des DHTs, puis l'architecture interne de HBase et ses mecanismes de persistance.
 
-%------------------------
-\subsection{Étude des approches P2P structurée: Les DHTs}
-
-Cette section résume les principes essentiels des \emph{Distributed Hash Tables} (DHTs) : localisation des données, routage, gestion des nœuds et interfaces applicatives.
-
-\begin{tcolorbox}[bluebox]
-\textbf{Référence} : \textcite{DBLP:conf/p2p/WehrleGR05}.
-\end{tcolorbox}
-
-\subsection{Introduction au problème du Lookup}
-
-Le problème central est le \emph{lookup problem} : où stocker une donnée \(D\), puis comment la retrouver dans un réseau distribué sans coordination centrale.
-
-\begin{quote}
-\emph{"Où stocker, et comment trouver un certain élément de donnée D dans un système distribué sans aucun contrôle ou coordination centralisés ?"}
-\end{quote}
-
-\begin{figure}[!ht]
-	\centering
-		\includegraphics[width=0.7\textwidth]{images/00_lookup_problem.png}
-	\caption{\textbf{Le problème du lookup} : le nœud A stocke une donnée \(D\) et le nœud B doit la retrouver sans connaître son emplacement.}
-	\label{fig:00_lookup_problem}
-\end{figure}
+\input{sections/introduction_dht}
 
 \newpage
-\subsection{Comparaison des stratégies de recherche}
-
-Trois familles de solutions sont comparées.
-
-\subsubsection*{1. Central Server}
-Approche de \textbf{première génération} (ex.~Napster). Un serveur central indexe les contenus. Recherche rapide en \(O(1)\), mais dépendance forte à un \emph{single point of failure}.
-
-\begin{figure}[!ht]
-	\centering
-		\includegraphics[width=0.7\textwidth]{images/01_central_server.png}
-	\caption{\textbf{Central Server} : publication, requête au serveur central, puis téléchargement direct entre pairs.}
-	\label{fig:01_central_server}
-\end{figure}
-
-\subsubsection*{2. Flooding Search}
-Approche de \textbf{deuxième génération} (ex.~Gnutella). La requête est propagée de voisin en voisin via un \emph{reactive flooding} jusqu'au \emph{Time To Live} (TTL). L'approche évite le serveur central, mais génère un fort \emph{communication overhead} et des résultats non garantis.
-
-\begin{figure}[!ht]
-	\centering
-		\includegraphics[width=0.7\textwidth]{images/02_flooding_search.png}
-	\caption{\textbf{Flooding Search} : diffusion récursive de requêtes, puis retour des nœuds ayant la donnée.}
-	\label{fig:02_flooding_search}
-\end{figure}
-
-\newpage
-\subsubsection*{3. Distributed Hash Tables (DHTs)}
-Les DHTs (\emph{structured Peer-to-Peer systems}) structurent l'\emph{overlay} pour obtenir un compromis robuste : \(O(\log N)\) entrées de routage par nœud et \(O(\log N)\) \emph{hops} pour localiser une donnée.
-
-\begin{figure}[!ht]
-	\centering
-		\includegraphics[width=0.7\textwidth]{images/04_dht_principle.png}
-	\caption{\textbf{Distributed Hash Table} : routage structuré et efficace vers le nœud responsable.}
-	\label{fig:04_dht_principle}
-\end{figure}
-
-Les Figures~\ref{fig:01_central_server}, \ref{fig:02_flooding_search}, \ref{fig:04_dht_principle} et~\ref{fig:03_comparison_central_flooding_dht} montrent que les DHTs offrent le meilleur compromis entre coût de recherche et coût de stockage.
-
-\begin{figure}[!ht]
-	\centering
-		\includegraphics[width=0.7\textwidth]{images/03_comparison_central_flooding_dht.png}
-\caption{Comparaison de la complexité en termes d'effort de recherche (axe y) et de coût de stockage par nœud (axe x). Les goulots d'étranglement (\emph{bottlenecks}) ainsi que les caractéristiques spécifiques de chaque approche sont indiqués.}
-	\label{fig:03_comparison_central_flooding_dht}
-\end{figure}
-
-\newpage
-\subsection{Fondamentaux des Distributed Hash Tables}
-
-Une DHT associe chaque clé à un nœud responsable via un espace d'adressage logique et un routage déterministe.
-
-\subsubsection*{Gestion distribuée des données}
-Chaque nœud gère une plage de clés et conserve une \emph{partial view} du système. Les messages sont relayés de nœud en nœud jusqu'à la destination.
-
-\subsubsection*{Adressage dans les Distributed Hash Tables}
-Nœuds et données partagent le même \emph{address space} logique (souvent très grand, p.~ex. \(0\) à \(2^{160}-1\)). Les IDs sont produits par une \emph{collision-resistant hash function}.
-
-\begin{figure}[!ht]
-	\centering
-		\includegraphics[width=0.7\textwidth]{images/05_a_linear_address_space_in_dht.png}
-	\caption{Espace d'adressage linéaire partitionné entre pairs.}
-	\label{fig:05_a_linear_address_space_in_dht}
-\end{figure}
-
-\begin{figure}[!ht]
-	\centering
-		\includegraphics[width=0.7\textwidth]{images/06_underlay_view_of_dht.png}
-	\caption{Vue logique de la DHT et vue du réseau sous-jacent.}
-	\label{fig:06_underlay_view_of_dht}
-\end{figure}
-
-\subsubsection*{Routage}
-Chaque nœud transmet vers un voisin plus proche de l'ID cible, ce qui réduit progressivement la distance jusqu'au nœud responsable en un \emph{small number of hops}.
-
-\subsubsection*{Méthodes de stockage}
-\textbf{Direct Storage} : la donnée est copiée sur le nœud responsable (meilleure \emph{availability}, coût plus élevé).
-
-\textbf{Indirect Storage} : la DHT stocke un \emph{pointer} vers la donnée (coût réduit, dépendance au nœud source).
-
-\begin{figure}[!ht]
-	\centering
-		\includegraphics[width=0.7\textwidth]{images/07_direct_indirect_storage.png}
-	\caption{Comparaison entre stockage direct et stockage indirect.}
-	\label{fig:07_direct_indirect_storage}
-\end{figure}
-
-\subsection{Mécanismes des DHTs}
-
-La robustesse dépend de la gestion du \emph{churn}, c'est-à-dire le taux de \emph{joins} et \emph{leaves} (arrivées/départs) ainsi que les pannes fréquentes.
-
-\subsubsection*{Arrivée de nœuds}
-L'entrée d'un nœud suit quatre étapes courtes :
-\begin{enumerate}
-\item \textbf{Bootstrap} : le nouveau pair contacte un nœud existant qui sert d'\emph{entry point}.
-\item \textbf{Address Assignment} : il reçoit sa partition dans le \emph{logical address space}.
-\item \textbf{Routing Update} : les tables de routage sont ajustées pour intégrer le nouveau pair.
-\item \textbf{Data Transfer} : les paires \emph{(key, value)} devenues sa responsabilité lui sont transférées.
-\end{enumerate}
-
-\subsubsection*{Défaillance de nœuds}
-Deux approches coexistent : \emph{reactive recovery} (détection pendant le routage, puis route alternative) et \emph{proactive recovery} (\emph{probes} périodiques, remplacement préventif des entrées invalides). La \emph{replication} limite la perte de données applicatives.
-
-\subsubsection*{Départ de nœuds}
-Un départ volontaire (\emph{graceful leave}) facilite la migration immédiate des données vers le \emph{successor} et accélère la convergence des tables de routage. Il améliore aussi la \emph{routing efficiency} et stabilise les mécanismes de \emph{replication} et de \emph{load-balancing}.
-
-\newpage
-\subsection{Interfaces des DHTs}
-
-\begin{figure}[h]
-	\centering
-		\includegraphics[width=0.5\textwidth]{images/08_interface_of_a_dht.png}
-	\caption{Interface d'une Distributed Hash Table, typiquement \textsf{put}/\textsf{get}.}
-	\label{fig:08_interface_of_a_dht}
-\end{figure}
-
-\subsubsection*{Interface de routage}
-Interface \emph{stateless} orientée messages : \texttt{send} livre vers un ID destination, \texttt{receive} remet les messages à l'application (\emph{delivery semantics}).
-Cette \emph{stateless interface} se concentre sur la livraison de paquets basés sur un ID logique plutôt que sur une adresse IP physique.
-
-\subsubsection*{Interface de stockage}
-Interface clé-valeur : \texttt{put} écrit la donnée, \texttt{get} la récupère. La couche gère \emph{routing failures}, \emph{replication} et \emph{admission control}.
-Cette couche ajoute de la complexité car elle gère la persistance et la fiabilité des données, comme une table de \emph{hash} distribuée.
-
-\subsubsection*{Interface Client}
-Des hôtes peuvent consommer le service DHT sans participer au routage de l'\emph{overlay} (mode \emph{client}).
-Ce mode est utile quand on veut séparer usage applicatif et participation au routage (fiabilité, politiques d'\emph{access control}).
-
-%\newpage
-\subsection{Conclusions}
-
-Les DHTs offrent une excellente \emph{scalability} sans point central, mais imposent des compromis entre efficacité de routage, coût de maintenance et résilience au \emph{churn}.
-
-\subsubsection*{Défis de conception}
-\begin{itemize}
-\item \textbf{Routing Efficiency} : qualité du routage selon la structure des tables et la topologie.
-\item \textbf{Management Overhead} : coût de maintenance en continu.
-\item \textbf{Churn} : impact des arrivées/départs simultanés sur la stabilité.
-\end{itemize}
-
-\subsubsection*{Limitations fondamentales}
-\begin{itemize}
-\item \textbf{Untrusted Environments} : résistance difficile face aux nœuds malveillants et aux \emph{Byzantine faults}.
-\item \textbf{Query Constraints} : \emph{fuzzy searches} et requêtes textuelles complexes peu adaptées au modèle par identifiants.
-\end{itemize}
-
-\newpage
-
-
-
-\newpage
-\subsection{Étude de l'approche hiérarchisée : HBase}
-
-Les DHT répondent bien au \emph{lookup} en environnement dynamique, mais certaines applications exigent davantage de contrôle sur la cohérence, la persistance et les performances de scan/écriture. L’approche hiérarchisée d’Apache HBase répond à ce besoin.
-
-\subsubsection{Introduction au modèle hiérarchisé}
-
-HBase, construit sur HDFS (\emph{Hadoop Distributed File System}), est une base NoSQL distribuée orientée grands volumes. Contrairement aux DHT décentralisées, HBase suit un modèle \emph{master-worker} avec \emph{range partitioning} : adressage déterministe par \emph{row key}, scans séquentiels efficaces et cohérence forte au niveau ligne.
-
-\subsubsection{Fondamentaux architecturaux de HBase}
-
-Le \emph{HBase Master} gère le cluster (allocation des régions, équilibrage, détection de pannes), tandis que les \emph{RegionServers} stockent les données et exécutent les lectures/écritures. Cette séparation simplifie l’administration et le contrôle opérationnel.
-
-\subsubsubsection{Modèle de données et espace d’adressage}
-
-Le modèle est orienté colonnes (tables, \emph{rows}, familles de colonnes). Les \emph{row keys} ordonnées lexicographiquement définissent l’espace d’adressage : excellent pour les scans et les requêtes par plages, mais sensible au design des clés.
-
-
-\subsubsection{Mécanismes internes : partitionnement et gestion des pannes}
-
-Deux mécanismes portent la scalabilité et la durabilité : partitionnement par régions et réaffectation après panne.
-
-\subsubsubsection{Partitionnement horizontal par plages de clés}
-
-Les tables sont découpées en régions couvrant des plages continues de \emph{row keys}. Avec la croissance des données, \emph{region splitting} répartit la charge entre RegionServers. Limite clé : des clés monotones (ex.~timestamps) créent des \emph{hotspots} et du \emph{data skew} (\emph{storage skew}/\emph{access skew}).
-
-Par rapport au \emph{consistent hashing} des DHT (distribution pseudo-aléatoire), HBase choisit un partitionnement déterministe par ordre de clés.
-
-\subsubsubsection{Gestion des pannes et réaffectation}
-
-En cas de panne d’un RegionServer, le Master (avec ZooKeeper) réassigne les régions. Avec le \emph{WAL} et HDFS, la reconstruction est robuste. Ce modèle est centralisé, contrairement à la réorganisation incrémentale des DHT.
-
-
-\subsubsection{Avantages et limites}
-
-\textbf{Avantages.} Cohérence forte en lecture/écriture, très bonnes performances de scans séquentiels, et bonne scalabilité horizontale via \emph{region splitting} + ajout de RegionServers.
-
-\textbf{Limites.} Forte sensibilité au schéma de clés (risque de \emph{hotspot} et \emph{data skew}) et complexité opérationnelle élevée (HDFS, ZooKeeper, tuning et supervision du cluster).
+\input{sections/introduction_hbase}
 
 \subsection{Conclusion et justification du choix architectural}
 
-DHT et HBase répondent au même objectif (stockage distribué à grande échelle) avec des choix opposés : décentralisation + \emph{consistent hashing} d’un côté, coordination centralisée + \emph{range partitioning} de l’autre.
+DHT et HBase repondent au meme objectif (stockage distribue a grande echelle) avec des choix opposes : decentralisation + \emph{consistent hashing} d'un cote, coordination centralisee + \emph{range partitioning} de l'autre.
 
-\subsubsubsection{Critère d’évaluation : gestion du data skew}
+\subsubsection*{Crit\`ere d'\'evaluation : gestion du data skew}
 
-Le \emph{data skew} est déterminant : HBase peut concentrer charge/stockage si les clés sont mal conçues, alors que les DHT réduisent structurellement ce risque via une distribution pseudo-aléatoire des identifiants.
+Le \emph{data skew} est determinant : HBase peut concentrer charge/stockage si les cles sont mal concues, alors que les DHT reduisent structurellement ce risque via une distribution pseudo-aleatoire des identifiants.
 
+\subsubsection*{Motivation du choix}
 
-\subsubsubsection{Motivation du choix}
+Notre objectif est d'implementer un systeme totalement decentralise en anneau logique. Les DHT sont mieux alignees avec cet objectif (routage distribue, auto-organisation, joins/leaves, absence de maitre), tandis qu'une approche HBase deplacerait le projet vers l'ingenierie d'un cluster hierarchise.
 
-Notre objectif est d’implémenter un système totalement décentralisé en anneau logique. Les DHT sont mieux alignées avec cet objectif (routage distribué, auto-organisation, joins/leaves, absence de maître), tandis qu’une approche HBase déplacerait le projet vers l’ingénierie d’un cluster hiérarchisé.
+\subsubsection*{Conclusion du choix}
 
-\subsubsubsection{Conclusion du choix}
-
-HBase reste excellent pour des besoins de cohérence forte et de scans massifs, mais pour nos objectifs pédagogiques/expérimentaux, l’approche DHT est plus pertinente.
-En conséquence, nous retenons l’architecture DHT comme base de la suite du projet.
-
-
-
+HBase reste excellent pour des besoins de coherence forte et de scans massifs, mais pour nos objectifs pedagogiques/experimentaux, l'approche DHT est plus pertinente.
+En consequence, nous retenons l'architecture DHT comme base de la suite du projet.
