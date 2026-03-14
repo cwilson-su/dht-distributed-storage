@@ -1,22 +1,18 @@
 \section{Analyse Comparative des Paradigmes Architecturaux de Stockage Distribué}
 
-L'explosion exponentielle du volume de données généré par les applications modernes a rendu obsolètes les architectures de stockage centralisées traditionnelles. Face à la nécessité de gérer des pétaoctets de données avec une haute disponibilité, les systèmes distribués se sont imposés comme la solution standard. Cependant, la distribution des données sur un grand nombre de nœuds introduit une complexité majeure : comment garantir la localisation efficace de la donnée (\emph{lookup}), la cohérence (\emph{consistency}) et la tolérance aux pannes (\emph{fault tolerance}) dans un environnement où les machines sont intrinsèquement peu fiables ?
+\setlength{\parskip}{3pt}
 
-Dans le cadre de ce projet Master, nous nous intéressons à deux architectures de référence qui répondent à ces problématiques selon des paradigmes radicalement différents. Cette introduction analyse et compare ces deux modèles architecturaux considérés pour notre système de stockage :
+La croissance du volume de données a rendu les architectures centralisées insuffisantes. Les systèmes distribués sont devenus la norme, mais posent un défi central : garantir un \emph{lookup} efficace, la \emph{consistency} et la \emph{fault tolerance} dans un environnement de nœuds peu fiables.
+
+Dans ce projet Master, nous comparons deux architectures de référence pour le stockage distribué, basées sur des paradigmes différents :
 
 \paragraph{1. L'architecture P2P structurée (Les DHTs)}
-Ce premier paradigme repose sur une décentralisation totale (architecture \emph{symmetric}). Chaque nœud joue un rôle identique, et le système s'auto-organise pour former un \emph{overlay} structuré.
-
-Plutôt que de nous limiter à une solution unique, nous étudierons plusieurs algorithmes de DHT (tels que Chord, mais aussi d'autres approches comme CAN, Pastry ou Kademlia). Bien que tous ces protocoles visent à résoudre le problème du \emph{lookup} de manière scalable (généralement en $O(\log N)$ ou mieux), ils diffèrent par leurs topologies logiques (anneau, hypercube, arbre) et leurs stratégies de maintenance face au \emph{churn}. Cette diversité permet d'analyser les compromis entre la latence de routage, la taille des tables d'état et la résilience du réseau.
+Paradigme décentralisé (architecture \emph{symmetric}) : les nœuds ont un rôle homogène et s'auto-organisent dans un \emph{overlay} structuré. Nous considérons plusieurs DHT (Chord, CAN, Pastry, Kademlia) qui résolvent le \emph{lookup} en général en $O(\log N)$, avec des compromis différents entre topologie logique, latence de routage, taille des tables d'état et résilience au \emph{churn}.
 
 \paragraph{2. L'architecture hiérarchisée orientée colonnes (Modèle HBase)}
-À l'opposé de l'approche P2P pure, ce second paradigme adopte une architecture \emph{master-worker} plus structurée, inspirée du Bigtable de Google. Ici, le système est conçu pour offrir une cohérence forte et un modèle de données riche (orienté colonnes, versionné). Bien que distribué, ce modèle conserve des éléments de centralisation (via le HMaster) pour simplifier la gestion des métadonnées et des transactions. HBase illustre comment sacrifier une part de l'autonomie des nœuds permet d'optimiser les performances d'écriture et de scan sur de très larges ensembles de données.
+À l'opposé du P2P pur, ce paradigme suit une architecture \emph{master-worker} inspirée de Bigtable. HBase vise une cohérence forte, un modèle orienté colonnes/versionné, et conserve une centralisation partielle (HMaster) pour la gestion des métadonnées et des transactions, en échange de meilleures performances d'écriture et de scan.
 
-\par\null
-
-La suite de ce document synthétise d'abord les mécanismes de routage et de maintenance des DHTs, avant d'aborder l'architecture interne de HBase et ses mécanismes de persistance.
-
-\par\null
+La suite du document présente d'abord le routage et la maintenance des DHTs, puis l'architecture interne de HBase et ses mécanismes de persistance.
 
 %------------------------
 \subsection{Étude des approches P2P structurée: Les DHTs}
@@ -78,8 +74,6 @@ Les DHTs (\emph{structured Peer-to-Peer systems}) structurent l'\emph{overlay} p
 	\label{fig:04_dht_principle}
 \end{figure}
 
-\par\null
-
 Les Figures~\ref{fig:01_central_server}, \ref{fig:02_flooding_search}, \ref{fig:04_dht_principle} et~\ref{fig:03_comparison_central_flooding_dht} montrent que les DHTs offrent le meilleur compromis entre coût de recherche et coût de stockage.
 
 \begin{figure}[!ht]
@@ -88,8 +82,6 @@ Les Figures~\ref{fig:01_central_server}, \ref{fig:02_flooding_search}, \ref{fig:
 \caption{Comparaison de la complexité en termes d'effort de recherche (axe y) et de coût de stockage par nœud (axe x). Les goulots d'étranglement (\emph{bottlenecks}) ainsi que les caractéristiques spécifiques de chaque approche sont indiqués.}
 	\label{fig:03_comparison_central_flooding_dht}
 \end{figure}
-
-\par\null
 
 \newpage
 \subsection{Fondamentaux des Distributed Hash Tables}
@@ -131,8 +123,6 @@ Chaque nœud transmet vers un voisin plus proche de l'ID cible, ce qui réduit p
 	\label{fig:07_direct_indirect_storage}
 \end{figure}
 
-\par\null
-
 \subsection{Mécanismes des DHTs}
 
 La robustesse dépend de la gestion du \emph{churn}, c'est-à-dire le taux de \emph{joins} et \emph{leaves} (arrivées/départs) ainsi que les pannes fréquentes.
@@ -152,7 +142,6 @@ Deux approches coexistent : \emph{reactive recovery} (détection pendant le rout
 \subsubsection*{Départ de nœuds}
 Un départ volontaire (\emph{graceful leave}) facilite la migration immédiate des données vers le \emph{successor} et accélère la convergence des tables de routage. Il améliore aussi la \emph{routing efficiency} et stabilise les mécanismes de \emph{replication} et de \emph{load-balancing}.
 
-\par\null
 \newpage
 \subsection{Interfaces des DHTs}
 
@@ -200,146 +189,59 @@ Les DHTs offrent une excellente \emph{scalability} sans point central, mais impo
 \newpage
 \subsection{Étude de l'approche hiérarchisée : HBase}
 
-Alors que la section précédente a mis en évidence la problématique fondamentale du stockage distribué — à savoir où stocker une donnée et comment la retrouver dans un système sans coordination centralisée — les DHT apportent une réponse fondée sur le hachage cohérent et l’auto-organisation pair-à-pair.
-
-Cependant, si des systèmes comme Chord permettent une localisation efficace dans des environnements dynamiques, certaines applications nécessitent des garanties supplémentaires comme un modèle de données plus structuré, une persistance forte,
-un contrôle plus fin de la cohérence, et une meilleure maîtrise des performances en lecture et écriture. 
-
-C’est dans ce contexte que s’inscrit l’approche hiérarchisée incarnée par HBase.
+Les DHT répondent bien au \emph{lookup} en environnement dynamique, mais certaines applications exigent davantage de contrôle sur la cohérence, la persistance et les performances de scan/écriture. L’approche hiérarchisée d’Apache HBase répond à ce besoin.
 
 \subsubsection{Introduction au modèle hiérarchisé}
 
-Développé au sein de l’écosystème Apache Hadoop, HBase est une base de données NoSQL distribuée construite au-dessus de HDFS (\emph{Hadoop Distributed File System}). Elle est conçue pour stocker et gérer de très grands volumes de données structurées ou semi-structurées, tout en fournissant un accès rapide et aléatoire en lecture et en écriture.
-
-Contrairement aux DHT, dont l’architecture repose sur une organisation entièrement décentralisée et un routage basé sur le hachage, HBase adopte une structure hiérarchisée de type maître-esclave. Le partitionnement des données n’est pas réalisé via un hachage aléatoire, mais par plages ordonnées de clés (range partitioning). Ce choix architectural permet une localisation déterministe des données, une meilleure prise en charge des scans séquentiels, et une cohérence forte au niveau des lignes.
+HBase, construit sur HDFS (\emph{Hadoop Distributed File System}), est une base NoSQL distribuée orientée grands volumes. Contrairement aux DHT décentralisées, HBase suit un modèle \emph{master-worker} avec \emph{range partitioning} : adressage déterministe par \emph{row key}, scans séquentiels efficaces et cohérence forte au niveau ligne.
 
 \subsubsection{Fondamentaux architecturaux de HBase}
 
-HBase repose sur une architecture de type maître-esclave. Le système est composé d’un HBase Master et de plusieurs RegionServers.
-
-Le HBase Master est responsable de la gestion globale du cluster : attribution et répartition des régions, détection des pannes, équilibrage de charge et gestion des opérations de création ou suppression de tables.
-
-Les RegionServers, quant à eux, assurent le stockage effectif des données et traitent les requêtes de lecture et d’écriture des clients.
-
-Ainsi, HBase distingue explicitement les responsabilités, ce qui permet une gestion centralisée du partitionnement et une meilleure maîtrise opérationnelle.
+Le \emph{HBase Master} gère le cluster (allocation des régions, équilibrage, détection de pannes), tandis que les \emph{RegionServers} stockent les données et exécutent les lectures/écritures. Cette séparation simplifie l’administration et le contrôle opérationnel.
 
 \subsubsubsection{Modèle de données et espace d’adressage}
 
-Le modèle de données de HBase est orienté colonnes et s’inspire de l’approche BigTable. Les données sont organisées en Tables, Lignes (rows) identifiées par une row key unique et Familles de colonnes.
-
-L’espace d’adressage est basé sur des lignes ordonnées lexicographiquement selon leur clé. Cette organisation impose un adressage déterministe : la position d’une donnée dépend directement de sa clé et de son ordre relatif. 
-
-Ce choix architectural favorise les opérations de scan séquentiel et les requêtes par plages de clés, mais nécessite une gestion attentive de la conception des clés afin d’éviter les déséquilibres de charge.
+Le modèle est orienté colonnes (tables, \emph{rows}, familles de colonnes). Les \emph{row keys} ordonnées lexicographiquement définissent l’espace d’adressage : excellent pour les scans et les requêtes par plages, mais sensible au design des clés.
 
 
 \subsubsection{Mécanismes internes : partitionnement et gestion des pannes}
 
-Cette section analyse les mécanismes internes, en particulier le partitionnement et la gestion des pannes, qui permettent à Apache HBase d’assurer la scalabilité et la durabilité des données dans un environnement distribué.
+Deux mécanismes portent la scalabilité et la durabilité : partitionnement par régions et réaffectation après panne.
 
 \subsubsubsection{Partitionnement horizontal par plages de clés}
 
-L’une des caractéristiques centrales de HBase est le partitionnement horizontal des données.
+Les tables sont découpées en régions couvrant des plages continues de \emph{row keys}. Avec la croissance des données, \emph{region splitting} répartit la charge entre RegionServers. Limite clé : des clés monotones (ex.~timestamps) créent des \emph{hotspots} et du \emph{data skew} (\emph{storage skew}/\emph{access skew}).
 
-Une table est découpée en régions, chacune couvrant une plage continue de clés (row keys).Chaque région contient donc un sous-ensemble ordonné des lignes de la table. Ce découpage permet de répartir les données entre plusieurs RegionServers et d’assurer la scalabilité horizontale du système.
-
-À mesure que le volume de données augmente, une région peut automatiquement se scinder en deux régions plus petites (region splitting). Ce mécanisme dynamique permet d’équilibrer la charge entre les serveurs et d’éviter qu’une région ne devienne trop volumineuse pour maintenir des performances stables.
- 
-Toutefois, l’efficacité de cette distribution dépend fortement du choix des clés. Si les clés suivent une progression monotone (par exemple des timestamps croissants), un phénomène de hotspot peut apparaître : toutes les nouvelles écritures sont dirigées vers la même région, créant un déséquilibre temporaire de charge.
-
-Ce partitionnement par plages de clés (range partitioning) diffère fondamentalement du consistent hashing utilisé dans les DHT. Là où une DHT répartit les données de manière pseudo-aléatoire afin de garantir un équilibrage probabiliste et une absence de point central, HBase adopte un partitionnement déterministe fondé sur l’ordre des clés.
+Par rapport au \emph{consistent hashing} des DHT (distribution pseudo-aléatoire), HBase choisit un partitionnement déterministe par ordre de clés.
 
 \subsubsubsection{Gestion des pannes et réaffectation}
 
-En cas de défaillance d’un RegionServer, le HBase Master détecte l’anomalie via Apache ZooKeeper et réassigne les régions concernées à d’autres serveurs actifs.
-
-Grâce au WAL et à la persistance sur HDFS, les données peuvent être reconstruites sans perte. Ce mécanisme de réaffectation centralisée contraste avec l’auto-réorganisation progressive des DHT, où la responsabilité des données est redistribuée de manière distribuée et incrémentale.
+En cas de panne d’un RegionServer, le Master (avec ZooKeeper) réassigne les régions. Avec le \emph{WAL} et HDFS, la reconstruction est robuste. Ce modèle est centralisé, contrairement à la réorganisation incrémentale des DHT.
 
 
 \subsubsection{Avantages et limites}
 
-Cette section analyse les principaux atouts et contraintes de Apache HBase, en lien avec les choix architecturaux précédemment décrits.
+\textbf{Avantages.} Cohérence forte en lecture/écriture, très bonnes performances de scans séquentiels, et bonne scalabilité horizontale via \emph{region splitting} + ajout de RegionServers.
 
-
-\subsubsubsection{Avantages}
-
-\subsubsubsection{1. Cohérence forte}
-
-L’un des principaux avantages de HBase réside dans sa cohérence forte au niveau de la ligne.
-
-Concrètement, lorsqu’une donnée est écrite avec succès, toute lecture ultérieure renvoie la version la plus récente. Cette propriété est essentielle pour les applications nécessitant une vision fiable et à jour des données, notamment dans des contextes analytiques ou transactionnels.
-
-\subsubsubsection{2.Performances accès séquentiels}
-
-Le partitionnement par plages de clés constitue un autre atout majeur. Les lignes étant stockées selon l’ordre lexicographique des row keys, HBase offre de très bonnes performances pour les requêtes par intervalle, les scans séquentiels et les analyses chronologiques.
-
-Cette organisation rend le système particulièrement adapté aux traitements massifs de données temporelles ou structurées, dans lesquels l’ordre des enregistrements joue un rôle central.
-
-\subsubsubsection{3. Scalabilité horizontale maîtrisée}
-
-Grâce au mécanisme de region splitting et à l’ajout dynamique de RegionServers, HBase permet une scalabilité horizontale efficace. L’augmentation du volume de données peut être absorbée par l’ajout de nouveaux nœuds sans modification majeure de l’architecture.
-
-\subsubsubsection{Limites}
-
-\subsubsubsection{1. Sensibilité au choix des clés et data skew}
-
-Le principal point faible de Apache HBase réside dans sa dépendance au schéma de clés.
-
-Le partitionnement par plages implique que la distribution des données dépend directement de l’ordre lexicographique des row keys. Si celles-ci sont mal conçues — par exemple strictement croissantes — un phénomène de hotspot peut apparaître : une seule région reçoit la majorité des écritures, créant un déséquilibre de charge temporaire.
-
-Ce phénomène constitue une forme de data skew, c’est-à-dire un déséquilibre dans la répartition des données ou des requêtes entre les nœuds d’un système distribué. Dans le cas de HBase, ce déséquilibre peut être :
-
-\textbf{un storage skew}, si certaines régions stockent significativement plus de données ;
-
-\textbf{un access skew}, si certaines régions reçoivent une proportion disproportionnée des requêtes.
-
-
-\subsubsubsection{2. Complexité opérationnelle}
-
-HBase est un système riche mais complexe à administrer. Il dépend de plusieurs composants de l’écosystème Hadoop, notamment HDFS et Apache ZooKeeper.
-
-La gestion du cluster, le réglage des paramètres de performance, la surveillance des régions et l’optimisation du schéma de données exigent une expertise technique significative
+\textbf{Limites.} Forte sensibilité au schéma de clés (risque de \emph{hotspot} et \emph{data skew}) et complexité opérationnelle élevée (HDFS, ZooKeeper, tuning et supervision du cluster).
 
 \subsection{Conclusion et justification du choix architectural}
 
-L’analyse précédente a mis en évidence deux paradigmes distincts du stockage distribué : l’approche pair-à-pair structurée incarnée par les DHT, et l’approche hiérarchisée représentée par Apache HBase.
-
-Ces deux architectures répondent à une problématique commune : la distribution de données à grande échelle mais s’appuient sur des hypothèses et des mécanismes fondamentalement différents.
-
-Les DHT reposent sur une décentralisation forte à savoir l’absence de nœud maître, un routage distribué, un hachage cohérent assurant une répartition pseudo-aléatoire, et une auto-organisation dynamique du réseau.
-
-Chaque nœud participe activement au routage et les données sont réparties grâce à un mécanisme de hachage, ce qui permet un bon équilibrage automatique et une adaptation progressive aux variations du système.
-
-À l’inverse, HBase adopte une architecture hiérarchisée à savoir un partitionnement déterministe par plages de clés, une coordination centralisée via un master, une persistance forte reposant sur Hadoop Distributed File System (HDFS), et une cohérence forte au niveau des lignes.
-
-Les données sont réparties selon des plages de clés et leur gestion est coordonnée. Cette organisation permet un contrôle précis des performances et une bonne prise en charge des requêtes séquentielles, mais suppose un environnement maîtrisé et relativement stable.
+DHT et HBase répondent au même objectif (stockage distribué à grande échelle) avec des choix opposés : décentralisation + \emph{consistent hashing} d’un côté, coordination centralisée + \emph{range partitioning} de l’autre.
 
 \subsubsubsection{Critère d’évaluation : gestion du data skew}
 
-Un critère déterminant dans l’évaluation de ces architectures concerne la gestion du data skew, c’est-à-dire le déséquilibre dans la répartition des données ou des requêtes entre les nœuds d’un système distribué.
-
-Dans une architecture à partitionnement par plages, comme HBase, la distribution dépend directement du schéma de clés. Une mauvaise conception peut engendrer des phénomènes de hotspot, conduisant à un déséquilibre significatif de charge (storage skew ou access skew).
-
-À l’inverse, les DHT utilisent un mécanisme de hachage cohérent produisant une distribution pseudo-aléatoire des identifiants. Ce choix réduit structurellement le risque de déséquilibre de stockage et favorise un équilibrage plus homogène sans configuration préalable complexe.
-
-Ainsi, du point de vue de la robustesse face au data skew, l’architecture DHT présente un avantage structurel dans des environnements dynamiques.
+Le \emph{data skew} est déterminant : HBase peut concentrer charge/stockage si les clés sont mal conçues, alors que les DHT réduisent structurellement ce risque via une distribution pseudo-aléatoire des identifiants.
 
 
-\subsubsubsection{Motivation du choix}:;
+\subsubsubsection{Motivation du choix}
 
-Dans le cadre de notre projet, l’objectif principal est d’implémenter un système pleinement décentralisé, organisé sous forme d’anneau logique. Cette orientation met l’accent sur : la compréhension des mécanismes de routage distribué, l’auto-organisation des nœuds, la gestion dynamique des entrées et sorties dans le réseau, et l’absence de coordination centrale.
-
-
-De ce point de vue, l’architecture des DHT apparaît particulièrement pertinente.
-Elle permet d’explorer en profondeur les problématiques fondamentales des systèmes distribués : lookup, maintenance de la structure, tolérance aux pannes, équilibrage probabiliste, et complexité logarithmique du routage.
-
-À l’inverse, une implémentation inspirée de HBase impliquerait la mise en place d’une infrastructure hiérarchisée complexe (gestion d’un master, coordination externe, persistance distribuée), ce qui déplacerait l’intérêt du projet vers des problématiques d’ingénierie de cluster plutôt que vers les mécanismes distribués eux-mêmes.
+Notre objectif est d’implémenter un système totalement décentralisé en anneau logique. Les DHT sont mieux alignées avec cet objectif (routage distribué, auto-organisation, joins/leaves, absence de maître), tandis qu’une approche HBase déplacerait le projet vers l’ingénierie d’un cluster hiérarchisé.
 
 \subsubsubsection{Conclusion du choix}
 
-Ainsi, bien que HBase offre des garanties fortes en matière de cohérence et de gestion structurée des données, l’approche DHT est plus adaptée aux objectifs pédagogiques et expérimentaux du projet.
-Le choix d’une architecture en anneau décentralisée permet une meilleure exploration des algorithmes distribués, une mise en œuvre plus conceptuellement cohérente avec les principes du pair-à-pair, et une étude approfondie des propriétés émergentes d’un système sans coordination centrale.
-
-En conséquence, nous retenons l’architecture DHT comme fondement de la suite du projet.
+HBase reste excellent pour des besoins de cohérence forte et de scans massifs, mais pour nos objectifs pédagogiques/expérimentaux, l’approche DHT est plus pertinente.
+En conséquence, nous retenons l’architecture DHT comme base de la suite du projet.
 
 
 
