@@ -3,55 +3,55 @@
 \contentsline {paragraph}{1. L'architecture P2P structurée (Les DHTs)}{3}{paragraph*.1}%
 \contentsline {paragraph}{2. L'architecture hiérarchisée orientée colonnes (Modèle HBase)}{3}{paragraph*.2}%
 \contentsline {subsection}{\numberline {1.1}Étude des approches P2P structurée: Les DHTs}{3}{subsection.1.1}%
-\contentsline {subsubsection}{\numberline {1.1.1}Introduction au problème du Lookup (ref. Section 7.1)}{4}{subsubsection.1.1.1}%
-\contentsline {subsubsection}{\numberline {1.1.2}Comparaison des stratégies de recherche (ref. Section 7.1.1 - 7.1.5)}{5}{subsubsection.1.1.2}%
-\contentsline {subsubsection}{\numberline {1.1.3}Fondamentaux des Distributed Hash Tables (ref. Section 7.2)}{7}{subsubsection.1.1.3}%
-\contentsline {subsubsection}{\numberline {1.1.4}Mécanismes des DHTs (ref. Section 7.3)}{9}{subsubsection.1.1.4}%
-\contentsline {subsubsection}{\numberline {1.1.5}Interfaces des DHTs (ref. Section 7.4)}{10}{subsubsection.1.1.5}%
-\contentsline {subsubsection}{\numberline {1.1.6}Conclusions (ref. Section 7.5)}{11}{subsubsection.1.1.6}%
-\contentsline {subsection}{\numberline {1.2}Étude de l'approche hiérarchisée : HBase}{12}{subsection.1.2}%
-\contentsline {subsubsection}{\numberline {1.2.1}Introduction au modèle hiérarchisé}{12}{subsubsection.1.2.1}%
-\contentsline {subsubsection}{\numberline {1.2.2}Fondamentaux architecturaux de HBase}{12}{subsubsection.1.2.2}%
-\contentsline {subsubsection}{\numberline {1.2.3}Mécanismes internes : partitionnement et gestion des pannes}{13}{subsubsection.1.2.3}%
-\contentsline {subsubsection}{\numberline {1.2.4}Avantages et limites}{13}{subsubsection.1.2.4}%
-\contentsline {subsection}{\numberline {1.3}Conclusion et justification du choix architectural}{14}{subsection.1.3}%
-\contentsline {section}{\numberline {2}Méthode de répartition des données}{16}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Motivation et définition de la répartition des données}{16}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Les différentes méthodes de répartitions des données}{16}{subsection.2.2}%
-\contentsline {subsubsection}{\numberline {2.2.1}hachage classique}{17}{subsubsection.2.2.1}%
-\contentsline {subsubsection}{\numberline {2.2.2}Hachage cohérent (Consistent Hashing)}{18}{subsubsection.2.2.2}%
-\contentsline {subsection}{\numberline {2.3}Conclusion sur les méthodes de répartitions des données}{22}{subsection.2.3}%
-\contentsline {section}{\numberline {3}Chord}{22}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Design du système et philosophie}{22}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Consistent Hashing et l'Identifier Circle}{23}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Localisation de clés scalable : Finger Tables}{23}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}Théorèmes}{24}{subsection.3.4}%
-\contentsline {subsection}{\numberline {3.5}Algorithmes des nœuds}{25}{subsection.3.5}%
-\contentsline {subsection}{\numberline {3.6}Algorithmes de la Finger Table}{27}{subsection.3.6}%
-\contentsline {section}{\numberline {4}Pastry}{28}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Architecture générale}{28}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Identifiants et espace de clés}{29}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Structures de routage}{29}{subsection.4.3}%
-\contentsline {subsubsection}{\numberline {4.3.1}1. Routing Table}{29}{subsubsection.4.3.1}%
-\contentsline {subsubsection}{\numberline {4.3.2}2. Leaf Set (ensemble des feuilles)}{29}{subsubsection.4.3.2}%
-\contentsline {subsubsection}{\numberline {4.3.3}3. Neighbor Set (ensemble des voisins)}{29}{subsubsection.4.3.3}%
-\contentsline {subsection}{\numberline {4.4}Processus de routage}{29}{subsection.4.4}%
-\contentsline {subsection}{\numberline {4.5}Algorithmes des nœuds et maintenance}{30}{subsection.4.5}%
-\contentsline {section}{\numberline {5}Architecture du syst\`eme et cycle de vie d'une requ\^ete}{31}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Choix architecturaux et probl\'ematique}{31}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}Architecture g\'en\'erale bas\'ee sur Chord}{31}{subsection.5.2}%
-\contentsline {subsubsection}{\numberline {5.2.1}Couche Overlay et Couche applicative}{31}{subsubsection.5.2.1}%
-\contentsline {subsubsection}{\numberline {5.2.2}Cycle de vie d'une requ\^ete}{31}{subsubsection.5.2.2}%
-\contentsline {subsubsection}{\numberline {5.2.3}Conclusion sur l'architecture Chord}{32}{subsubsection.5.2.3}%
-\contentsline {subsection}{\numberline {5.3}Architecture g\'en\'erale bas\'ee sur Pastry}{32}{subsection.5.3}%
-\contentsline {subsubsection}{\numberline {5.3.1}Couche overlay et couche applicative dans Pastry}{32}{subsubsection.5.3.1}%
-\contentsline {subsubsection}{\numberline {5.3.2}Cycle de vie d'une requ\^ete dans Pastry}{33}{subsubsection.5.3.2}%
-\contentsline {subsubsection}{\numberline {5.3.3}Conclusion sur l'architecture Pastry}{33}{subsubsection.5.3.3}%
-\contentsline {section}{\numberline {6}Premiere impl\'ementation triviale d'un DHT}{35}{section.6}%
-\contentsline {subsection}{\numberline {6.1}L'Entit\'e de Base : Du N\oe ud au Thread}{35}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Le M\'ecanisme de Communication : La Mailbox}{36}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}\'Evolution du Message : Du simple "Sender" \`a l'"Origin"}{36}{subsection.6.3}%
-\contentsline {subsection}{\numberline {6.4}Mesure du parcours et topologie du syst\`eme}{36}{subsection.6.4}%
-\contentsline {subsection}{\numberline {6.5}Analyse des Erreurs et Limites de la V0}{37}{subsection.6.5}%
-\contentsline {subsection}{\numberline {6.6}Erreurs majeures rencontr\'ees}{37}{subsection.6.6}%
-\contentsline {subsection}{\numberline {6.7}Points d'am\'eliorations pour la V1}{37}{subsection.6.7}%
+\contentsline {subsection}{\numberline {1.2}Introduction au problème du Lookup}{3}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Comparaison des stratégies de recherche}{4}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Fondamentaux des Distributed Hash Tables}{6}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}Mécanismes des DHTs}{7}{subsection.1.5}%
+\contentsline {subsection}{\numberline {1.6}Interfaces des DHTs}{9}{subsection.1.6}%
+\contentsline {subsection}{\numberline {1.7}Conclusions}{9}{subsection.1.7}%
+\contentsline {subsection}{\numberline {1.8}Étude de l'approche hiérarchisée : HBase}{10}{subsection.1.8}%
+\contentsline {subsubsection}{\numberline {1.8.1}Introduction au modèle hiérarchisé}{10}{subsubsection.1.8.1}%
+\contentsline {subsubsection}{\numberline {1.8.2}Fondamentaux architecturaux de HBase}{10}{subsubsection.1.8.2}%
+\contentsline {subsubsection}{\numberline {1.8.3}Mécanismes internes : partitionnement et gestion des pannes}{11}{subsubsection.1.8.3}%
+\contentsline {subsubsection}{\numberline {1.8.4}Avantages et limites}{11}{subsubsection.1.8.4}%
+\contentsline {subsection}{\numberline {1.9}Conclusion et justification du choix architectural}{12}{subsection.1.9}%
+\contentsline {section}{\numberline {2}Méthode de répartition des données}{14}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Motivation et définition de la répartition des données}{14}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Les différentes méthodes de répartitions des données}{14}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}hachage classique}{15}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Hachage cohérent (Consistent Hashing)}{16}{subsubsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.3}Conclusion sur les méthodes de répartitions des données}{20}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Chord}{20}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Design du système et philosophie}{20}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Consistent Hashing et l'Identifier Circle}{21}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Localisation de clés scalable : Finger Tables}{21}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Théorèmes}{22}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Algorithmes des nœuds}{23}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}Algorithmes de la Finger Table}{25}{subsection.3.6}%
+\contentsline {section}{\numberline {4}Pastry}{26}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Architecture générale}{26}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Identifiants et espace de clés}{27}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Structures de routage}{27}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}1. Routing Table}{27}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}2. Leaf Set (ensemble des feuilles)}{27}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}3. Neighbor Set (ensemble des voisins)}{27}{subsubsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.4}Processus de routage}{27}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Algorithmes des nœuds et maintenance}{28}{subsection.4.5}%
+\contentsline {section}{\numberline {5}Architecture du syst\`eme et cycle de vie d'une requ\^ete}{29}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Choix architecturaux et probl\'ematique}{29}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Architecture g\'en\'erale bas\'ee sur Chord}{29}{subsection.5.2}%
+\contentsline {subsubsection}{\numberline {5.2.1}Couche Overlay et Couche applicative}{29}{subsubsection.5.2.1}%
+\contentsline {subsubsection}{\numberline {5.2.2}Cycle de vie d'une requ\^ete}{29}{subsubsection.5.2.2}%
+\contentsline {subsubsection}{\numberline {5.2.3}Conclusion sur l'architecture Chord}{30}{subsubsection.5.2.3}%
+\contentsline {subsection}{\numberline {5.3}Architecture g\'en\'erale bas\'ee sur Pastry}{30}{subsection.5.3}%
+\contentsline {subsubsection}{\numberline {5.3.1}Couche overlay et couche applicative dans Pastry}{30}{subsubsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.2}Cycle de vie d'une requ\^ete dans Pastry}{31}{subsubsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3}Conclusion sur l'architecture Pastry}{31}{subsubsection.5.3.3}%
+\contentsline {section}{\numberline {6}Premiere impl\'ementation triviale d'un DHT}{33}{section.6}%
+\contentsline {subsection}{\numberline {6.1}L'Entit\'e de Base : Du N\oe ud au Thread}{33}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Le M\'ecanisme de Communication : La Mailbox}{34}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}\'Evolution du Message : Du simple "Sender" \`a l'"Origin"}{34}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Mesure du parcours et topologie du syst\`eme}{34}{subsection.6.4}%
+\contentsline {subsection}{\numberline {6.5}Analyse des Erreurs et Limites de la V0}{35}{subsection.6.5}%
+\contentsline {subsection}{\numberline {6.6}Erreurs majeures rencontr\'ees}{35}{subsection.6.6}%
+\contentsline {subsection}{\numberline {6.7}Points d'am\'eliorations pour la V1}{35}{subsection.6.7}%
