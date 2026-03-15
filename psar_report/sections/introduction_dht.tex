@@ -16,7 +16,7 @@ Le probl\`eme central est le \emph{lookup problem} : o\`u stocker une donn\'ee \
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/00_lookup_problem.png}
-	\caption{\textbf{Le probl\`eme du lookup} : le n\oe ud A stocke une donn\'ee \(D\) et le n\oe ud B doit la retrouver sans conna\^itre son emplacement.}
+	\caption{\textbf{Le probl\`eme du lookup} : le n\oe ud A stocke une donn\'ee \(D\) et le n\oe ud B doit la retrouver sans conna\^itre son emplacement. \texttt{[Source:sch\'ema pris des notes de cours~\cite{DBLP:conf/p2p/WehrleGR05}]}}
 	\label{fig:00_lookup_problem}
 \end{figure}
 
@@ -31,7 +31,7 @@ Approche de \textbf{premi\`ere g\'en\'eration} (ex.~Napster). Un serveur central
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/01_central_server.png}
-	\caption{\textbf{Central Server} : publication, requ\^ete au serveur central, puis t\'el\'echargement direct entre pairs.}
+	\caption{\textbf{Central Server} : publication, requ\^ete au serveur central, puis t\'el\'echargement direct entre pairs. \texttt{[Source:sch\'ema pris des notes de cours~\cite{DBLP:conf/p2p/WehrleGR05}]}}
 	\label{fig:01_central_server}
 \end{figure}
 
@@ -41,7 +41,7 @@ Approche de \textbf{deuxi\`eme g\'en\'eration} (ex.~Gnutella). La requ\^ete est 
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/02_flooding_search.png}
-	\caption{\textbf{Flooding Search} : diffusion r\'ecursive de requ\^etes, puis retour des n\oe uds ayant la donn\'ee.}
+	\caption{\textbf{Flooding Search} : diffusion r\'ecursive de requ\^etes, puis retour des n\oe uds ayant la donn\'ee. \texttt{[Source:sch\'ema pris des notes de cours~\cite{DBLP:conf/p2p/WehrleGR05}]}}
 	\label{fig:02_flooding_search}
 \end{figure}
 
@@ -52,7 +52,7 @@ Les DHTs (\emph{structured Peer-to-Peer systems}) structurent l'\emph{overlay} p
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/04_dht_principle.png}
-	\caption{\textbf{Distributed Hash Table} : routage structur\'e et efficace vers le n\oe ud responsable.}
+	\caption{\textbf{Distributed Hash Table} : routage structur\'e et efficace vers le n\oe ud responsable. \texttt{[Source:sch\'ema pris des notes de cours~\cite{DBLP:conf/p2p/WehrleGR05}]}}
 	\label{fig:04_dht_principle}
 \end{figure}
 
@@ -61,7 +61,7 @@ Les Figures~\ref{fig:01_central_server}, \ref{fig:02_flooding_search}, \ref{fig:
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/03_comparison_central_flooding_dht.png}
-\caption{Comparaison de la complexit\'e en termes d'effort de recherche (axe y) et de co\^ut de stockage par n\oe ud (axe x). Les goulots d'\'etranglement (\emph{bottlenecks}) ainsi que les caract\'eristiques sp\'ecifiques de chaque approche sont indiqu\'es.}
+\caption{Comparaison de la complexit\'e en termes d'effort de recherche (axe y) et de co\^ut de stockage par n\oe ud (axe x). Les goulots d'\'etranglement (\emph{bottlenecks}) ainsi que les caract\'eristiques sp\'ecifiques de chaque approche sont indiqu\'es. \texttt{[Source:sch\'ema pris des notes de cours~\cite{DBLP:conf/p2p/WehrleGR05}]}}
 	\label{fig:03_comparison_central_flooding_dht}
 \end{figure}
 
@@ -79,14 +79,14 @@ N\oe uds et donn\'ees partagent le m\^eme \emph{address space} logique (souvent 
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/05_a_linear_address_space_in_dht.png}
-	\caption{Espace d'adressage lin\'eaire partitionn\'e entre pairs.}
+	\caption{Espace d'adressage lin\'eaire partitionn\'e entre pairs. \texttt{[Source:sch\'ema pris des notes de cours~\cite{DBLP:conf/p2p/WehrleGR05}]}}
 	\label{fig:05_a_linear_address_space_in_dht}
 \end{figure}
 
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/06_underlay_view_of_dht.png}
-	\caption{Vue logique de la DHT et vue du r\'eseau sous-jacent.}
+	\caption{Vue logique de la DHT et vue du r\'eseau sous-jacent. \texttt{[Source:sch\'ema pris des notes de cours~\cite{DBLP:conf/p2p/WehrleGR05}]} }
 	\label{fig:06_underlay_view_of_dht}
 \end{figure}
 
@@ -101,7 +101,7 @@ Chaque n\oe ud transmet vers un voisin plus proche de l'ID cible, ce qui r\'edui
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/07_direct_indirect_storage.png}
-	\caption{Comparaison entre stockage direct et stockage indirect.}
+	\caption{Comparaison entre stockage direct et stockage indirect. \texttt{[Source:sch\'ema pris des notes de cours~\cite{DBLP:conf/p2p/WehrleGR05}]}}
 	\label{fig:07_direct_indirect_storage}
 \end{figure}
 
@@ -130,7 +130,7 @@ Un d\'epart volontaire (\emph{graceful leave}) facilite la migration imm\'ediate
 \begin{figure}[h]
 	\centering
 		\includegraphics[width=0.5\textwidth]{images/08_interface_of_a_dht.png}
-	\caption{Interface d'une Distributed Hash Table, typiquement \textsf{put}/\textsf{get}.}
+	\caption{Interface d'une Distributed Hash Table, typiquement \textsf{put}/\textsf{get}. \texttt{[Source:sch\'ema pris des notes de cours~\cite{DBLP:conf/p2p/WehrleGR05}]}}
 	\label{fig:08_interface_of_a_dht}
 \end{figure}
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.15)  15 MAR 2026 09:40
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.15)  15 MAR 2026 10:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1400,6 +1400,27 @@ File: images/00_lookup_problem.png Graphic file (type png)
 Package pdftex.def Info: images/00_lookup_problem.png  used on input line 18.
 (pdftex.def)             Requested size: 338.58632pt x 155.74501pt.
 
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 3 undefined on input
+ line 19.
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 3 undefined on input
+ line 19.
+
+
+Underfull \hbox (badness 3417) in paragraph at lines 19--19
+[]\OT1/qhv/m/sc/10.95 Figure 1 \OT1/qhv/m/n/10.95 { |\OT1/qhv/b/n/10.95 Le prob
+l[]eme du loo-kup \OT1/qhv/m/n/10.95 : le n^^[ud A stocke une donn[]ee $\OML/cm
+m/m/it/10.95 D$ \OT1/qhv/m/n/10.95 et le n^^[ud
+ []
+
+
+Underfull \hbox (badness 4726) in paragraph at lines 19--19
+\OT1/qhv/m/n/10.95 B doit la re-trou-ver sans conna[]^^Ptre son em-pla-ce-ment.
+ \OT1/cmtt/m/n/10.95 [Source:sch^^Sema pris des notes de
+ []
+
+
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
 (fancyhdr)                \setlength{\headheight}{13.59999pt}.
@@ -1408,16 +1429,32 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 [3{C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/tex-gyre/q-rm-
 sc.enc} <./images/00_lookup_problem.png>]
-<images/01_central_server.png, id=337, 965.40675pt x 455.90324pt>
+<images/01_central_server.png, id=338, 965.40675pt x 455.90324pt>
 File: images/01_central_server.png Graphic file (type png)
 <use images/01_central_server.png>
 Package pdftex.def Info: images/01_central_server.png  used on input line 33.
 (pdftex.def)             Requested size: 338.58632pt x 159.89548pt.
-<images/02_flooding_search.png, id=338, 952.7595pt x 395.076pt>
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 4 undefined on input
+ line 34.
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 4 undefined on input
+ line 34.
+
+<images/02_flooding_search.png, id=339, 952.7595pt x 395.076pt>
 File: images/02_flooding_search.png Graphic file (type png)
 <use images/02_flooding_search.png>
 Package pdftex.def Info: images/02_flooding_search.png  used on input line 43.
 (pdftex.def)             Requested size: 338.58632pt x 140.40065pt.
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 4 undefined on input
+ line 44.
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 4 undefined on input
+ line 44.
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -1427,18 +1464,40 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
 [4 <./images/01_central_server.png> <./images/02_flooding_search.png>]
-<images/04_dht_principle.png, id=347, 820.86674pt x 497.4585pt>
+<images/04_dht_principle.png, id=348, 820.86674pt x 497.4585pt>
 File: images/04_dht_principle.png Graphic file (type png)
 <use images/04_dht_principle.png>
 Package pdftex.def Info: images/04_dht_principle.png  used on input line 54.
 (pdftex.def)             Requested size: 338.58632pt x 205.18898pt.
-<images/03_comparison_central_flooding_dht.png, id=352, 895.54575pt x 491.436pt
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 5 undefined on input
+ line 55.
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 5 undefined on input
+ line 55.
+
+<images/03_comparison_central_flooding_dht.png, id=353, 895.54575pt x 491.436pt
 >
 File: images/03_comparison_central_flooding_dht.png Graphic file (type png)
 <use images/03_comparison_central_flooding_dht.png>
 Package pdftex.def Info: images/03_comparison_central_flooding_dht.png  used on
  input line 63.
 (pdftex.def)             Requested size: 338.58632pt x 185.80278pt.
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 5 undefined on input
+ line 64.
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 5 undefined on input
+ line 64.
+
+
+Underfull \hbox (badness 1924) in paragraph at lines 64--64
+\OT1/qhv/m/n/10.95 de sto-ckage par n^^[ud (axe x). Les gou-lots d'[]etrangleme
+nt (\OT1/qhv/m/it/10.95 bot-tle-necks\OT1/qhv/m/n/10.95 ) ainsi que les ca-
+ []
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -1449,25 +1508,49 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 [5 <./images/04_dht_principle.png> <./images/03_comparison_central_flooding_dht
 .png>]
-<images/05_a_linear_address_space_in_dht.png, id=361, 1079.232pt x 377.61075pt>
+<images/05_a_linear_address_space_in_dht.png, id=362, 1079.232pt x 377.61075pt>
 
 File: images/05_a_linear_address_space_in_dht.png Graphic file (type png)
 <use images/05_a_linear_address_space_in_dht.png>
 Package pdftex.def Info: images/05_a_linear_address_space_in_dht.png  used on i
 nput line 81.
 (pdftex.def)             Requested size: 338.58632pt x 118.464pt.
-<images/06_underlay_view_of_dht.png, id=362, 898.557pt x 401.0985pt>
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 6 undefined on input
+ line 82.
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 6 undefined on input
+ line 82.
+
+<images/06_underlay_view_of_dht.png, id=363, 898.557pt x 401.0985pt>
 File: images/06_underlay_view_of_dht.png Graphic file (type png)
 <use images/06_underlay_view_of_dht.png>
 Package pdftex.def Info: images/06_underlay_view_of_dht.png  used on input line
  88.
 (pdftex.def)             Requested size: 338.58632pt x 151.13986pt.
-<images/07_direct_indirect_storage.png, id=363, 1075.6185pt x 330.033pt>
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 6 undefined on input
+ line 89.
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 6 undefined on input
+ line 89.
+
+<images/07_direct_indirect_storage.png, id=364, 1075.6185pt x 330.033pt>
 File: images/07_direct_indirect_storage.png Graphic file (type png)
 <use images/07_direct_indirect_storage.png>
 Package pdftex.def Info: images/07_direct_indirect_storage.png  used on input l
 ine 103.
 (pdftex.def)             Requested size: 338.58632pt x 103.89043pt.
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 6 undefined on input
+ line 104.
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 6 undefined on input
+ line 104.
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -1486,12 +1569,21 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
 [7 <./images/07_direct_indirect_storage.png>]
-<images/08_interface_of_a_dht.png, id=385, 1129.821pt x 431.211pt>
+<images/08_interface_of_a_dht.png, id=386, 1129.821pt x 431.211pt>
 File: images/08_interface_of_a_dht.png Graphic file (type png)
 <use images/08_interface_of_a_dht.png>
 Package pdftex.def Info: images/08_interface_of_a_dht.png  used on input line 1
 32.
 (pdftex.def)             Requested size: 241.84843pt x 92.30061pt.
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 8 undefined on input
+ line 133.
+
+
+LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 8 undefined on input
+ line 133.
+
 )
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -1845,9 +1937,6 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 LaTeX Warning: There were undefined references.
 
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package rerunfilecheck Info: File `psar_report.out' has not changed.
 (rerunfilecheck)             Checksum: 841FA7964FE07071BBC72AC8EB83E61D;13433.
 
@@ -1862,7 +1951,7 @@ Package logreq Info: Writing requests to 'psar_report.run.xml'.
 Here is how much of TeX's memory you used:
  38881 strings out of 467870
  792946 string characters out of 5417871
- 1680354 words of memory out of 5000000
+ 1681019 words of memory out of 5000000
  67050 multiletter control sequences out of 15000+600000
  683474 words of font info for 75 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1882,7 +1971,7 @@ yre/qhvb.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/public/
 tex-gyre/qhvbi.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/p
 ublic/tex-gyre/qhvr.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/ty
 pe1/public/tex-gyre/qhvri.pfb>
-Output written on psar_report.pdf (31 pages, 2592381 bytes).
+Output written on psar_report.pdf (31 pages, 2593497 bytes).
 PDF statistics:
  749 PDF objects out of 1000 (max. 8388607)
  135 named destinations out of 1000 (max. 500000)
