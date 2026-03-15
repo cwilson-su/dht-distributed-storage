@@ -2,17 +2,17 @@
 
 \setlength{\parskip}{3pt}
 
-La croissance du volume de donn\'ees a rendu les architectures centralisees insuffisantes. Les systemes distribues sont devenus la norme, mais posent un defi central : garantir un \emph{lookup} efficace, la \emph{consistency} et la \emph{fault tolerance} dans un environnement de n\oe uds peu fiables.
+La croissance du volume de donn\'ees a rendu les architectures centralis\'ees insuffisantes. Les syst\`emes distribu\'es sont devenus la norme, mais posent un d\'efi central : garantir un \emph{lookup} efficace, la \emph{consistency} et la \emph{fault tolerance} dans un environnement de n\oe uds peu fiables.
 
-Dans ce projet Master, nous comparons deux architectures de reference pour le stockage distribue, basees sur des paradigmes differents :
+Dans ce projet Master, nous comparons deux architectures de r\'ef\'erence pour le stockage distribu\'e, bas\'ees sur des paradigmes diff\'erents :
 
 \paragraph{1. L'architecture P2P structur\'ee (Les DHTs)}
-Paradigme decentralise (architecture \emph{symmetric}) : les n\oe uds ont un role homogene et s'auto-organisent dans un \emph{overlay} structure. Nous considerons plusieurs DHT (Chord, CAN, Pastry, Kademlia) qui resolvent le \emph{lookup} en general en $O(\log N)$, avec des compromis differents entre topologie logique, latence de routage, taille des tables d'etat et r\'esilience au \emph{churn}.
+Paradigme d\'ecentralis\'e (architecture \emph{symmetric}) : les n\oe uds ont un r\^ole homog\`ene et s'auto-organisent dans un \emph{overlay} structur\'e. Nous consid\'erons plusieurs DHT (Chord, CAN, Pastry, Kademlia) qui r\'esolvent le \emph{lookup} en g\'en\'eral en $O(\log N)$, avec des compromis diff\'erents entre topologie logique, latence de routage, taille des tables d'\'etat et r\'esilience au \emph{churn}.
 
 \paragraph{2. L'architecture hi\'erarchis\'ee orient\'ee colonnes (Mod\`ele HBase)}
-A l'oppose du P2P pur, ce paradigme suit une architecture \emph{master-worker} inspiree de Bigtable. HBase vise une coherence forte, un modele oriente colonnes/versionne, et conserve une centralisation partielle (HMaster) pour la gestion des metadonnees et des transactions, en echange de meilleures performances d'ecriture et de scan.
+\`A l'oppos\'e du P2P pur, ce paradigme suit une architecture \emph{master-worker} inspir\'ee de Bigtable. HBase vise une coh\'erence forte, un mod\`ele orient\'e colonnes/versionn\'e, et conserve une centralisation partielle (HMaster) pour la gestion des m\'etadonn\'ees et des transactions, en \'echange de meilleures performances d'\'ecriture et de scan.
 
-La suite du document presente d'abord le routage et la maintenance des DHTs, puis l'architecture interne de HBase et ses mecanismes de persistance.
+La suite du document pr\'esente d'abord le routage et la maintenance des DHTs, puis l'architecture interne de HBase et ses m\'ecanismes de persistance.
 
 \input{sections/introduction_dht}
 
@@ -21,17 +21,17 @@ La suite du document presente d'abord le routage et la maintenance des DHTs, pui
 
 \subsection{Conclusion et justification du choix architectural}
 
-DHT et HBase repondent au meme objectif (stockage distribue a grande echelle) avec des choix opposes : decentralisation + \emph{consistent hashing} d'un cote, coordination centralisee + \emph{range partitioning} de l'autre.
+DHT et HBase r\'epondent au m\^eme objectif (stockage distribu\'e \`a grande \'echelle) avec des choix oppos\'es : d\'ecentralisation + \emph{consistent hashing} d'un c\^ot\'e, coordination centralis\'ee + \emph{range partitioning} de l'autre.
 
 \subsubsection*{Crit\`ere d'\'evaluation : gestion du data skew}
 
-Le \emph{data skew} est determinant : HBase peut concentrer charge/stockage si les cles sont mal concues, alors que les DHT reduisent structurellement ce risque via une distribution pseudo-aleatoire des identifiants.
+Le \emph{data skew} est d\'eterminant : HBase peut concentrer charge/stockage si les cl\'es sont mal con\c{c}ues, alors que les DHT r\'eduisent structurellement ce risque via une distribution pseudo-al\'eatoire des identifiants.
 
 \subsubsection*{Motivation du choix}
 
-Notre objectif est d'implementer un systeme totalement decentralise en anneau logique. Les DHT sont mieux alignees avec cet objectif (routage distribue, auto-organisation, joins/leaves, absence de maitre), tandis qu'une approche HBase deplacerait le projet vers l'ingenierie d'un cluster hierarchise.
+Notre objectif est d'impl\'ementer un syst\`eme totalement d\'ecentralis\'e en anneau logique. Les DHT sont mieux align\'ees avec cet objectif (routage distribu\'e, auto-organisation, joins/leaves, absence de ma\^itre), tandis qu'une approche HBase d\'eplacerait le projet vers l'ing\'enierie d'un cluster hi\'erarchis\'e.
 
 \subsubsection*{Conclusion du choix}
 
-HBase reste excellent pour des besoins de coherence forte et de scans massifs, mais pour nos objectifs pedagogiques/experimentaux, l'approche DHT est plus pertinente.
-En consequence, nous retenons l'architecture DHT comme base de la suite du projet.
+HBase reste excellent pour des besoins de coh\'erence forte et de scans massifs, mais pour nos objectifs p\'edagogiques/exp\'erimentaux, l'approche DHT est plus pertinente.
+En cons\'equence, nous retenons l'architecture DHT comme base de la suite du projet.

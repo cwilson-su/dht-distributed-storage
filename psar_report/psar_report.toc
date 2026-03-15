@@ -10,7 +10,7 @@
 \contentsline {subsubsection}{\numberline {1.1.5}Interfaces des DHTs}{8}{subsubsection.1.1.5}%
 \contentsline {subsubsection}{\numberline {1.1.6}Conclusions}{8}{subsubsection.1.1.6}%
 \contentsline {subsection}{\numberline {1.2}\'Etude de l'approche hi\'erarchis\'ee : HBase}{9}{subsection.1.2}%
-\contentsline {subsubsection}{\numberline {1.2.1}Introduction au modele hierarchise}{9}{subsubsection.1.2.1}%
+\contentsline {subsubsection}{\numberline {1.2.1}Introduction au mod\`ele hi\'erarchis\'e}{9}{subsubsection.1.2.1}%
 \contentsline {subsubsection}{\numberline {1.2.2}Fondamentaux architecturaux de HBase}{9}{subsubsection.1.2.2}%
 \contentsline {subsubsection}{\numberline {1.2.3}M\'ecanismes internes : partitionnement et gestion des pannes}{9}{subsubsection.1.2.3}%
 \contentsline {subsubsection}{\numberline {1.2.4}Avantages et limites}{9}{subsubsection.1.2.4}%

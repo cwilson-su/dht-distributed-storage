@@ -8,16 +8,15 @@ Cette section r\'esume les principes essentiels des \emph{Distributed Hash Table
 
 \subsubsection{Introduction au probl\`eme du Lookup}
 
-Le probl\`eme central est le \emph{lookup problem} : ou stocker une donn\'ee \(D\), puis comment la retrouver dans un reseau distribue sans coordination centrale.
-
+Le probl\`eme central est le \emph{lookup problem} : o\`u stocker une donn\'ee \(D\), puis comment la retrouver dans un r\'eseau distribu\'e sans coordination centrale.
 \begin{quote}
-\emph{"Ou stocker, et comment trouver un certain element de donn\'ee D dans un systeme distribue sans aucun controle ou coordination centralises ?"}
+\emph{"O\`u stocker, et comment trouver un certain \'el\'ement de donn\'ee D dans un syst\`eme distribu\'e sans aucun contr\^ole ou coordination centralis\'es ?"}
 \end{quote}
 
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/00_lookup_problem.png}
-	\caption{\textbf{Le probl\`eme du lookup} : le n\oe ud A stocke une donn\'ee \(D\) et le n\oe ud B doit la retrouver sans connaitre son emplacement.}
+	\caption{\textbf{Le probl\`eme du lookup} : le n\oe ud A stocke une donn\'ee \(D\) et le n\oe ud B doit la retrouver sans conna\^itre son emplacement.}
 	\label{fig:00_lookup_problem}
 \end{figure}
 
@@ -27,22 +26,22 @@ Le probl\`eme central est le \emph{lookup problem} : ou stocker une donn\'ee \(D
 Trois familles de solutions sont compar\'ees.
 
 \subsubsection*{1. Central Server}
-Approche de \textbf{premi\`ere generation} (ex.~Napster). Un serveur central indexe les contenus. Recherche rapide en \(O(1)\), mais dependance forte a un \emph{single point of failure}.
+Approche de \textbf{premi\`ere g\'en\'eration} (ex.~Napster). Un serveur central indexe les contenus. Recherche rapide en \(O(1)\), mais d\'ependance forte \`a un \emph{single point of failure}.
 
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/01_central_server.png}
-	\caption{\textbf{Central Server} : publication, requ\^ete au serveur central, puis telechargement direct entre pairs.}
+	\caption{\textbf{Central Server} : publication, requ\^ete au serveur central, puis t\'el\'echargement direct entre pairs.}
 	\label{fig:01_central_server}
 \end{figure}
 
 \subsubsection*{2. Flooding Search}
-Approche de \textbf{deuxi\`eme generation} (ex.~Gnutella). La requ\^ete est propag\'ee de voisin en voisin via un \emph{reactive flooding} jusqu'au \emph{Time To Live} (TTL). L'approche evite le serveur central, mais g\'en\`ere un fort \emph{communication overhead} et des resultats non garantis.
+Approche de \textbf{deuxi\`eme g\'en\'eration} (ex.~Gnutella). La requ\^ete est propag\'ee de voisin en voisin via un \emph{reactive flooding} jusqu'au \emph{Time To Live} (TTL). L'approche \`evite le serveur central, mais g\'en\`ere un fort \emph{communication overhead} et des r\'esultats non garantis.
 
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/02_flooding_search.png}
-	\caption{\textbf{Flooding Search} : diffusion recursive de requ\^etes, puis retour des n\oe uds ayant la donn\'ee.}
+	\caption{\textbf{Flooding Search} : diffusion r\'ecursive de requ\^etes, puis retour des n\oe uds ayant la donn\'ee.}
 	\label{fig:02_flooding_search}
 \end{figure}
 
@@ -53,29 +52,29 @@ Les DHTs (\emph{structured Peer-to-Peer systems}) structurent l'\emph{overlay} p
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/04_dht_principle.png}
-	\caption{\textbf{Distributed Hash Table} : routage structure et efficace vers le n\oe ud responsable.}
+	\caption{\textbf{Distributed Hash Table} : routage structur\'e et efficace vers le n\oe ud responsable.}
 	\label{fig:04_dht_principle}
 \end{figure}
 
-Les Figures~\ref{fig:01_central_server}, \ref{fig:02_flooding_search}, \ref{fig:04_dht_principle} et~\ref{fig:03_comparison_central_flooding_dht} montrent que les DHTs offrent le meilleur compromis entre cout de recherche et cout de stockage.
+Les Figures~\ref{fig:01_central_server}, \ref{fig:02_flooding_search}, \ref{fig:04_dht_principle} et~\ref{fig:03_comparison_central_flooding_dht} montrent que les DHTs offrent le meilleur compromis entre co\^ut de recherche et co\^ut de stockage.
 
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/03_comparison_central_flooding_dht.png}
-\caption{Comparaison de la complexit\'e en termes d'effort de recherche (axe y) et de cout de stockage par n\oe ud (axe x). Les goulots d'\'etranglement (\emph{bottlenecks}) ainsi que les caract\'eristiques specifiques de chaque approche sont indiqu\'es.}
+\caption{Comparaison de la complexit\'e en termes d'effort de recherche (axe y) et de co\^ut de stockage par n\oe ud (axe x). Les goulots d'\'etranglement (\emph{bottlenecks}) ainsi que les caract\'eristiques sp\'ecifiques de chaque approche sont indiqu\'es.}
 	\label{fig:03_comparison_central_flooding_dht}
 \end{figure}
 
 \newpage
 \subsubsection{Fondamentaux des Distributed Hash Tables}
 
-Une DHT associe chaque cl\'e a un n\oe ud responsable via un espace d'adressage logique et un routage d\'eterministe.
+Une DHT associe chaque cl\'e \`a un n\oe ud responsable via un espace d'adressage logique et un routage d\'eterministe.
 
 \subsubsection*{Gestion distribu\'ee des donn\'ees}
-Chaque n\oe ud g\`ere une plage de cles et conserve une \emph{partial view} du systeme. Les messages sont relay\'es de n\oe ud en n\oe ud jusqu'a la destination.
+Chaque n\oe ud g\`ere une plage de cl\'es et conserve une \emph{partial view} du syst\`eme. Les messages sont relay\'es de n\oe ud en n\oe ud jusqu'\`a la destination.
 
 \subsubsection*{Adressage dans les Distributed Hash Tables}
-Noeuds et donn\'ees partagent le meme \emph{address space} logique (souvent tr\`es grand, p.~ex. \(0\) a \(2^{160}-1\)). Les IDs sont produits par une \emph{collision-resistant hash function}.
+N\oe uds et donn\'ees partagent le m\^eme \emph{address space} logique (souvent tr\`es grand, p.~ex. \(0\) \`a \(2^{160}-1\)). Les IDs sont produits par une \emph{collision-resistant hash function}.
 
 \begin{figure}[!ht]
 	\centering
@@ -87,17 +86,17 @@ Noeuds et donn\'ees partagent le meme \emph{address space} logique (souvent tr\`
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.7\textwidth]{images/06_underlay_view_of_dht.png}
-	\caption{Vue logique de la DHT et vue du reseau sous-jacent.}
+	\caption{Vue logique de la DHT et vue du r\'eseau sous-jacent.}
 	\label{fig:06_underlay_view_of_dht}
 \end{figure}
 
 \subsubsection*{Routage}
-Chaque n\oe ud transmet vers un voisin plus proche de l'ID cible, ce qui reduit progressivement la distance jusqu'au n\oe ud responsable en un \emph{small number of hops}.
+Chaque n\oe ud transmet vers un voisin plus proche de l'ID cible, ce qui r\'eduit progressivement la distance jusqu'au n\oe ud responsable en un \emph{small number of hops}.
 
 \subsubsection*{M\'ethodes de stockage}
-\textbf{Direct Storage} : la donn\'ee est copi\'ee sur le n\oe ud responsable (meilleure \emph{availability}, cout plus \'elev\'e).
+\textbf{Direct Storage} : la donn\'ee est copi\'ee sur le n\oe ud responsable (meilleure \emph{availability}, co\^ut plus \'elev\'e).
 
-\textbf{Indirect Storage} : la DHT stocke un \emph{pointer} vers la donn\'ee (cout reduit, dependance au n\oe ud source).
+\textbf{Indirect Storage} : la DHT stocke un \emph{pointer} vers la donn\'ee (co\^ut r\'eduit, d\'ependance au n\oe ud source).
 
 \begin{figure}[!ht]
 	\centering
@@ -108,7 +107,7 @@ Chaque n\oe ud transmet vers un voisin plus proche de l'ID cible, ce qui reduit 
 
 \subsubsection{M\'ecanismes des DHTs}
 
-La robustesse depend de la gestion du \emph{churn}, c'est-\`a-dire le taux de \emph{joins} et \emph{leaves} (arriv\'ees/d\'eparts) ainsi que les pannes fr\'equentes.
+La robustesse d\'epend de la gestion du \emph{churn}, c'est-\`a-dire le taux de \emph{joins} et \emph{leaves} (arriv\'ees/d\'eparts) ainsi que les pannes fr\'equentes.
 
 \subsubsection*{Arriv\'ee de n\oe uds}
 L'entr\'ee d'un n\oe ud suit quatre \'etapes courtes :
@@ -123,7 +122,7 @@ L'entr\'ee d'un n\oe ud suit quatre \'etapes courtes :
 Deux approches coexistent : \emph{reactive recovery} (d\'etection pendant le routage, puis route alternative) et \emph{proactive recovery} (\emph{probes} p\'eriodiques, remplacement pr\'eventif des entr\'ees invalides). La \emph{replication} limite la perte de donn\'ees applicatives.
 
 \subsubsection*{D\'epart de n\oe uds}
-Un depart volontaire (\emph{graceful leave}) facilite la migration imm\'ediate des donn\'ees vers le \emph{successor} et acc\'el\`ere la convergence des tables de routage. Il ameliore aussi la \emph{routing efficiency} et stabilise les mecanismes de \emph{replication} et de \emph{load-balancing}.
+Un d\'epart volontaire (\emph{graceful leave}) facilite la migration imm\'ediate des donn\'ees vers le \emph{successor} et acc\'el\`ere la convergence des tables de routage. Il am\'eliore aussi la \emph{routing efficiency} et stabilise les m\'ecanismes de \emph{replication} et de \emph{load-balancing}.
 
 \newpage
 \subsubsection{Interfaces des DHTs}
@@ -136,7 +135,7 @@ Un depart volontaire (\emph{graceful leave}) facilite la migration imm\'ediate d
 \end{figure}
 
 \subsubsection*{Interface de routage}
-Interface \emph{stateless} orient\'ee messages : \texttt{send} livre vers un ID destination, \texttt{receive} remet les messages a l'application (\emph{delivery semantics}).
+Interface \emph{stateless} orient\'ee messages : \texttt{send} livre vers un ID destination, \texttt{receive} remet les messages \`a l'application (\emph{delivery semantics}).
 Cette \emph{stateless interface} se concentre sur la livraison de paquets bas\'es sur un ID logique plut\^ot que sur une adresse IP physique.
 
 \subsubsection*{Interface de stockage}
@@ -150,17 +149,17 @@ Ce mode est utile quand on veut s\'eparer usage applicatif et participation au r
 %\newpage
 \subsubsection{Conclusions}
 
-Les DHTs offrent une excellente \emph{scalability} sans point central, mais imposent des compromis entre efficacit\'e de routage, cout de maintenance et r\'esilience au \emph{churn}.
+Les DHTs offrent une excellente \emph{scalability} sans point central, mais imposent des compromis entre efficacit\'e de routage, co\^ut de maintenance et r\'esilience au \emph{churn}.
 
 \subsubsection*{D\'efis de conception}
 \begin{itemize}
 \item \textbf{Routing Efficiency} : qualit\'e du routage selon la structure des tables et la topologie.
-\item \textbf{Management Overhead} : cout de maintenance en continu.
-\item \textbf{Churn} : impact des arriv\'ees/d\'eparts simultanes sur la stabilit\'e.
+\item \textbf{Management Overhead} : co\^ut de maintenance en continu.
+\item \textbf{Churn} : impact des arriv\'ees/d\'eparts simultan\'es sur la stabilit\'e.
 \end{itemize}
 
 \subsubsection*{Limitations fondamentales}
 \begin{itemize}
 \item \textbf{Untrusted Environments} : r\'esistance difficile face aux n\oe uds malveillants et aux \emph{Byzantine faults}.
-\item \textbf{Query Constraints} : \emph{fuzzy searches} et requ\^etes textuelles complexes peu adapt\'ees au modele par identifiants.
+\item \textbf{Query Constraints} : \emph{fuzzy searches} et requ\^etes textuelles complexes peu adapt\'ees au mod\`ele par identifiants.
 \end{itemize}

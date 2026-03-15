@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.15)  14 MAR 2026 18:09
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.15)  15 MAR 2026 09:40
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1383,7 +1383,13 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[2] (sections/introduction.tex (sections/introduction_dht.tex
+[2] (sections/introduction.tex
+Overfull \hbox (4.51353pt too wide) in paragraph at lines 5--6
+[]\OT1/qhv/m/n/10.95 La crois-sance du vo-lume de donn[]ees a rendu les ar-chi-
+tec-tures cen-tra-lis[]ees in-suf-fi-santes. Les syst[]emes
+ []
+
+(sections/introduction_dht.tex
 
 LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 3 undefined on input
  line 6.
@@ -1391,7 +1397,7 @@ LaTeX Warning: Citation 'DBLP:conf/p2p/WehrleGR05' on page 3 undefined on input
 <images/00_lookup_problem.png, id=323, 1076.22075pt x 495.0495pt>
 File: images/00_lookup_problem.png Graphic file (type png)
 <use images/00_lookup_problem.png>
-Package pdftex.def Info: images/00_lookup_problem.png  used on input line 19.
+Package pdftex.def Info: images/00_lookup_problem.png  used on input line 18.
 (pdftex.def)             Requested size: 338.58632pt x 155.74501pt.
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -1405,12 +1411,12 @@ sc.enc} <./images/00_lookup_problem.png>]
 <images/01_central_server.png, id=337, 965.40675pt x 455.90324pt>
 File: images/01_central_server.png Graphic file (type png)
 <use images/01_central_server.png>
-Package pdftex.def Info: images/01_central_server.png  used on input line 34.
+Package pdftex.def Info: images/01_central_server.png  used on input line 33.
 (pdftex.def)             Requested size: 338.58632pt x 159.89548pt.
 <images/02_flooding_search.png, id=338, 952.7595pt x 395.076pt>
 File: images/02_flooding_search.png Graphic file (type png)
 <use images/02_flooding_search.png>
-Package pdftex.def Info: images/02_flooding_search.png  used on input line 44.
+Package pdftex.def Info: images/02_flooding_search.png  used on input line 43.
 (pdftex.def)             Requested size: 338.58632pt x 140.40065pt.
 
 
@@ -1424,14 +1430,14 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 <images/04_dht_principle.png, id=347, 820.86674pt x 497.4585pt>
 File: images/04_dht_principle.png Graphic file (type png)
 <use images/04_dht_principle.png>
-Package pdftex.def Info: images/04_dht_principle.png  used on input line 55.
+Package pdftex.def Info: images/04_dht_principle.png  used on input line 54.
 (pdftex.def)             Requested size: 338.58632pt x 205.18898pt.
 <images/03_comparison_central_flooding_dht.png, id=352, 895.54575pt x 491.436pt
 >
 File: images/03_comparison_central_flooding_dht.png Graphic file (type png)
 <use images/03_comparison_central_flooding_dht.png>
 Package pdftex.def Info: images/03_comparison_central_flooding_dht.png  used on
- input line 64.
+ input line 63.
 (pdftex.def)             Requested size: 338.58632pt x 185.80278pt.
 
 
@@ -1448,19 +1454,19 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 File: images/05_a_linear_address_space_in_dht.png Graphic file (type png)
 <use images/05_a_linear_address_space_in_dht.png>
 Package pdftex.def Info: images/05_a_linear_address_space_in_dht.png  used on i
-nput line 82.
+nput line 81.
 (pdftex.def)             Requested size: 338.58632pt x 118.464pt.
 <images/06_underlay_view_of_dht.png, id=362, 898.557pt x 401.0985pt>
 File: images/06_underlay_view_of_dht.png Graphic file (type png)
 <use images/06_underlay_view_of_dht.png>
 Package pdftex.def Info: images/06_underlay_view_of_dht.png  used on input line
- 89.
+ 88.
 (pdftex.def)             Requested size: 338.58632pt x 151.13986pt.
 <images/07_direct_indirect_storage.png, id=363, 1075.6185pt x 330.033pt>
 File: images/07_direct_indirect_storage.png Graphic file (type png)
 <use images/07_direct_indirect_storage.png>
 Package pdftex.def Info: images/07_direct_indirect_storage.png  used on input l
-ine 104.
+ine 103.
 (pdftex.def)             Requested size: 338.58632pt x 103.89043pt.
 
 
@@ -1484,7 +1490,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 File: images/08_interface_of_a_dht.png Graphic file (type png)
 <use images/08_interface_of_a_dht.png>
 Package pdftex.def Info: images/08_interface_of_a_dht.png  used on input line 1
-33.
+32.
 (pdftex.def)             Requested size: 241.84843pt x 92.30061pt.
 )
 
@@ -1495,6 +1501,13 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
 [8 <./images/08_interface_of_a_dht.png>] (sections/introduction_hbase.tex)
+Overfull \hbox (14.70241pt too wide) in paragraph at lines 37--21
+[]\OT1/qhv/b/n/10.95 Limites. \OT1/qhv/m/n/10.95 Forte sen-si-bi-lit[]e au sch[
+]ema de cl[]es (risque de \OT1/qhv/m/it/10.95 hots-pot \OT1/qhv/m/n/10.95 et \O
+T1/qhv/m/it/10.95 data skew\OT1/qhv/m/n/10.95 ) et com-plexit[]e op[]erationnel
+le
+ []
+
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1832,8 +1845,11 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 LaTeX Warning: There were undefined references.
 
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
 Package rerunfilecheck Info: File `psar_report.out' has not changed.
-(rerunfilecheck)             Checksum: A6E4C806C8A494C1F5614A696C540BE3;13424.
+(rerunfilecheck)             Checksum: 841FA7964FE07071BBC72AC8EB83E61D;13433.
 
 Package biblatex Warning: Please (re)run Biber on the file:
 (biblatex)                psar_report
@@ -1866,7 +1882,7 @@ yre/qhvb.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/public/
 tex-gyre/qhvbi.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/p
 ublic/tex-gyre/qhvr.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/ty
 pe1/public/tex-gyre/qhvri.pfb>
-Output written on psar_report.pdf (31 pages, 2590633 bytes).
+Output written on psar_report.pdf (31 pages, 2592381 bytes).
 PDF statistics:
  749 PDF objects out of 1000 (max. 8388607)
  135 named destinations out of 1000 (max. 500000)
