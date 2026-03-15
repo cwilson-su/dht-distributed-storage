@@ -76,66 +76,68 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.2}\'Etude de l'approche hi\'erarchis\'ee : HBase}{9}{subsection.1.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.1}Introduction au mod\`ele hi\'erarchis\'e}{9}{subsubsection.1.2.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.2}Fondamentaux architecturaux de HBase}{9}{subsubsection.1.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.3}M\'ecanismes internes : partitionnement et gestion des pannes}{9}{subsubsection.1.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.4}Avantages et limites}{9}{subsubsection.1.2.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Ce diagramme illustre l'architecture distribu\'ee d'Apache HBase et met en \`evidence le probl\`eme de la d\'ecouverte de l'emplacement des r\'egions. Il montre comment deux n\oe uds clients, A et B, interagissent avec le syst\`eme. Les RegionServers et HMaster sont g\'eographiquement distribu\'es sur la carte, soulignant la nature distribu\'ee du cluster. La premi\`ere \`etape, commune, est la recherche de m\'etadonn\'ees (\textbf  {\'etape 1}) : les clients interrogent le coordinateur HMaster/ZooKeeper (localis\'e sur un n\oe ud de datacenter g\'en\'erique) pour trouver le RegionServer responsable de la plage de cl\'es sp\'ecifique. Pour le n\oe ud A, effectuant une op\'eration \texttt  {PUT} (\'ecriture) pour une ligne d'utilisateur, HMaster localise la plage de cl\'es sur le RegionServer 1 (RS1). Le n\oe ud A effectue ensuite directement le \texttt  {PUT} sur RS1 (\textbf  {\'etape 2}), puis RS1 vidange son MemStore vers les HFiles sur les DataNodes HDFS (\textbf  {\'etape 3}). Pour le n\oe ud B, effectuant une op\'eration \texttt  {GET} (lecture) pour une ligne de logs, HMaster localise la plage de cl\'es sur le RegionServer 2 (RS2), puis le n\oe ud B effectue directement le \texttt  {GET} sur RS2 (\textbf  {\'etape 2}). La couche de persistance, situ\'ee en bas, d\'etaille le Write-Ahead Log (donn\'ees WAL) pour la r\'ecup\'eration logique avant persistance et les DataNodes HDFS pour le stockage physique des fichiers HFiles. }}{9}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:hbase_architecture_simple}{{10}{9}{Ce diagramme illustre l'architecture distribu\'ee d'Apache HBase et met en \`evidence le probl\`eme de la d\'ecouverte de l'emplacement des r\'egions. Il montre comment deux n\oe uds clients, A et B, interagissent avec le syst\`eme. Les RegionServers et HMaster sont g\'eographiquement distribu\'es sur la carte, soulignant la nature distribu\'ee du cluster. La premi\`ere \`etape, commune, est la recherche de m\'etadonn\'ees (\textbf {\'etape 1}) : les clients interrogent le coordinateur HMaster/ZooKeeper (localis\'e sur un n\oe ud de datacenter g\'en\'erique) pour trouver le RegionServer responsable de la plage de cl\'es sp\'ecifique. Pour le n\oe ud A, effectuant une op\'eration \texttt {PUT} (\'ecriture) pour une ligne d'utilisateur, HMaster localise la plage de cl\'es sur le RegionServer 1 (RS1). Le n\oe ud A effectue ensuite directement le \texttt {PUT} sur RS1 (\textbf {\'etape 2}), puis RS1 vidange son MemStore vers les HFiles sur les DataNodes HDFS (\textbf {\'etape 3}). Pour le n\oe ud B, effectuant une op\'eration \texttt {GET} (lecture) pour une ligne de logs, HMaster localise la plage de cl\'es sur le RegionServer 2 (RS2), puis le n\oe ud B effectue directement le \texttt {GET} sur RS2 (\textbf {\'etape 2}). La couche de persistance, situ\'ee en bas, d\'etaille le Write-Ahead Log (donn\'ees WAL) pour la r\'ecup\'eration logique avant persistance et les DataNodes HDFS pour le stockage physique des fichiers HFiles}{figure.caption.12}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.3}M\'ecanismes internes : partitionnement et gestion des pannes}{10}{subsubsection.1.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.4}Avantages et limites}{10}{subsubsection.1.2.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Conclusion et justification du choix architectural}{10}{subsection.1.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Méthode de répartition des données}{11}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Motivation et définition de la répartition des données}{11}{subsection.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Les différentes méthodes de répartitions des données}{11}{subsection.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}hachage classique}{12}{subsubsection.2.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}Hachage cohérent (Consistent Hashing)}{13}{subsubsection.2.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Conclusion sur les méthodes de répartitions des données}{17}{subsection.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Chord}{17}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Design du système et philosophie}{17}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Consistent Hashing et l'Identifier Circle}{18}{subsection.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Localisation de clés scalable : Finger Tables}{18}{subsection.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Théorèmes}{19}{subsection.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Algorithmes des nœuds}{20}{subsection.3.5}\protected@file@percent }
-\newlabel{the-successor-resolution-algorithm}{{3.5}{20}{}{subsection.3.5}{}}
-\newlabel{dynamic-ring-maintenance-joining-and-stabilisation}{{3.5}{21}{}{subsection.3.5}{}}
-\newlabel{resilience-the-successor-list-mechanism}{{3.5}{21}{}{subsection.3.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Algorithmes de la Finger Table}{21}{subsection.3.6}\protected@file@percent }
-\newlabel{finger-table-entry-calculation}{{3.6}{21}{}{subsection.3.6}{}}
-\newlabel{finger-table-initialisation}{{3.6}{22}{}{subsection.3.6}{}}
-\newlabel{proactive-table-maintenance}{{3.6}{22}{}{subsection.3.6}{}}
-\newlabel{updating-other-nodes}{{3.6}{22}{}{subsection.3.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Pastry}{23}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Architecture générale}{23}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Identifiants et espace de clés}{23}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Structures de routage}{24}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}1. Routing Table}{24}{subsubsection.4.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2}2. Leaf Set (ensemble des feuilles)}{24}{subsubsection.4.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.3}3. Neighbor Set (ensemble des voisins)}{24}{subsubsection.4.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Processus de routage}{24}{subsection.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Algorithmes des nœuds et maintenance}{24}{subsection.4.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Architecture du syst\`eme et cycle de vie d'une requ\^ete}{26}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Choix architecturaux et probl\'ematique}{26}{subsection.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Architecture g\'en\'erale bas\'ee sur Chord}{26}{subsection.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.1}Couche Overlay et Couche applicative}{26}{subsubsection.5.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.2}Cycle de vie d'une requ\^ete}{26}{subsubsection.5.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.3}Conclusion sur l'architecture Chord}{27}{subsubsection.5.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Architecture g\'en\'erale bas\'ee sur Pastry}{27}{subsection.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.1}Couche overlay et couche applicative dans Pastry}{27}{subsubsection.5.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.2}Cycle de vie d'une requ\^ete dans Pastry}{28}{subsubsection.5.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.3}Conclusion sur l'architecture Pastry}{28}{subsubsection.5.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6}Premiere impl\'ementation triviale d'un DHT}{29}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}L'Entit\'e de Base : Du N\oe ud au Thread}{29}{subsection.6.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces \textbf  {Architecture interne et fonctionnement du \texttt  {NodeThread}.} Ce diagramme d\'etaille la composition d'un n\oe ud. La fl\`eche verticale symbolise le thread actif, tandis que la bo\^ite 3D repr\'esente l'objet \texttt  {Node} avec son \'etat (\texttt  {id}, \texttt  {running}) et ses structures (\texttt  {peers}, \texttt  {localStore}). La structure \texttt  {Message} est dessin\'ee en gris pour montrer qu'elle est stock\'ee dans la \texttt  {mailbox}. Les mots cl\'es Key et Value sont mis en \'evidence pour montrer le transfert d'information du message vers le stockage local. Les fonctions principales sont aussi d\'ecrites : \texttt  {run()} maintient le n\oe ud actif, \texttt  {receiveMessage()} ajoute les requ\^etes \`a la file, et \texttt  {processMessage()} traite la logique m\'etier.}}{29}{figure.caption.21}\protected@file@percent }
-\newlabel{fig:node_thread_architecture}{{10}{29}{\textbf {Architecture interne et fonctionnement du \texttt {NodeThread}.} Ce diagramme d\'etaille la composition d'un n\oe ud. La fl\`eche verticale symbolise le thread actif, tandis que la bo\^ite 3D repr\'esente l'objet \texttt {Node} avec son \'etat (\texttt {id}, \texttt {running}) et ses structures (\texttt {peers}, \texttt {localStore}). La structure \texttt {Message} est dessin\'ee en gris pour montrer qu'elle est stock\'ee dans la \texttt {mailbox}. Les mots cl\'es Key et Value sont mis en \'evidence pour montrer le transfert d'information du message vers le stockage local. Les fonctions principales sont aussi d\'ecrites : \texttt {run()} maintient le n\oe ud actif, \texttt {receiveMessage()} ajoute les requ\^etes \`a la file, et \texttt {processMessage()} traite la logique m\'etier}{figure.caption.21}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Le M\'ecanisme de Communication : La Mailbox}{30}{subsection.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}\'Evolution du Message : Du simple "Sender" \`a l'"Origin"}{30}{subsection.6.3}\protected@file@percent }
-\newlabel{fig:msg_v0}{{11a}{30}{\textbf {v0} : Limit\'e au \texttt {Sender}}{figure.caption.22}{}}
-\newlabel{sub@fig:msg_v0}{{a}{30}{\textbf {v0} : Limit\'e au \texttt {Sender}}{figure.caption.22}{}}
-\newlabel{fig:msg_v1}{{11b}{30}{\textbf {v1} : Ajout de \texttt {Origin}}{figure.caption.22}{}}
-\newlabel{sub@fig:msg_v1}{{b}{30}{\textbf {v1} : Ajout de \texttt {Origin}}{figure.caption.22}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Comparaison de l'\'evolution de la structure du Message.}}{30}{figure.caption.22}\protected@file@percent }
-\newlabel{fig:message_evolution}{{11}{30}{Comparaison de l'\'evolution de la structure du Message}{figure.caption.22}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Mesure du parcours et topologie du syst\`eme}{30}{subsection.6.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces \textbf  {Topologie et initialisation du r\'eseau via \texttt  {DHTSystem}.} Ce sch\'ema illustre l'organisation des n\oe uds stock\'es dans une \texttt  {ArrayList}. En bas, la fonction \texttt  {addNode()} est indiqu\'ee comme responsable de l'ajout d'un nouveau n\oe ud et du d\'emarrage de son thread. En haut, la fonction \texttt  {buildDiscoveryChain()} est mise en \'evidence : elle parcourt la liste pour \'etablir des connexions bidirectionnelles entre les n\oe uds voisins. Ces connexions sont mat\'erialis\'ees par les fl\`eches rouges \texttt  {addPeer}, transformant la simple liste en une cha\^ine de propagation op\'erationnelle.}}{31}{figure.caption.23}\protected@file@percent }
-\newlabel{fig:dht_system_topology}{{12}{31}{\textbf {Topologie et initialisation du r\'eseau via \texttt {DHTSystem}.} Ce sch\'ema illustre l'organisation des n\oe uds stock\'es dans une \texttt {ArrayList}. En bas, la fonction \texttt {addNode()} est indiqu\'ee comme responsable de l'ajout d'un nouveau n\oe ud et du d\'emarrage de son thread. En haut, la fonction \texttt {buildDiscoveryChain()} est mise en \'evidence : elle parcourt la liste pour \'etablir des connexions bidirectionnelles entre les n\oe uds voisins. Ces connexions sont mat\'erialis\'ees par les fl\`eches rouges \texttt {addPeer}, transformant la simple liste en une cha\^ine de propagation op\'erationnelle}{figure.caption.23}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Analyse des Erreurs et Limites de la V0}{31}{subsection.6.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}Erreurs majeures rencontr\'ees}{31}{subsection.6.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.7}Points d'am\'eliorations pour la V1}{31}{subsection.6.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Méthode de répartition des données}{12}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Motivation et définition de la répartition des données}{12}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Les différentes méthodes de répartitions des données}{12}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}hachage classique}{13}{subsubsection.2.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}Hachage cohérent (Consistent Hashing)}{14}{subsubsection.2.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Conclusion sur les méthodes de répartitions des données}{18}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Chord}{18}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Design du système et philosophie}{18}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Consistent Hashing et l'Identifier Circle}{19}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Localisation de clés scalable : Finger Tables}{19}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Théorèmes}{20}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Algorithmes des nœuds}{21}{subsection.3.5}\protected@file@percent }
+\newlabel{the-successor-resolution-algorithm}{{3.5}{21}{}{subsection.3.5}{}}
+\newlabel{dynamic-ring-maintenance-joining-and-stabilisation}{{3.5}{22}{}{subsection.3.5}{}}
+\newlabel{resilience-the-successor-list-mechanism}{{3.5}{22}{}{subsection.3.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Algorithmes de la Finger Table}{22}{subsection.3.6}\protected@file@percent }
+\newlabel{finger-table-entry-calculation}{{3.6}{22}{}{subsection.3.6}{}}
+\newlabel{finger-table-initialisation}{{3.6}{23}{}{subsection.3.6}{}}
+\newlabel{proactive-table-maintenance}{{3.6}{23}{}{subsection.3.6}{}}
+\newlabel{updating-other-nodes}{{3.6}{23}{}{subsection.3.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Pastry}{24}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Architecture générale}{24}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Identifiants et espace de clés}{24}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Structures de routage}{25}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}1. Routing Table}{25}{subsubsection.4.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2}2. Leaf Set (ensemble des feuilles)}{25}{subsubsection.4.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.3}3. Neighbor Set (ensemble des voisins)}{25}{subsubsection.4.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Processus de routage}{25}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Algorithmes des nœuds et maintenance}{25}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Architecture du syst\`eme et cycle de vie d'une requ\^ete}{27}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Choix architecturaux et probl\'ematique}{27}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Architecture g\'en\'erale bas\'ee sur Chord}{27}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.1}Couche Overlay et Couche applicative}{27}{subsubsection.5.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.2}Cycle de vie d'une requ\^ete}{27}{subsubsection.5.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.3}Conclusion sur l'architecture Chord}{28}{subsubsection.5.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Architecture g\'en\'erale bas\'ee sur Pastry}{28}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.1}Couche overlay et couche applicative dans Pastry}{28}{subsubsection.5.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.2}Cycle de vie d'une requ\^ete dans Pastry}{29}{subsubsection.5.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.3}Conclusion sur l'architecture Pastry}{29}{subsubsection.5.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Premiere impl\'ementation triviale d'un DHT}{30}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}L'Entit\'e de Base : Du N\oe ud au Thread}{30}{subsection.6.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces \textbf  {Architecture interne et fonctionnement du \texttt  {NodeThread}.} Ce diagramme d\'etaille la composition d'un n\oe ud. La fl\`eche verticale symbolise le thread actif, tandis que la bo\^ite 3D repr\'esente l'objet \texttt  {Node} avec son \'etat (\texttt  {id}, \texttt  {running}) et ses structures (\texttt  {peers}, \texttt  {localStore}). La structure \texttt  {Message} est dessin\'ee en gris pour montrer qu'elle est stock\'ee dans la \texttt  {mailbox}. Les mots cl\'es Key et Value sont mis en \'evidence pour montrer le transfert d'information du message vers le stockage local. Les fonctions principales sont aussi d\'ecrites : \texttt  {run()} maintient le n\oe ud actif, \texttt  {receiveMessage()} ajoute les requ\^etes \`a la file, et \texttt  {processMessage()} traite la logique m\'etier.}}{30}{figure.caption.22}\protected@file@percent }
+\newlabel{fig:node_thread_architecture}{{11}{30}{\textbf {Architecture interne et fonctionnement du \texttt {NodeThread}.} Ce diagramme d\'etaille la composition d'un n\oe ud. La fl\`eche verticale symbolise le thread actif, tandis que la bo\^ite 3D repr\'esente l'objet \texttt {Node} avec son \'etat (\texttt {id}, \texttt {running}) et ses structures (\texttt {peers}, \texttt {localStore}). La structure \texttt {Message} est dessin\'ee en gris pour montrer qu'elle est stock\'ee dans la \texttt {mailbox}. Les mots cl\'es Key et Value sont mis en \'evidence pour montrer le transfert d'information du message vers le stockage local. Les fonctions principales sont aussi d\'ecrites : \texttt {run()} maintient le n\oe ud actif, \texttt {receiveMessage()} ajoute les requ\^etes \`a la file, et \texttt {processMessage()} traite la logique m\'etier}{figure.caption.22}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Le M\'ecanisme de Communication : La Mailbox}{31}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}\'Evolution du Message : Du simple "Sender" \`a l'"Origin"}{31}{subsection.6.3}\protected@file@percent }
+\newlabel{fig:msg_v0}{{12a}{31}{\textbf {v0} : Limit\'e au \texttt {Sender}}{figure.caption.23}{}}
+\newlabel{sub@fig:msg_v0}{{a}{31}{\textbf {v0} : Limit\'e au \texttt {Sender}}{figure.caption.23}{}}
+\newlabel{fig:msg_v1}{{12b}{31}{\textbf {v1} : Ajout de \texttt {Origin}}{figure.caption.23}{}}
+\newlabel{sub@fig:msg_v1}{{b}{31}{\textbf {v1} : Ajout de \texttt {Origin}}{figure.caption.23}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Comparaison de l'\'evolution de la structure du Message.}}{31}{figure.caption.23}\protected@file@percent }
+\newlabel{fig:message_evolution}{{12}{31}{Comparaison de l'\'evolution de la structure du Message}{figure.caption.23}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Mesure du parcours et topologie du syst\`eme}{31}{subsection.6.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces \textbf  {Topologie et initialisation du r\'eseau via \texttt  {DHTSystem}.} Ce sch\'ema illustre l'organisation des n\oe uds stock\'es dans une \texttt  {ArrayList}. En bas, la fonction \texttt  {addNode()} est indiqu\'ee comme responsable de l'ajout d'un nouveau n\oe ud et du d\'emarrage de son thread. En haut, la fonction \texttt  {buildDiscoveryChain()} est mise en \'evidence : elle parcourt la liste pour \'etablir des connexions bidirectionnelles entre les n\oe uds voisins. Ces connexions sont mat\'erialis\'ees par les fl\`eches rouges \texttt  {addPeer}, transformant la simple liste en une cha\^ine de propagation op\'erationnelle.}}{32}{figure.caption.24}\protected@file@percent }
+\newlabel{fig:dht_system_topology}{{13}{32}{\textbf {Topologie et initialisation du r\'eseau via \texttt {DHTSystem}.} Ce sch\'ema illustre l'organisation des n\oe uds stock\'es dans une \texttt {ArrayList}. En bas, la fonction \texttt {addNode()} est indiqu\'ee comme responsable de l'ajout d'un nouveau n\oe ud et du d\'emarrage de son thread. En haut, la fonction \texttt {buildDiscoveryChain()} est mise en \'evidence : elle parcourt la liste pour \'etablir des connexions bidirectionnelles entre les n\oe uds voisins. Ces connexions sont mat\'erialis\'ees par les fl\`eches rouges \texttt {addPeer}, transformant la simple liste en une cha\^ine de propagation op\'erationnelle}{figure.caption.24}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Analyse des Erreurs et Limites de la V0}{32}{subsection.6.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}Erreurs majeures rencontr\'ees}{32}{subsection.6.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.7}Points d'am\'eliorations pour la V1}{32}{subsection.6.7}\protected@file@percent }
 \abx@aux@read@bbl@mdfivesum{nobblfile}
 \abx@aux@read@bblrerun
-\gdef \@abspage@last{31}
+\gdef \@abspage@last{32}

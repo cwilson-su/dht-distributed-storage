@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.15)  15 MAR 2026 10:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.2.15)  15 MAR 2026 11:43
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1592,14 +1592,32 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[8 <./images/08_interface_of_a_dht.png>] (sections/introduction_hbase.tex)
-Overfull \hbox (14.70241pt too wide) in paragraph at lines 37--21
+[8 <./images/08_interface_of_a_dht.png>] (sections/introduction_hbase.tex
+<images/Gemini_Generated_Image_HBaseArchitecture.png, id=393, 3105.6025pt x 134
+9.04pt>
+File: images/Gemini_Generated_Image_HBaseArchitecture.png Graphic file (type pn
+g)
+<use images/Gemini_Generated_Image_HBaseArchitecture.png>
+Package pdftex.def Info: images/Gemini_Generated_Image_HBaseArchitecture.png  u
+sed on input line 14.
+(pdftex.def)             Requested size: 483.69687pt x 210.10768pt.
+
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[9 <./images/Gemini_Generated_Image_HBaseArchitecture.png>])
+Overfull \hbox (14.70241pt too wide) in paragraph at lines 47--21
 []\OT1/qhv/b/n/10.95 Limites. \OT1/qhv/m/n/10.95 Forte sen-si-bi-lit[]e au sch[
 ]ema de cl[]es (risque de \OT1/qhv/m/it/10.95 hots-pot \OT1/qhv/m/n/10.95 et \O
 T1/qhv/m/it/10.95 data skew\OT1/qhv/m/n/10.95 ) et com-plexit[]e op[]erationnel
 le
  []
 
+)
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1607,7 +1625,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[9]) (sections/methode_repartition.tex
+[10] (sections/methode_repartition.tex
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1615,14 +1633,14 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[10]
-<images/09_central_architecture.png, id=401, 371.88937pt x 134.75343pt>
+[11]
+<images/09_central_architecture.png, id=408, 371.88937pt x 134.75343pt>
 File: images/09_central_architecture.png Graphic file (type png)
 <use images/09_central_architecture.png>
 Package pdftex.def Info: images/09_central_architecture.png  used on input line
  13.
 (pdftex.def)             Requested size: 338.58632pt x 122.68954pt.
-<images/10_distributed_architecture.png, id=402, 344.03531pt x 183.68625pt>
+<images/10_distributed_architecture.png, id=409, 344.03531pt x 183.68625pt>
 File: images/10_distributed_architecture.png Graphic file (type png)
 <use images/10_distributed_architecture.png>
 Package pdftex.def Info: images/10_distributed_architecture.png  used on input 
@@ -1641,9 +1659,9 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[11 <./images/09_central_architecture.png> <./images/10_distributed_architectur
+[12 <./images/09_central_architecture.png> <./images/10_distributed_architectur
 e.png>]
-<images/11_hash_modulo.png, id=411, 353.06906pt x 198.7425pt>
+<images/11_hash_modulo.png, id=418, 353.06906pt x 198.7425pt>
 File: images/11_hash_modulo.png Graphic file (type png)
 <use images/11_hash_modulo.png>
 Package pdftex.def Info: images/11_hash_modulo.png  used on input line 65.
@@ -1654,7 +1672,7 @@ LaTeX Font Info:    Trying to load font information for TS1+qhv on input line 6
 (C:\Users\Wilson\AppData\Local\Programs\MiKTeX\tex/latex/tex-gyre\ts1qhv.fd
 File: ts1qhv.fd 2009/09/25 v1.2 font definition file for TS1/qhv
 )
-<images/12_hash_resize_problem.png, id=412, 331.2375pt x 173.14688pt>
+<images/12_hash_resize_problem.png, id=419, 331.2375pt x 173.14688pt>
 File: images/12_hash_resize_problem.png Graphic file (type png)
 <use images/12_hash_resize_problem.png>
 Package pdftex.def Info: images/12_hash_resize_problem.png  used on input line 
@@ -1668,9 +1686,9 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[12{C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/tex-gyre/q-ts
+[13{C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/tex-gyre/q-ts
 1.enc} <./images/11_hash_modulo.png>]
-<images/13_hash_resize_problem2.png, id=423, 442.65375pt x 222.07968pt>
+<images/13_hash_resize_problem2.png, id=431, 442.65375pt x 222.07968pt>
 File: images/13_hash_resize_problem2.png Graphic file (type png)
 <use images/13_hash_resize_problem2.png>
 Package pdftex.def Info: images/13_hash_resize_problem2.png  used on input line
@@ -1684,9 +1702,9 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[13 <./images/12_hash_resize_problem.png> <./images/13_hash_resize_problem2.png
+[14 <./images/12_hash_resize_problem.png> <./images/13_hash_resize_problem2.png
 >]
-<images/14_consistent_example.png, id=434, 322.587pt x 242.1045pt>
+<images/14_consistent_example.png, id=441, 322.587pt x 242.1045pt>
 File: images/14_consistent_example.png Graphic file (type png)
 <use images/14_consistent_example.png>
 Package pdftex.def Info: images/14_consistent_example.png  used on input line 1
@@ -1698,7 +1716,7 @@ Overfull \hbox (9.3255pt too wide) in paragraph at lines 160--161
 om-prises entre 75 et 90 doivent d[]esormais
  []
 
-<images/15_consistent_add.png, id=435, 374.90062pt x 379.4175pt>
+<images/15_consistent_add.png, id=442, 374.90062pt x 379.4175pt>
 File: images/15_consistent_add.png Graphic file (type png)
 <use images/15_consistent_add.png>
 Package pdftex.def Info: images/15_consistent_add.png  used on input line 170.
@@ -1710,7 +1728,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[14 <./images/14_consistent_example.png>]
+[15 <./images/14_consistent_example.png>]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1718,8 +1736,8 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[15 <./images/15_consistent_add.png>]
-<images/16_consistent_remove.png, id=453, 346.29375pt x 355.3275pt>
+[16 <./images/15_consistent_add.png>]
+<images/16_consistent_remove.png, id=460, 346.29375pt x 355.3275pt>
 File: images/16_consistent_remove.png Graphic file (type png)
 <use images/16_consistent_remove.png>
 Package pdftex.def Info: images/16_consistent_remove.png  used on input line 19
@@ -1733,8 +1751,8 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[16 <./images/16_consistent_remove.png>]
-<images/17_virtual_nodes.png, id=460, 457.71pt x 255.20343pt>
+[17 <./images/16_consistent_remove.png>]
+<images/17_virtual_nodes.png, id=467, 457.71pt x 255.20343pt>
 File: images/17_virtual_nodes.png Graphic file (type png)
 <use images/17_virtual_nodes.png>
 Package pdftex.def Info: images/17_virtual_nodes.png  used on input line 218.
@@ -1747,21 +1765,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[17 <./images/17_virtual_nodes.png>]
-
-Package fancyhdr Warning: \headheight is too small (12.0pt): 
-(fancyhdr)                Make it at least 13.59999pt, for example:
-(fancyhdr)                \setlength{\headheight}{13.59999pt}.
-(fancyhdr)                You might also make \topmargin smaller:
-(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
-
-[18]
-Overfull \hbox (6.37488pt too wide) in paragraph at lines 63--64
-\OT1/qhv/m/n/10.95 r[]ealisant un \OT1/qhv/m/it/10.95 "na-tu-ral load ba-lance"
-\OT1/qhv/m/n/10.95 . Il ga-ran-tit qu'au-cune ma-chine ne de-vienne un gou-lot 
-d'[]etranglement. 
- []
-
+[18 <./images/17_virtual_nodes.png>]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1770,6 +1774,12 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
 [19]
+Overfull \hbox (6.37488pt too wide) in paragraph at lines 63--64
+\OT1/qhv/m/n/10.95 r[]ealisant un \OT1/qhv/m/it/10.95 "na-tu-ral load ba-lance"
+\OT1/qhv/m/n/10.95 . Il ga-ran-tit qu'au-cune ma-chine ne de-vienne un gou-lot 
+d'[]etranglement. 
+ []
+
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1793,7 +1803,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[22]) (sections/pastry.tex
+[22]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1801,7 +1811,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[23]
+[23]) (sections/pastry.tex
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1809,7 +1819,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[24]) (sections/Architecture.tex
+[24]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1817,7 +1827,15 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[25]
+[25]) (sections/Architecture.tex
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[26]
 Overfull \hbox (5.13356pt too wide) in paragraph at lines 18--19
 []\OT1/qhv/m/n/10.95 Dans cette premi[]ere par-tie, nous d[]etaillons l'ar-chi-
 tec-ture re-te-nue pour Chord, en ana-ly-sant pr[]ecis[]ement
@@ -1830,7 +1848,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[26]
+[27]
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1838,7 +1856,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[27]) (sections/dht0.tex
+[28]) (sections/dht0.tex
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1846,11 +1864,11 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[28]
+[29]
 
 pdfTeX warning: pdflatex.exe (file ./figures/NodeThread.drawio.pdf): PDF inclus
 ion: found PDF version <1.7>, but at most version <1.5> allowed
-<figures/NodeThread.drawio.pdf, id=529, 918.3108pt x 876.1533pt>
+<figures/NodeThread.drawio.pdf, id=536, 918.3108pt x 876.1533pt>
 File: figures/NodeThread.drawio.pdf Graphic file (type pdf)
 <use figures/NodeThread.drawio.pdf>
 Package pdftex.def Info: figures/NodeThread.drawio.pdf  used on input line 11.
@@ -1866,7 +1884,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[29 <./figures/NodeThread.drawio.pdf>]
+[30 <./figures/NodeThread.drawio.pdf>]
 Overfull \hbox (20.05624pt too wide) in paragraph at lines 23--24
 []\OT1/qhv/m/n/10.95 Une fois les n^^[uds ac-tifs, ils com-mu-niquent via une \
 OT1/cmtt/b/n/10.95 mailbox \OT1/qhv/m/n/10.95 impl[]ement[]ee par une \OT1/cmtt
@@ -1877,7 +1895,7 @@ OT1/cmtt/b/n/10.95 mailbox \OT1/qhv/m/n/10.95 impl[]ement[]ee par une \OT1/cmtt
 
 pdfTeX warning: pdflatex.exe (file ./figures/Messagev0.drawio.pdf): PDF inclusi
 on: found PDF version <1.7>, but at most version <1.5> allowed
-<figures/Messagev0.drawio.pdf, id=588, 845.07718pt x 1195.5867pt>
+<figures/Messagev0.drawio.pdf, id=595, 845.07718pt x 1195.5867pt>
 File: figures/Messagev0.drawio.pdf Graphic file (type pdf)
 <use figures/Messagev0.drawio.pdf>
 Package pdftex.def Info: figures/Messagev0.drawio.pdf  used on input line 39.
@@ -1891,7 +1909,7 @@ Underfull \hbox (badness 5924) in paragraph at lines 40--40
 
 pdfTeX warning: pdflatex.exe (file ./figures/Messagev1.drawio.pdf): PDF inclusi
 on: found PDF version <1.7>, but at most version <1.5> allowed
-<figures/Messagev1.drawio.pdf, id=589, 845.07718pt x 1195.5867pt>
+<figures/Messagev1.drawio.pdf, id=596, 845.07718pt x 1195.5867pt>
 File: figures/Messagev1.drawio.pdf Graphic file (type pdf)
 <use figures/Messagev1.drawio.pdf>
 Package pdftex.def Info: figures/Messagev1.drawio.pdf  used on input line 49.
@@ -1905,7 +1923,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 50--50
 
 pdfTeX warning: pdflatex.exe (file ./figures/DHTSystem.drawio.pdf): PDF inclusi
 on: found PDF version <1.7>, but at most version <1.5> allowed
-<figures/DHTSystem.drawio.pdf, id=591, 435.54718pt x 222.8325pt>
+<figures/DHTSystem.drawio.pdf, id=598, 435.54718pt x 222.8325pt>
 File: figures/DHTSystem.drawio.pdf Graphic file (type pdf)
 <use figures/DHTSystem.drawio.pdf>
 Package pdftex.def Info: figures/DHTSystem.drawio.pdf  used on input line 65.
@@ -1917,7 +1935,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[30 <./figures/Messagev0.drawio.pdf> <./figures/Messagev1.drawio.pdf>])
+[31 <./figures/Messagev0.drawio.pdf> <./figures/Messagev1.drawio.pdf>])
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1925,7 +1943,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[31 <./figures/DHTSystem.drawio.pdf>] (psar_report.aux)
+[32 <./figures/DHTSystem.drawio.pdf>] (psar_report.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
@@ -1936,6 +1954,9 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 
 LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
 Package rerunfilecheck Info: File `psar_report.out' has not changed.
 (rerunfilecheck)             Checksum: 841FA7964FE07071BBC72AC8EB83E61D;13433.
@@ -1949,13 +1970,13 @@ Package logreq Info: Writing requests to 'psar_report.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 38881 strings out of 467870
- 792946 string characters out of 5417871
- 1681019 words of memory out of 5000000
- 67050 multiletter control sequences out of 15000+600000
+ 38891 strings out of 467870
+ 793406 string characters out of 5417871
+ 1682463 words of memory out of 5000000
+ 67058 multiletter control sequences out of 15000+600000
  683474 words of font info for 75 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 131i,12n,135p,977b,2383s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 131i,12n,135p,1714b,2383s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm
 /cmitt10.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/public/
 amsfonts/cm/cmmi10.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/typ
@@ -1971,9 +1992,9 @@ yre/qhvb.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/public/
 tex-gyre/qhvbi.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/type1/p
 ublic/tex-gyre/qhvr.pfb><C:/Users/Wilson/AppData/Local/Programs/MiKTeX/fonts/ty
 pe1/public/tex-gyre/qhvri.pfb>
-Output written on psar_report.pdf (31 pages, 2593497 bytes).
+Output written on psar_report.pdf (32 pages, 7866326 bytes).
 PDF statistics:
- 749 PDF objects out of 1000 (max. 8388607)
- 135 named destinations out of 1000 (max. 500000)
- 699 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 756 PDF objects out of 1000 (max. 8388607)
+ 137 named destinations out of 1000 (max. 500000)
+ 704 words of extra memory for PDF output out of 10000 (max. 10000000)
 
