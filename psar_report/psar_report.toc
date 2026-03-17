@@ -21,28 +21,26 @@
 \contentsline {subsubsection}{\numberline {2.2.2}Hachage cohérent (Consistent Hashing)}{15}{subsubsection.2.2.2}%
 \contentsline {subsection}{\numberline {2.3}Conclusion sur les méthodes de répartitions des données}{19}{subsection.2.3}%
 \contentsline {section}{\numberline {3}Chord}{19}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Design du système et philosophie}{19}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Consistent Hashing et l'Identifier Circle}{20}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Localisation de clés scalable : Finger Tables}{20}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}Théorèmes}{21}{subsection.3.4}%
-\contentsline {subsection}{\numberline {3.5}Algorithmes des nœuds}{22}{subsection.3.5}%
-\contentsline {subsection}{\numberline {3.6}Algorithmes de la Finger Table}{23}{subsection.3.6}%
-\contentsline {section}{\numberline {4}Pastry}{25}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Architecture générale}{25}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Identifiants et espace de clés}{25}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Structures de routage}{26}{subsection.4.3}%
-\contentsline {subsubsection}{\numberline {4.3.1}1. Routing Table}{26}{subsubsection.4.3.1}%
-\contentsline {subsubsection}{\numberline {4.3.2}2. Leaf Set (ensemble des feuilles)}{26}{subsubsection.4.3.2}%
-\contentsline {subsubsection}{\numberline {4.3.3}3. Neighbor Set (ensemble des voisins)}{26}{subsubsection.4.3.3}%
-\contentsline {subsection}{\numberline {4.4}Processus de routage}{26}{subsection.4.4}%
-\contentsline {subsection}{\numberline {4.5}Algorithmes des nœuds et maintenance}{26}{subsection.4.5}%
-\contentsline {section}{\numberline {5}Architecture du syst\`eme et cycle de vie d'une requ\^ete}{28}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Choix architecturaux et probl\'ematique}{28}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}Architecture g\'en\'erale bas\'ee sur Chord}{28}{subsection.5.2}%
-\contentsline {subsubsection}{\numberline {5.2.1}Couche Overlay et Couche applicative}{28}{subsubsection.5.2.1}%
-\contentsline {subsubsection}{\numberline {5.2.2}Cycle de vie d'une requ\^ete}{28}{subsubsection.5.2.2}%
-\contentsline {subsubsection}{\numberline {5.2.3}Conclusion sur l'architecture Chord}{29}{subsubsection.5.2.3}%
-\contentsline {subsection}{\numberline {5.3}Architecture g\'en\'erale bas\'ee sur Pastry}{29}{subsection.5.3}%
-\contentsline {subsubsection}{\numberline {5.3.1}Couche overlay et couche applicative dans Pastry}{29}{subsubsection.5.3.1}%
-\contentsline {subsubsection}{\numberline {5.3.2}Cycle de vie d'une requ\^ete dans Pastry}{30}{subsubsection.5.3.2}%
-\contentsline {subsubsection}{\numberline {5.3.3}Conclusion sur l'architecture Pastry}{30}{subsubsection.5.3.3}%
+\contentsline {subsection}{\numberline {3.1}Principe de fonctionnement}{19}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Routage efficace : Finger Table}{20}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Algorithmes essentiels}{20}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Complexit\'e (r\'esum\'e)}{20}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Pastry}{20}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Architecture générale}{20}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Identifiants et espace de clés}{21}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Structures de routage}{21}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}1. Routing Table}{21}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}2. Leaf Set (ensemble des feuilles)}{21}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}3. Neighbor Set (ensemble des voisins)}{22}{subsubsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.4}Processus de routage}{22}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Algorithmes des nœuds et maintenance}{22}{subsection.4.5}%
+\contentsline {section}{\numberline {5}Architecture du syst\`eme et cycle de vie d'une requ\^ete}{23}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Choix architecturaux et probl\'ematique}{23}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Architecture g\'en\'erale bas\'ee sur Chord}{23}{subsection.5.2}%
+\contentsline {subsubsection}{\numberline {5.2.1}Couche Overlay et Couche applicative}{23}{subsubsection.5.2.1}%
+\contentsline {subsubsection}{\numberline {5.2.2}Cycle de vie d'une requ\^ete}{23}{subsubsection.5.2.2}%
+\contentsline {subsubsection}{\numberline {5.2.3}Conclusion sur l'architecture Chord}{24}{subsubsection.5.2.3}%
+\contentsline {subsection}{\numberline {5.3}Architecture g\'en\'erale bas\'ee sur Pastry}{24}{subsection.5.3}%
+\contentsline {subsubsection}{\numberline {5.3.1}Couche overlay et couche applicative dans Pastry}{24}{subsubsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.2}Cycle de vie d'une requ\^ete dans Pastry}{25}{subsubsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3}Conclusion sur l'architecture Pastry}{25}{subsubsection.5.3.3}%

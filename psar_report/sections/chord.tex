@@ -1,282 +1,65 @@
 \section{Chord}
 
-Chord est un protocole de \emph{lookup} distribué qui répond à un problème fondamental : localiser efficacement le nœud stockant une donnée particulière. Alors que de nombreux systèmes \emph{peer-to-peer} offrent des fonctionnalités complexes comme l'anonymat ou le stockage redondant, Chord se concentre exclusivement sur une opération centrale : le \emph{mapping} d'une \emph{key} vers un nœud.
-
-\subsection{Design du système et philosophie}
-
-Chord est conçu comme une bibliothèque liée aux applications clientes et serveurs. Il répond à cinq défis critiques des systèmes \emph{peer-to-peer} (P2P) :
-
-\begin{enumerate}
-\item
-  \textbf{Load Balance} :
-Chord agit comme une fonction de \emph{hash} distribuée, répartissant les \emph{keys} uniformément pour éviter qu'un seul nœud ne soit submergé.
-\item
-  \textbf{Decentralisation} :
-Aucun nœud n'est plus important qu'un autre, ce qui élimine les \emph{single points of failure} tels que ceux rencontrés dans Napster.
-\item
-  \textbf{Scalability} :
-Le coût du \emph{lookup} croît selon le logarithme du nombre de nœuds, rendant possible l'exploitation de systèmes impliquant des millions de participants.
-\item
-  \textbf{Availability} :
-Le système s'ajuste automatiquement aux \emph{joins} et aux \emph{failures}, garantissant que le nœud responsable soit toujours localisé.
-\item
-  \textbf{Flexible Naming} :
-Chord utilise un \emph{flat key space}, offrant aux applications une liberté totale quant à la manière de lier leurs noms internes aux \emph{keys} de Chord.
-\end{enumerate}
-
-\subsection{Consistent Hashing et l'Identifier Circle}
-
-Chord utilise une variante du \emph{consistent hashing} pour assigner les \emph{keys} aux nœuds. 
-
-
-
-Les nœuds ainsi que les \emph{keys} reçoivent un \textbf{identifier} de \(m\) bits via une fonction de \emph{hash} de base telle que SHA-1. L'ID d'un nœud est dérivé de son adresse IP, tandis que l'ID d'une \emph{key} est le \emph{hash} de la donnée elle-même.
-
-Les identifiants sont disposés sur un cercle modulo \(2^m\) appelé \textbf{chord ring}. Une \emph{key} \(k\) est assignée au premier nœud dont l'identifiant est égal ou supérieur à \(k\) dans le sens des aiguilles d'une montre. Ce nœud est appelé le \emph{successor} de la \emph{key} \(k\).
-
-\subsection{Localisation de clés scalable : Finger Tables}
-
-Pour éviter l'inefficacité d'un parcours linéaire du cercle, Chord maintient une table de routage appelée \textbf{finger table}.
-
-Chaque nœud \(n\) maintient jusqu'à \(m\) entrées. La $i$\up{ème} entrée pointe vers le premier nœud qui succède à \(n\) d'au moins \(2^{i-1}\).
-
-\textbf{Approche par Binary Search} : Cette structure permet à un nœud de stocker davantage d'informations sur les nœuds qui le suivent de près et moins sur ceux qui sont plus éloignés.
-
-\textbf{Performance} : Chaque \emph{lookup} réduit de moitié la distance vers la cible, garantissant que la destination est atteinte en $O(\log N)$ \emph{hops}.
-
-\par\null
-
-Les nœuds proches d'une \emph{key} disposent d'informations de type \emph{"fine-grained"}, tandis que les nœuds plus éloignés permettent des \emph{"long jumps"} à travers le réseau pour accélérer la recherche.
-
-\newpage
-
-\subsection{Théorèmes}
-
-L'article présente 8 théorèmes servant à justifier l'usage du \emph{consistent hashing} et de la structure de la \textbf{finger table}.
-
-\par\null
-
-\begin{theorembox}{Théorème 1}
-\textit{Pour tout ensemble de $N$ nœuds et $K$ keys, avec une probabilité élevée : chaque nœud est responsable d'au plus $(1 + \epsilon)K/N$ keys. Lorsqu'un $(N+1)$\up{ème} nœud rejoint ou quitte le réseau, seules $O(K/N)$ keys sont déplacées.}
-\end{theorembox}
-
-Ce premier théorème traite de l'efficacité avec laquelle Chord répartit les données sur le réseau, réalisant un \emph{"natural load balance"}. Il garantit qu'aucune machine ne devienne un goulot d'étranglement.
-
-\par\null
-
-\begin{theorembox}{Théorème 2}
-\textit{Avec une probabilité élevée, le nombre de nœuds devant être contactés pour trouver un successor dans un réseau de $N$ nœuds est en $O(\log N)$.}
-\end{theorembox}
-
-Ce théorème démontre l'efficacité des \emph{lookups}, même dans des systèmes comptant des millions de nœuds. Il justifie la structure de la \textbf{finger table}, où chaque \emph{hop} est conçu pour réduire de moitié la distance vers l'ID cible.
-
-\par\null
-
-\begin{theorembox}{Théorème 3}
-\textit{Avec une probabilité élevée, tout nœud rejoignant ou quittant un réseau Chord de $N$ nœuds utilisera $O(\log^2 N)$ messages pour rétablir les finger tables et les invariants de routage.}
-\end{theorembox}
-
-
-Le troisième théorème quantifie le coût du maintien de la structure du réseau lors de l'arrivée ou du départ de participants. Il permet aux développeurs d'estimer le \emph{"management overhead"} du système. Il montre que bien qu'un \emph{join} soit plus coûteux qu'un simple \emph{lookup}, il reste très performant à mesure que le réseau croît.
-
-\par\null
-
-\begin{theorembox}{Théorème 4}
-\emph{Dès qu'un nœud peut résoudre avec succès une requête donnée, il sera toujours en mesure de le faire à l'avenir.}
-\end{theorembox}
-
-
-Cette propriété garantit qu'une fois que le réseau a atteint un état où un chemin vers une \emph{key} existe, les routines de maintenance du protocole ne briseront pas cette connectivité.
-
-\par\null
-
-\begin{theorembox}{Théorème 5}
-\emph{Passé un certain délai après le dernier join, tous les successor pointers seront corrects.}
-\end{theorembox}
-
-
-Le protocole \texttt{stabilize} garantit la convergence, ramenant ainsi le réseau vers un état de cercle parfait une fois que le \emph{"churn"} des nœuds entrants s'arrête.
-
-\par\null
-
-\begin{theorembox}{Théorème 6}
-\textit{Si nous prenons un réseau stable de $N$ nœuds, et qu'un autre ensemble allant jusqu'à $N$ nœuds rejoint le réseau sans finger pointers (mais avec des successor pointers corrects), alors les lookups prendront toujours un temps en $O(\log N)$ avec une probabilité élevée.}
-\end{theorembox}
-
-
-Cela prouve que Chord est extrêmement résilient lors de phases de croissance. Même si un nombre massif de nouveaux nœuds rejoint le réseau sans avoir encore construit leurs \textbf{finger tables}, l'infrastructure existante garantit que la vitesse de recherche ne se dégrade pas.
-
-\par\null
-
-\begin{theorembox}{Théorème 7}
-\textit{Si nous utilisons une successor list de longueur $r = O(\log N)$ dans un réseau initialement stable, et que chaque nœud échoue avec une probabilité de $1/2$, alors avec une probabilité élevée \texttt{find\_successor} renvoie le successor vivant le plus proche de la key demandée.}
-\end{theorembox}
-
-
-Ce théorème valide le mécanisme de \textbf{Successor List}. Il prouve qu'avec seulement une quantité logarithmique de redondance, le système peut localiser les données de manière fiable, même si la moitié des machines du réseau disparaissent simultanément.
-
-\par\null
-
-
-\begin{theorembox}{Théorème 8}
-\textit{Si nous utilisons une successor list de longueur $r = O(\log N)$ dans un réseau initialement stable, et que chaque nœud échoue avec une probabilité de $1/2$, alors le temps attendu pour exécuter \texttt{find\_successor} dans le réseau défaillant est en $O(\log N)$.}
-\end{theorembox}
-
-
-Il s'agit du pendant de performance du Théorème 7. Il garantit que non seulement la recherche trouvera le nœud correct après une défaillance de 50\%, mais qu'elle le fera avec la même efficacité logarithmique.
-
-\par\null\par\null
-
-\subsection{Algorithmes des nœuds}
-\subsubsection*{1. L'algorithme de Successor Resolution}
-\label{the-successor-resolution-algorithm}
-
-Le cœur de l'efficacité de Chord réside dans la fonction \texttt{find\_successor}. Elle utilise la \textbf{finger table} pour effectuer des bonds exponentiels vers l'ID cible.
-
-$$\begin{array}{l}
-\textbf{Algorithm: } \text{Node.find\_successor}(id) \\
-\hline
-\text{1: \textbf{if} } id \in (\text{node, successor}] \text{ \textbf{then}} \\
-\text{2: \quad \textbf{return} successor} \\
-\text{3: \textbf{else}} \\
-\text{4: \quad } n' = \text{closest\_preceding\_node}(id) \\
-\text{5: \quad \textbf{return} } n'.\text{find\_successor}(id) \\
-\text{6: \textbf{end if}}
-\end{array}$$
-
-Pour trouver le nœud précédent le plus proche, le système itère à travers la \textbf{finger table}, du saut le plus grand vers le plus petit :
-
-$$\begin{array}{l}
-\textbf{Algorithm: } \text{Node.closest\_preceding\_node}(id) \\
-\hline
-\text{1: \textbf{for} } i = m \text{ \textbf{downto} } 1 \text{ \textbf{do}} \\
-\text{2: \quad \textbf{if} } \text{finger}[i].\text{node} \in (\text{node, } id) \text{ \textbf{then}} \\
-\text{3: \quad \quad \textbf{return} finger}[i].\text{node} \\
-\text{4: \quad \textbf{end if}} \\
-\text{5: \textbf{end for}} \\
-\text{6: \textbf{return node}}
-\end{array}$$
-
-\par\null
-
-\subsubsection*{2. Maintenance dynamique du ring : Joining et Stabilisation}
-\label{dynamic-ring-maintenance-joining-and-stabilisation}
-
-Lorsqu'un nœud rejoint le réseau, il n'a besoin de connaître qu'un seul nœud existant pour s'intégrer au cercle. La fonction \texttt{stabilize} est exécutée périodiquement pour vérifier le \emph{successor} et l'informer de l'existence du nœud.
-
-$$\begin{array}{l}
-\textbf{Algorithm: } \text{Node.join}(n') \\
-\hline
-\text{1: } \text{predecessor} = \text{nil} \\
-\text{2: } \text{successor} = n'.\text{find\_successor}(\text{node}) \\
-\end{array}$$
-
-$$\begin{array}{l}
-\textbf{Algorithm: } \text{Node.stabilize}() \\
-\hline
-\text{1: } x = \text{successor.predecessor} \\
-\text{2: \textbf{if} } x \in (\text{node, successor}) \text{ \textbf{then}} \\
-\text{3: \quad } \text{successor} = x \\
-\text{4: \textbf{end if}} \\
-\text{5: } \text{successor.notify}(\text{node}) \\
-\end{array}$$
-
-\par\null
-
-\subsubsection*{3. Résilience : Le mécanisme de Successor List}
-\label{resilience-the-successor-list-mechanism}
-
-Pour gérer le \emph{"churn"} des nœuds tombant en panne sans préavis, chaque nœud maintient une liste de $r$ \emph{successors}. Cela garantit que si le \emph{successor} primaire échoue, le nœud peut toujours router vers le prochain nœud actif disponible dans la liste.
-
-$$\begin{array}{l}
-\textbf{Algorithm: } \text{Node.check\_predecessor}() \\
-\hline
-\text{1: \textbf{if} } (\text{predecessor has failed}) \text{ \textbf{then}} \\
-\text{2: \quad } \text{predecessor} = \text{nil} \\
-\text{3: \textbf{end if}}
-\end{array}$$$$\begin{array}{l}
-\textbf{Algorithm: } \text{Node.handle\_successor\_failure}() \\
-\hline
-\text{1: \textbf{for each} } s \in \text{successor\_list} \text{ \textbf{do}} \\
-\text{2: \quad \textbf{if} } s \text{ is alive \textbf{then}} \\
-\text{3: \quad \quad } \text{successor} = s \\
-\text{4: \quad \quad \textbf{break}} \\
-\text{5: \quad \textbf{end if}} \\
-\text{6: \textbf{end for}}
-\end{array}$$
-
-\par\null\par\null
-
-\subsection{Algorithmes de la Finger Table}
-\subsubsection*{1. Calcul des entrées de la Finger Table}
-\label{finger-table-entry-calculation}
-
-Chaque nœud \(n\) maintient une table de routage de \(m\) entrées. La $i$\up{ème} entrée est définie comme le premier nœud qui succède au point \(n+2^{i-1}\) sur le cercle d'identifiants.
-
-\par\null
-
-$$\text{finger}[i].\text{start} = (n + 2^{i-1}) \pmod{2^m}, \quad 1 \leq i \leq m \text{}$$$$\text{finger}[i].\text{node} = \text{find\_successor}(\text{finger}[i].\text{start}) \text{}$$
-
-\par\null
-
-\subsubsection*{2. Initialisation de la Finger Table}
-\label{finger-table-initialisation}
-
-Lorsqu'un nouveau nœud rejoint le réseau, il doit renseigner sa \textbf{finger table}. Alors qu'une approche naïve consisterait à appeler \texttt{find\_successor} \(m\) fois, le protocole utilise souvent des nœuds existants pour fournir des \emph{"hints"}, réduisant ainsi la complexité de l'initialisation.
-
-\par\null
-
-$$\begin{array}{l}
-\textbf{Algorithm: } \text{Node.init\_finger\_table}(n') \\
-\hline
-\text{1: } \text{finger}[1].\text{node} = n'.\text{find\_successor}(\text{finger}[1].\text{start}) \\
-\text{2: } \text{predecessor} = \text{successor.predecessor} \\
-\text{3: } \text{successor.predecessor} = \text{node} \\
-\text{4: \textbf{for} } i = 1 \text{ \textbf{to} } m-1 \text{ \textbf{do}} \\
-\text{5: \quad \textbf{if} } \text{finger}[i+1].\text{start} \in [\text{node, finger}[i].\text{node}) \text{ \textbf{then}} \\
-\text{6: \quad \quad } \text{finger}[i+1].\text{node} = \text{finger}[i].\text{node} \\
-\text{7: \quad \textbf{else}} \\
-\text{8: \quad \quad } \text{finger}[i+1].\text{node} = n'.\text{find\_successor}(\text{finger}[i+1].\text{start}) \\
-\text{9: \quad \textbf{end if}} \\
-\text{10: \textbf{end for}}
-\end{array}$$
-
-\par\null
-
-\subsubsection*{3. Maintenance proactive de la table}
-\label{proactive-table-maintenance}
-
-Le réseau étant dynamique, les entrées des doigts peuvent devenir \emph{"stale"} lors de l'arrivée ou du départ de nœuds. La routine \texttt{fix\_fingers} est exécutée périodiquement pour rafraîchir une entrée aléatoire, garantissant que les informations de routage demeurent \emph{eventually consistent}.
-
-$$\begin{array}{l}
-\textbf{Algorithm: } \text{Node.fix\_fingers}() \\
-\hline
-\text{1: } i = \text{random index } \in [1, m] \\
-\text{2: } \text{finger}[i].\text{node} = \text{find\_successor}(\text{finger}[i].\text{start}) \\
-\end{array}$$
-
-\par\null
-
-\subsubsection*{4. Mise à jour des autres nœuds}
-\label{updating-other-nodes}
-
-Lorsqu'un nouveau nœud \(n\) rejoint le réseau, il peut devenir le $i$\up{ème} doigt de plusieurs nœuds existants. La fonction \texttt{update\_others} identifie ces nœuds et les force à mettre à jour leurs tables pour refléter l'arrivée de \(n\).
-
-\par\null
-
-$$\begin{array}{l}
-\textbf{Algorithm: } \text{Node.update\_others}() \\
-\hline
-\text{1: \textbf{for} } i = 1 \text{ \textbf{to} } m \text{ \textbf{do}} \\
-\text{2: \quad } p = \text{find\_predecessor}(\text{node} - 2^{i-1}) \\
-\text{3: \quad } p.\text{update\_finger\_table}(\text{node, } i) \\
-\text{4: \textbf{end for}}
-\end{array}$$$$\begin{array}{l}
-\textbf{Algorithm: } \text{p.update\_finger\_table}(s, i) \\
-\hline
-\text{1: \textbf{if} } s \in [\text{node, finger}[i].\text{node}) \text{ \textbf{then}} \\
-\text{2: \quad } \text{finger}[i].\text{node} = s \\
-\text{3: \quad } p = \text{predecessor} \\
-\text{4: \quad } p.\text{update\_finger\_table}(s, i) \\
-\text{5: \textbf{end if}}
-\end{array}$$
+Chord est un protocole DHT (\emph{Distributed Hash Table}) qui r\'esout un probl\`eme unique : trouver rapidement le n\oe ud responsable d'une cl\'e dans un r\'eseau pair-\`a-pair dynamique.
+
+\subsection{Principe de fonctionnement}
+
+Chaque n\oe ud et chaque cl\'e re\c coivent un identifiant sur \(m\) bits (souvent via SHA-1), plac\'e sur un anneau modulo \(2^m\). Une cl\'e \(k\) est stock\'ee sur son \emph{successor} : le premier n\oe ud rencontr\'e dans le sens horaire dont l'identifiant est sup\'erieur ou \`a \(k\).
+
+Cette r\`egle donne trois propri\'et\'es utiles :
+\begin{itemize}
+\item \textbf{R\'epartition} : le \emph{consistent hashing} distribue les cl\'es de mani\`ere quasi uniforme.
+\item \textbf{Scalabilit\'e} : l'ajout/retrait d'un n\oe ud ne d\'eplace qu'une fraction des cl\'es.
+\item \textbf{D\'ecentralisation} : aucun serveur central n'est requis.
+\end{itemize}
+
+\subsection{Routage efficace : Finger Table}
+
+Pour \`eviter un parcours lin\'eaire de l'anneau, chaque n\oe ud maintient une \textbf{finger table} de \(m\) entr\'ees. L'entr\'ee \(i\) pointe vers le premier n\oe ud joignable \`a partir de \(n + 2^{i-1}\).
+
+\[
+\text{finger}[i].\text{start} = (n + 2^{i-1}) \bmod 2^m
+\]
+
+Cette structure permet des sauts exponentiels et un co\^ut moyen de recherche en \(O(\log N)\) messages.
+
+\subsection{Algorithmes essentiels}
+
+\textbf{1) Recherche de la cl\'e : \texttt{find\_successor(id)}}
+\begin{itemize}
+\item Si \texttt{id} est entre le n\oe ud courant et son \emph{successor}, on retourne ce \emph{successor}.
+\item Sinon, on avance vers le \emph{closest\_preceding\_node(id)} dans la finger table et on r\'ep\`ete.
+\end{itemize}
+
+\textbf{2) Choix du prochain saut : \texttt{closest\_preceding\_node(id)}}
+\begin{itemize}
+\item Parcours de la finger table du plus grand saut au plus petit.
+\item Retour du premier doigt situ\'e strictement avant \texttt{id} sur l'anneau.
+\end{itemize}
+
+\textbf{3) Arriv\'ee d'un n\oe ud : \texttt{join(n')}}
+\begin{itemize}
+\item Le nouveau n\oe ud contacte un n\oe ud connu \(n'\).
+\item Il initialise son \emph{successor} via \texttt{find\_successor} puis construit sa finger table.
+\end{itemize}
+
+\textbf{4) Stabilisation : \texttt{stabilize()} et \texttt{notify()}}
+\begin{itemize}
+\item Ex\'ecution p\'eriodique pour corriger les pointeurs \emph{successor}/\emph{predecessor}.
+\item Garantit la convergence vers un anneau coh\'erent apr\`es churn mod\'er\'e.
+\end{itemize}
+
+\textbf{5) Tol\'erance aux pannes : \texttt{successor list}}
+\begin{itemize}
+\item Chaque n\oe ud conserve plusieurs successeurs de secours.
+\item En cas de panne du successeur principal, le routage continue via le suivant vivant.
+\end{itemize}
+
+\subsection{Complexit\'e (r\'esum\'e)}
+\begin{itemize}
+\item \textbf{Lookup} : \(O(\log N)\) messages.
+\item \textbf{Maintenance d'un join/leave} : surco\^ut logarithmique (d\'epend de la politique de mise \`a jour).
+\item \textbf{M\'emoire par n\oe ud} : \(O(\log N)\) entr\'ees de routage.
+\end{itemize}
+
+En pratique, Chord fournit une base simple et robuste pour le \emph{lookup} distribu\'e : routage logarithmique, maintenance locale p\'eriodique et bonne r\'esilience aux variations du r\'eseau.
