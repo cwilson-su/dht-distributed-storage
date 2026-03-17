@@ -46,11 +46,3 @@
 \contentsline {subsubsection}{\numberline {5.3.1}Couche overlay et couche applicative dans Pastry}{29}{subsubsection.5.3.1}%
 \contentsline {subsubsection}{\numberline {5.3.2}Cycle de vie d'une requ\^ete dans Pastry}{30}{subsubsection.5.3.2}%
 \contentsline {subsubsection}{\numberline {5.3.3}Conclusion sur l'architecture Pastry}{30}{subsubsection.5.3.3}%
-\contentsline {section}{\numberline {6}Premiere impl\'ementation triviale d'un DHT}{31}{section.6}%
-\contentsline {subsection}{\numberline {6.1}L'Entit\'e de Base : Du N\oe ud au Thread}{31}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Le M\'ecanisme de Communication : La Mailbox}{32}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}\'Evolution du Message : Du simple "Sender" \`a l'"Origin"}{32}{subsection.6.3}%
-\contentsline {subsection}{\numberline {6.4}Mesure du parcours et topologie du syst\`eme}{32}{subsection.6.4}%
-\contentsline {subsection}{\numberline {6.5}Analyse des Erreurs et Limites de la V0}{33}{subsection.6.5}%
-\contentsline {subsection}{\numberline {6.6}Erreurs majeures rencontr\'ees}{33}{subsection.6.6}%
-\contentsline {subsection}{\numberline {6.7}Points d'am\'eliorations pour la V1}{33}{subsection.6.7}%
