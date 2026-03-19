@@ -52,20 +52,34 @@ public class Node {
         System.out.println("Node " + p + " processing " + m.type + " for " + m.k);
 
         switch (m.type) {
-	        case PUT -> {
-	            store.put(m.k, m.v);
-	            System.out.println("Stored [" + m.k + " -> " + m.v + "] at Node " + p);
-	        }
-	        case GET -> {
-	            if (store.containsKey(m.k)) {
-	                System.out.println(">>> Node " + p + " FOUND IT: " + store.get(m.k));
-	            } else {
-	                System.out.println("Node " + p + " key not found, attempting to forward...");
-	                forward(m);
-	            }
-	        }
-	        default -> System.out.println("Unknown type");
-	    }
+        case PUT -> {
+            store.put(m.k, m.v);
+            System.out.println("Stored [" + m.k + " -> " + m.v + "] at Node " + p);
+        }
+        case GET -> {
+            if (store.containsKey(m.k)) {
+                System.out.println(">>> Node " + p + " FOUND IT: " + store.get(m.k));
+                
+                // construct and send the REPLY directly to the origin
+                Message res = new Message();
+                res.type = Message.Type.REPLY;
+                res.k = m.k;
+                res.v = store.get(m.k);
+                res.origin = new Address(p); // identify the replying node
+                res.seq = (int) System.currentTimeMillis(); // ensure unique sequence
+                
+                send(m.origin.port, res); // send directly to the client
+            } else {
+                System.out.println("Node " + p + " key not found, attempting to forward...");
+                forward(m);
+            }
+        }
+        case REPLY -> {
+            System.out.println("\n<<< SUCCESS: Key '" + m.k + "' -> '" + m.v + "' (from Node " + m.origin.port + ")");
+            System.out.print("> "); 
+        }
+        default -> System.out.println("Unknown type");
+    }
 	}
       
     private void forward(Message m) {

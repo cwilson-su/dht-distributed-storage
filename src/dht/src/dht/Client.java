@@ -16,6 +16,8 @@ public class Client {
         Address myAddr = new Address(clientPort);
         
         Node tool = new Node(clientPort);	// used for send() mechanism
+        tool.start(); // <--- added this line to enable receiving messages
+        
         int seqNum = 0;
         Scanner sc = new Scanner(System.in);
 
