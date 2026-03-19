@@ -6,7 +6,8 @@ import java.net.UnknownHostException;
 import java.util.Objects;
 
 public class Address implements Serializable {
-    public final String ip;
+    private static final long serialVersionUID = 1L;
+	public final String ip;
     public final int port;
 
     public Address(int port) {
