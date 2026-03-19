@@ -8,41 +8,46 @@ public class Client {
             System.out.println("Usage: java dht.Client <targetPort>");
             return;
         }
+
+        int target = Integer.parseInt(args[0]);
         
-     
-        int myId = (int) (System.currentTimeMillis() % 10000);	// use a random originPort or a timestamp to ensure nodes treat it as a new session
+        int clientPort = 10000 + new java.util.Random().nextInt(50000);		// Generate a random ephemeral port for this client session
         
-        int target = Integer.parseInt(args[0]); //target port
-        Node tool = new Node(9999); // Temporary node to use its send() method
+        Address myAddr = new Address(clientPort);
+        
+        Node tool = new Node(clientPort);	// used for send() mechanism
         int seqNum = 0;
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("Client connected to Node " + target);
-        System.out.println("Commands: PUT k v | GET k | exit");
-        
-        System.out.println("--- DHT Client (Connected to " + target + ") ---");
+        System.out.println("--- DHT Client (" + myAddr + ") ---");
+        System.out.println("Connected to Node: " + target);
+        System.out.println("Commands: PUT <key> <value> | GET <key> | exit");
 
         while (true) {
-        	Message m = new Message();
-            m.originPort = myId; // unique to this client session
-        	m.lastPort = 9999;   // mark client as last hop to prevent back-propagation
-        	
             System.out.print("> ");
             String line = sc.nextLine();
-            if (line.equals("exit")) break;
+            if (line.equalsIgnoreCase("exit")) break;
 
             String[] parts = line.split(" ");
+            if (parts.length < 2) continue;
 
             String cmd = parts[0].toUpperCase();
-            m.seq = ++seqNum; // increment for every unique request
+            
+            Message m = new Message();
+            m.origin = myAddr;  // Original source 
+            m.last = myAddr;    // Immediate previous hop 
+            m.seq = ++seqNum;   // Sequence to prevent broadcast storms
+            m.hops = 0;         // Initial TTL
 
             switch (cmd) {
                 case "PUT" -> {
                     if (parts.length == 3) {
                         m.type = Message.Type.PUT;
-                        m.k = parts[1]; 
+                        m.k = parts[1];
                         m.v = parts[2];
                         tool.send(target, m);
+                    } else {
+                        System.out.println("Usage: PUT k v");
                     }
                 }
                 case "GET" -> {
@@ -50,10 +55,14 @@ public class Client {
                         m.type = Message.Type.GET;
                         m.k = parts[1];
                         tool.send(target, m);
+                        System.out.println("GET request " + m.seq + " sent for key: " + m.k);
+                    } else {
+                        System.out.println("Usage: GET k");
                     }
                 }
-                default -> System.out.println("Unknown command. Use PUT k v or GET k");
+                default -> System.out.println("Unknown command.");
             }
         }
+        sc.close();
     }
 }

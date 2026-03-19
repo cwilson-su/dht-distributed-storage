@@ -9,7 +9,7 @@ public class Node {
     int p; // port
     Map<String, String> store = new ConcurrentHashMap<>();
     List<Integer> peers = new CopyOnWriteArrayList<>();
-    Map<Integer, Integer> seenSeq = new ConcurrentHashMap<>(); // Tracks the last sequence number seen from each source
+    Map<Address, Integer> seenSeq = new ConcurrentHashMap<>(); // Tracks the last sequence number seen from each source
     
     static final int MAX_HOPS = 10; // Global TTL
 
@@ -46,8 +46,8 @@ public class Node {
     }
 
     private void process(Message m) {    	
-        if (seenSeq.getOrDefault(m.originPort, -1) >= m.seq) return;	// if we've seen a higher or equal seq number from this source, ignore it
-        seenSeq.put(m.originPort, m.seq);
+        if (seenSeq.getOrDefault(m.origin, -1) >= m.seq) return;	// Drop if we've seen this sequence from this specific Address
+        seenSeq.put(m.origin, m.seq);
         
         System.out.println("Node " + p + " processing " + m.type + " for " + m.k);
 
@@ -71,15 +71,15 @@ public class Node {
     private void forward(Message m) {
         if (m.hops < MAX_HOPS) {
             m.hops++;
-            int prev = m.lastPort; 
-            m.lastPort = p; 
+            Address prev = m.last;
+            m.last = new Address(p); // Set current node as last hop
             
-            System.out.println("Node " + p + " forwarding " + m.k + " (Hop: " + m.hops + ")");
+            System.out.println("Node " + p + " forwarding (Hop: " + m.hops + ")");
             for (int peer : peers) {
-                if (peer != prev) send(peer, m);
+                if (peer != prev.port) send(peer, m); // don't send back to the immediate previous Address
             }
         } else {
-            System.out.println("Node " + p + ": Max hops (" + MAX_HOPS + ") reached for " + m.k);
+            System.out.println("Node " + p + ": Max hops reached for " + m.k);
         }
     }
         
