@@ -62,24 +62,21 @@ public class Node {
             default -> System.out.println("Unknown type");
         }
     }
-    
-    // temporary forward procedure without hop count
-    private void forward(Message m) {
-        System.out.println("Node " + p + " missing key. Forwarding...");
-        for (int peerPort : peers) send(peerPort, m);
-
-    }
-    /*
+      
     private void forward(Message m) {
         if (m.hops < MAX_HOPS) {
-            System.out.println("Node " + p + " missing key. Forwarding...");
-            m.hops++;
-            for (int peerPort : peers) send(peerPort, m);
+            m.hops++; 
+            System.out.println("Node " + p + " missing key. Forwarding (Hop " + m.hops + ")...");
+            
+            for (int peerPort : peers) {               
+                if (peerPort != m.port) {	// Correction for infinite loop - don't send the message back to the immediate sender
+                    send(peerPort, m);
+                }
+            }
         } else {
             System.out.println("Max hops (" + MAX_HOPS + ") reached at Node " + p);
         }
     }
-    */
 
     public void send(int dest, Message m) {
         try (Socket s = new Socket("localhost", dest);
