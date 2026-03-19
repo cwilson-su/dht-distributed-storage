@@ -4,6 +4,7 @@
 echo "Cleaning up old processes..."
 pkill -f "dht.Main"
 pkill -f "dht.Client"
+rm -rf bin
 
 # 2. Compile
 echo "Compiling..."
