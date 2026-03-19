@@ -9,8 +9,12 @@ public class Client {
             return;
         }
         
+     
+        int myId = (int) (System.currentTimeMillis() % 10000);	// use a random originPort or a timestamp to ensure nodes treat it as a new session
+        
         int target = Integer.parseInt(args[0]); //target port
         Node tool = new Node(9999); // Temporary node to use its send() method
+        int seqNum = 0;
         Scanner sc = new Scanner(System.in);
 
         System.out.println("Client connected to Node " + target);
@@ -19,14 +23,18 @@ public class Client {
         System.out.println("--- DHT Client (Connected to " + target + ") ---");
 
         while (true) {
+        	Message m = new Message();
+            m.originPort = myId; // unique to this client session
+        	m.lastPort = 9999;   // mark client as last hop to prevent back-propagation
+        	
             System.out.print("> ");
             String line = sc.nextLine();
             if (line.equals("exit")) break;
 
             String[] parts = line.split(" ");
-            Message m = new Message();
 
             String cmd = parts[0].toUpperCase();
+            m.seq = ++seqNum; // increment for every unique request
 
             switch (cmd) {
                 case "PUT" -> {
