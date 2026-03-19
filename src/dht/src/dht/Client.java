@@ -4,12 +4,12 @@ import java.util.Scanner;
 
 public class Client {
     public static void main(String[] args) {
-        if (args.length < 1) {
-            System.out.println("Usage: java dht.Client <targetPort>");
+    	if (args.length < 1) {
+            System.out.println("Usage: java dht.Client <targetIP:targetPort>");
             return;
         }
 
-        int target = Integer.parseInt(args[0]);
+    	Address target = Address.parse(args[0]);
         
         int clientPort = 10000 + new java.util.Random().nextInt(50000);		// Generate a random ephemeral port for this client session
         

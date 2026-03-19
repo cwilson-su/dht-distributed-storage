@@ -8,16 +8,16 @@ import java.util.concurrent.*;
 public class Node {
     int p; // port
     Map<String, String> store = new ConcurrentHashMap<>();
-    List<Integer> peers = new CopyOnWriteArrayList<>();
+    List<Address> peers = new CopyOnWriteArrayList<>();
     Map<Address, Integer> seenSeq = new ConcurrentHashMap<>(); // Tracks the last sequence number seen from each source
     
     static final int MAX_HOPS = 10; // Global TTL
 
     public Node(int port) { this.p = port; }
     
-    public Node(int port, int... peerPorts) {
+    public Node(int port, Address... peerAddrs) {
         this.p = port;
-        for (int peer : peerPorts) peers.add(peer);
+        for (Address peer : peerAddrs) peers.add(peer);
     }
 
     // Start the server thread
@@ -60,15 +60,14 @@ public class Node {
             if (store.containsKey(m.k)) {
                 System.out.println(">>> Node " + p + " FOUND IT: " + store.get(m.k));
                 
-                // construct and send the REPLY directly to the origin
                 Message res = new Message();
                 res.type = Message.Type.REPLY;
                 res.k = m.k;
                 res.v = store.get(m.k);
-                res.origin = new Address(p); // identify the replying node
-                res.seq = (int) System.currentTimeMillis(); // ensure unique sequence
-                
-                send(m.origin.port, res); // send directly to the client
+                res.origin = new Address(p);
+                res.seq = (int) System.currentTimeMillis();
+                               
+                send(m.origin, res); 	// Route directly via IP and Port
             } else {
                 System.out.println("Node " + p + " key not found, attempting to forward...");
                 forward(m);
@@ -86,21 +85,28 @@ public class Node {
         if (m.hops < MAX_HOPS) {
             m.hops++;
             Address prev = m.last;
-            m.last = new Address(p); // Set current node as last hop
+            m.last = new Address(p); 
             
             System.out.println("Node " + p + " forwarding (Hop: " + m.hops + ")");
-            for (int peer : peers) {
-                if (peer != prev.port) send(peer, m); // don't send back to the immediate previous Address
+            for (Address peer : peers) {
+                // Ensure we don't route back to the immediate previous Address
+                if (!peer.equals(prev)) {
+                    send(peer, m); 
+                }
             }
         } else {
             System.out.println("Node " + p + ": Max hops reached for " + m.k);
         }
     }
         
-    public void send(int dest, Message m) {
-        try (Socket s = new Socket("localhost", dest);
+    // Direct routing using the underlying network (IP + Port)
+    public void send(Address dest, Message m) {
+        try (Socket s = new Socket(dest.ip, dest.port);
              ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream())) {
             out.writeObject(m);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.err.println("Failed to route direct message to " + dest);
+        }
     }
+
 }
