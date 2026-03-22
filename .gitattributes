@@ -1,0 +1,20 @@
+# Ignore all LaTeX-related files
+*.tex  linguist-detectable=false
+*.sty  linguist-detectable=false
+*.cls  linguist-detectable=false
+*.bib  linguist-detectable=false
+*.bst  linguist-detectable=false
+*.dtx  linguist-detectable=false
+*.ins  linguist-detectable=false
+
+# Ignore LaTeX build artifacts
+*.aux  linguist-generated=true
+*.log  linguist-generated=true
+*.toc  linguist-generated=true
+*.out  linguist-generated=true
+*.lof  linguist-generated=true
+*.lot  linguist-generated=true
+*.fls  linguist-generated=true
+*.fdb_latexmk linguist-generated=true
+*.synctex.gz linguist-generated=true
+
