@@ -10,3 +10,23 @@ bin/
 # OS
 .DS_Store
 Thumbs.db
+
+# LaTeX build files
+*.aux
+*.bcf
+*.log
+*.out
+*.run.xml
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.nav
+*.snm
+*.vrb
+*.blg
+*.bbl
+*.tcp
+*.tps
