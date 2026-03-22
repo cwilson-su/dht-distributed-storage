@@ -1,0 +1,46 @@
+\babel@toc {french}{}\relax 
+\contentsline {section}{\numberline {1}Analyse Comparative des Paradigmes Architecturaux de Stockage Distribu\'e}{3}{section.1}%
+\contentsline {paragraph}{1. L'architecture P2P structur\'ee (Les DHTs)}{3}{paragraph*.1}%
+\contentsline {paragraph}{2. L'architecture hi\'erarchis\'ee orient\'ee colonnes (Mod\`ele HBase)}{3}{paragraph*.2}%
+\contentsline {subsection}{\numberline {1.1}\'Etude des approches P2P structur\'ee: Les DHTs}{3}{subsection.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1}Introduction au probl\`eme du Lookup}{3}{subsubsection.1.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.2}Comparaison des strat\'egies de recherche}{4}{subsubsection.1.1.2}%
+\contentsline {subsubsection}{\numberline {1.1.3}Fondamentaux des Distributed Hash Tables}{6}{subsubsection.1.1.3}%
+\contentsline {subsubsection}{\numberline {1.1.4}M\'ecanismes des DHTs}{7}{subsubsection.1.1.4}%
+\contentsline {subsubsection}{\numberline {1.1.5}Interfaces des DHTs}{8}{subsubsection.1.1.5}%
+\contentsline {subsubsection}{\numberline {1.1.6}Conclusions}{8}{subsubsection.1.1.6}%
+\contentsline {subsection}{\numberline {1.2}\'Etude de l'approche hi\'erarchis\'ee : HBase}{9}{subsection.1.2}%
+\contentsline {subsubsection}{\numberline {1.2.1}Fondamentaux architecturaux de HBase}{9}{subsubsection.1.2.1}%
+\contentsline {subsubsection}{\numberline {1.2.2}M\'ecanismes internes : partitionnement et gestion des pannes}{11}{subsubsection.1.2.2}%
+\contentsline {subsubsection}{\numberline {1.2.3}Avantages et limites}{12}{subsubsection.1.2.3}%
+\contentsline {subsection}{\numberline {1.3}Conclusion et justification du choix architectural}{12}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Méthode de répartition des données}{13}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Motivation et définition de la répartition des données}{13}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Les différentes méthodes de répartitions des données}{13}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}hachage classique}{14}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Hachage cohérent (Consistent Hashing)}{15}{subsubsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.3}Conclusion sur les méthodes de répartitions des données}{19}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Chord}{19}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Principe de fonctionnement}{19}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Routage efficace : Finger Table}{20}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Algorithmes essentiels}{20}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Complexit\'e (r\'esum\'e)}{20}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Pastry}{20}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Architecture générale}{20}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Identifiants et espace de clés}{21}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Structures de routage}{21}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}1. Routing Table}{21}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}2. Leaf Set (ensemble des feuilles)}{21}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}3. Neighbor Set (ensemble des voisins)}{22}{subsubsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.4}Processus de routage}{22}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Algorithmes des nœuds et maintenance}{22}{subsection.4.5}%
+\contentsline {section}{\numberline {5}Architecture du syst\`eme et cycle de vie d'une requ\^ete}{23}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Choix architecturaux et probl\'ematique}{23}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Architecture g\'en\'erale bas\'ee sur Chord}{23}{subsection.5.2}%
+\contentsline {subsubsection}{\numberline {5.2.1}Couche Overlay et Couche applicative}{23}{subsubsection.5.2.1}%
+\contentsline {subsubsection}{\numberline {5.2.2}Cycle de vie d'une requ\^ete}{23}{subsubsection.5.2.2}%
+\contentsline {subsubsection}{\numberline {5.2.3}Conclusion sur l'architecture Chord}{24}{subsubsection.5.2.3}%
+\contentsline {subsection}{\numberline {5.3}Architecture g\'en\'erale bas\'ee sur Pastry}{24}{subsection.5.3}%
+\contentsline {subsubsection}{\numberline {5.3.1}Couche overlay et couche applicative dans Pastry}{24}{subsubsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.2}Cycle de vie d'une requ\^ete dans Pastry}{25}{subsubsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3}Conclusion sur l'architecture Pastry}{25}{subsubsection.5.3.3}%
