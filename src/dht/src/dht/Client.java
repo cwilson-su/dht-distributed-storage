@@ -1,23 +1,26 @@
 package dht;
 
+import java.util.Random;
 import java.util.Scanner;
 
 public class Client {
     public static void main(String[] args) {
-    	if (args.length < 1) {
+        if (args.length < 1) {
             System.out.println("Usage: java dht.Client <targetIP:targetPort>");
             return;
         }
 
-    	Address target = Address.parse(args[0]);
-        
-        int clientPort = 10000 + new java.util.Random().nextInt(50000);		// Generate a random ephemeral port for this client session
-        
+        Address target = Address.parse(args[0]);
+
+        // Generate a random ephemeral port for this client session
+        int clientPort = 10000 + new Random().nextInt(50000);
+
         Address myAddr = new Address(clientPort);
-        
-        Node tool = new Node(clientPort);	// used for send() mechanism
-        tool.start(); // <--- added this line to enable receiving messages
-        
+
+        // used for send() mechanism + receiving replies
+        Node tool = new Node(clientPort);
+        tool.start();
+
         int seqNum = 0;
         Scanner sc = new Scanner(System.in);
 
@@ -28,43 +31,61 @@ public class Client {
         while (true) {
             System.out.print("> ");
             String line = sc.nextLine();
-            if (line.equalsIgnoreCase("exit")) break;
+
+            if (line.equalsIgnoreCase("exit")) {
+                break;
+            }
 
             String[] parts = line.split(" ");
-            if (parts.length < 2) continue;
+            if (parts.length < 2) {
+                continue;
+            }
 
             String cmd = parts[0].toUpperCase();
-            
-            Message m = new Message();
-            m.origin = myAddr;  // Original source 
-            m.last = myAddr;    // Immediate previous hop 
-            m.seq = ++seqNum;   // Sequence to prevent broadcast storms
-            m.hops = 0;         // Initial TTL
+            int seq = ++seqNum;
 
             switch (cmd) {
                 case "PUT" -> {
                     if (parts.length == 3) {
-                        m.type = Message.Type.PUT;
-                        m.k = parts[1];
-                        m.v = parts[2];
+                        Message m = new Message(
+                                Message.Type.PUT,
+                                parts[1],
+                                parts[2],
+                                myAddr,
+                                myAddr,
+                                seq,
+                                0
+                        );
+
                         tool.send(target, m);
                     } else {
-                        System.out.println("Usage: PUT k v");
+                        System.out.println("Usage: PUT <key> <value>");
                     }
                 }
+
                 case "GET" -> {
                     if (parts.length == 2) {
-                        m.type = Message.Type.GET;
-                        m.k = parts[1];
+                        Message m = new Message(
+                                Message.Type.GET,
+                                parts[1],
+                                "",
+                                myAddr,
+                                myAddr,
+                                seq,
+                                0
+                        );
+
                         tool.send(target, m);
-                        System.out.println("GET request " + m.seq + " sent for key: " + m.k);
+                        System.out.println("GET request " + m.getSeq() + " sent for key: " + m.getKey());
                     } else {
-                        System.out.println("Usage: GET k");
+                        System.out.println("Usage: GET <key>");
                     }
                 }
+
                 default -> System.out.println("Unknown command.");
             }
         }
+
         sc.close();
     }
 }
