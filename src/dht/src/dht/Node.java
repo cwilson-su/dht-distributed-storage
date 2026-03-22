@@ -83,7 +83,7 @@ public class Node {
 
     private void listen() {
         try (ServerSocket ss = new ServerSocket(p)) {
-            while (!Thread.currentThread().isInterrupted()) {	// better coding practice than while (true) {PS: lectures ;) }
+            while (!Thread.currentThread().isInterrupted()) {
                 try (Socket s = ss.accept();
                     ObjectInputStream in = new ObjectInputStream(s.getInputStream())) {
                     process((Message) in.readObject());
@@ -112,24 +112,46 @@ public class Node {
 
         switch (m.type) {
         case PUT -> {
-            store.put(m.k, m.v);
-            System.out.println("Stored [" + m.k + " -> " + m.v + "] at Node " + p);
+            // First, ask the Hasher who should own this data
+            Address myAddr = new Address(p);
+            Address target = Hasher.getTargetNode(m.k, myAddr, peers);
+            
+            if (target.equals(myAddr)) {
+                // It belongs to me! Store it.
+                store.put(m.k, m.v);
+                System.out.println(">>> Stored [" + m.k + " -> " + m.v + "] locally at Node " + p);
+            } else {
+                // It belongs to someone else. Route it to them!
+                System.out.println("Node " + p + " hashing key '" + m.k + "' -> routing to " + target);
+                send(target, m);
+            }
         }
         case GET -> {
-            if (store.containsKey(m.k)) {
-                System.out.println(">>> Node " + p + " FOUND IT: " + store.get(m.k));
-                
-                Message res = new Message();
-                res.type = Message.Type.REPLY;
-                res.k = m.k;
-                res.v = store.get(m.k);
-                res.origin = new Address(p);
-                res.seq = (int) System.currentTimeMillis();
-                               
-                send(m.origin, res); 	// Route directly via IP and Port
+            // First, ask the Hasher who should have this data
+            Address myAddr = new Address(p);
+            Address target = Hasher.getTargetNode(m.k, myAddr, peers);
+            
+            if (target.equals(myAddr)) {
+                // It should be in my local store
+                if (store.containsKey(m.k)) {
+                    System.out.println(">>> Node " + p + " FOUND IT locally: " + store.get(m.k));
+                    
+                    Message res = new Message();
+                    res.type = Message.Type.REPLY;
+                    res.k = m.k;
+                    res.v = store.get(m.k);
+                    res.origin = myAddr;
+                    res.seq = (int) System.currentTimeMillis();
+                    
+                    // Send straight back to the original client/node
+                    send(m.origin, res); 
+                } else {
+                    System.out.println("Node " + p + " is the target, but key '" + m.k + "' is missing.");
+                }
             } else {
-                System.out.println("Node " + p + " key not found, attempting to forward...");
-                forward(m);
+                // I don't own it. Route the GET request to the correct node
+                System.out.println("Node " + p + " hashing key '" + m.k + "' -> routing GET to " + target);
+                send(target, m);
             }
         }
         case REPLY -> {
