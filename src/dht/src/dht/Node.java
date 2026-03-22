@@ -11,6 +11,15 @@ public class Node {
     List<Address> peers = new CopyOnWriteArrayList<>();
     Map<Address, Integer> seenSeq = new ConcurrentHashMap<>(); // Tracks the last sequence number seen from each source
     
+    // Tracks the last active timestamp for each peer
+    Map<Address, Long> lastSeen = new ConcurrentHashMap<>();
+
+    // ANSI Colour Codes for terminal formatting
+    static final String C_RESET = "\u001B[0m";
+    static final String C_CYAN = "\u001B[36m";   // for PING
+    static final String C_PURPLE = "\u001B[35m"; // for PONG
+    static final String C_RED = "\u001B[31m";    // for Disconnects
+    
     static final int MAX_HOPS = 10; // Global TTL
 
     public Node(int port) { this.p = port; }
@@ -20,11 +29,56 @@ public class Node {
         for (Address peer : peerAddrs) peers.add(peer);
     }
 
-    // Start the server thread
+    // Start the server thread and lifecycle hooks
     public void start() {
         Thread t = new Thread(this::listen);
         t.start();
         System.out.println("Node " + p + " Started and listening...");
+
+        // 1. Announce presence to initial peers (Bootstrap)
+        Message jm = new Message();
+        jm.type = Message.Type.JOIN;
+        jm.origin = new Address(p);
+        jm.seq = (int) System.currentTimeMillis();
+        for (Address peer : peers) send(peer, jm);
+
+        // 2. Start Heartbeat (PING & Timeout checker)
+        Thread ticker = new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    Thread.sleep(5000); // Ping every 5 seconds
+                    long now = System.currentTimeMillis();
+                    Message ping = new Message();
+                    ping.type = Message.Type.PING;
+                    ping.origin = new Address(p);
+                    ping.seq = (int) System.currentTimeMillis();
+                    
+                    for (Address peer : peers) {
+                        // If no response for 15 seconds, drop the peer
+                        if (lastSeen.containsKey(peer) && (now - lastSeen.get(peer) > 15000)) {
+                            System.out.println(C_RED + "--- Peer " + peer.port + " TIMED OUT. Dropping." + C_RESET);
+                            peers.remove(peer);
+                            lastSeen.remove(peer);
+                        } else {
+                            System.out.println(C_CYAN + "[PING -> " + peer.port + "]" + C_RESET);
+                            send(peer, ping);
+                        }
+                    }
+                } catch (InterruptedException e) { break; }
+            }
+        });
+        ticker.setDaemon(true);
+        ticker.start();
+
+        // 3. Graceful Shutdown (LEAVE)
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("\nNode " + p + " shutting down. Notifying peers...");
+            Message lm = new Message();
+            lm.type = Message.Type.LEAVE;
+            lm.origin = new Address(p);
+            lm.seq = (int) System.currentTimeMillis() + 1;
+            for (Address peer : peers) send(peer, lm);
+        }));
     }
 
     private void listen() {
@@ -45,11 +99,16 @@ public class Node {
         System.out.println("Node " + p + " stopped.");
     }
 
-    private void process(Message m) {    	
-        if (seenSeq.getOrDefault(m.origin, -1) >= m.seq) return;	// Drop if we've seen this sequence from this specific Address
+    private void process(Message m) {       	
+        lastSeen.put(m.origin, System.currentTimeMillis());		// update liveness tracker for any incoming message
+        
+        if (seenSeq.getOrDefault(m.origin, -1) >= m.seq) return;	// drop if we've seen this sequence from this specific Address
         seenSeq.put(m.origin, m.seq);
         
-        System.out.println("Node " + p + " processing " + m.type + " for " + m.k);
+        // Omit processing prints for heartbeats to keep terminal clean
+        if (m.type != Message.Type.PING && m.type != Message.Type.PONG) {
+            System.out.println("Node " + p + " processing " + m.type + " for " + m.k);
+        } 
 
         switch (m.type) {
         case PUT -> {
@@ -76,6 +135,28 @@ public class Node {
         case REPLY -> {
             System.out.println("\n<<< SUCCESS: Key '" + m.k + "' -> '" + m.v + "' (from Node " + m.origin.port + ")");
             System.out.print("> "); 
+        }
+        case JOIN -> {
+            if (!peers.contains(m.origin)) {
+                peers.add(m.origin);
+                System.out.println("+++ Node " + m.origin.port + " JOINED the network.");
+            }
+        }
+        case LEAVE -> {
+            peers.remove(m.origin);
+            System.out.println("--- Node " + m.origin.port + " LEFT the network.");
+        }
+        case PING -> {
+            System.out.println(C_CYAN + "[PING <- " + m.origin.port + "]" + C_RESET);
+            Message res = new Message();
+            res.type = Message.Type.PONG;
+            res.origin = new Address(p);
+            res.seq = (int) System.currentTimeMillis();
+            System.out.println(C_PURPLE + "[PONG -> " + m.origin.port + "]" + C_RESET);
+            send(m.origin, res);            
+        }
+        case PONG -> {
+            System.out.println(C_PURPLE + "[PONG <- " + m.origin.port + "]" + C_RESET);
         }
         default -> System.out.println("Unknown type");
     }
