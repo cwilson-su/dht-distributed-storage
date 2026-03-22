@@ -9,7 +9,9 @@ public class Address implements Serializable {
     private static final long serialVersionUID = 1L;
 	public final String ip;
     public final int port;
-
+  
+    /*
+    // this version will be used later when we'll no longer test our project locally
     public Address(int port) {
         String tempIp;
         try {
@@ -18,6 +20,13 @@ public class Address implements Serializable {
             tempIp = "127.0.0.1";
         }
         this.ip = tempIp;
+        this.port = port;
+    }
+    */
+
+    // local-friendly version
+    public Address(int port) {
+        this.ip = "127.0.0.1";
         this.port = port;
     }
     
