@@ -37,5 +37,5 @@ run_term "java -cp bin dht.Client 127.0.0.1:8001" "CLIENT 8001"
 run_term "java -cp bin dht.Client 127.0.0.1:8005" "CLIENT 8005"
 
 echo ""
-echo "✅ Nodes and clients launched in Windows Terminal tabs."
-echo "🛑 Pour arrêter : pkill -f dht"
+echo "Nodes and clients launched in Windows Terminal tabs."
+echo "Pour arrêter : pkill -f dht"

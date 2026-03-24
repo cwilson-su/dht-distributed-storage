@@ -99,7 +99,7 @@ public class ChordNodeHandler extends NodeHandler {
     }
 
 
-    /** Envoie FIND_SUCCESSOR à dest et attend la réponse. */
+    
     public Address remoteCallFindSuccessor(Address dest, int targetId) {
         int seq = node.nextSeq();
         Pending p = new Pending();
@@ -117,7 +117,7 @@ public class ChordNodeHandler extends NodeHandler {
         return p.result;
     }
 
-    /** Envoie GET_PREDECESSOR à dest et attend la réponse. */
+    
     public Address remoteCallGetPredecessor(Address dest) {
         int seq = node.nextSeq();
         Pending p = new Pending();
@@ -135,7 +135,7 @@ public class ChordNodeHandler extends NodeHandler {
         return p.result;
     }
 
-    /** Envoie NOTIFY (one-way, pas de réponse attendue). */
+
     public void sendNotify(Address dest) {
         send(dest, ChordMessage.notify(node.self, node.nextSeq()));
     }
