@@ -18,33 +18,33 @@ public class ChordMessage extends Message {
     private final ChordType chordType;
     private final int targetId;  
 
-    public ChordMessage(ChordType chordType, int targetId, String key, String value, Address origin, Address last, int seq, int hops) {
-        super(Type.REPLY, key, value, origin, last, seq, hops);
+    public ChordMessage(ChordType chordType, int targetId, String value, Address origin, int seq) {
+        super(Type.REPLY, "", value, origin, origin, seq, 0);
         this.chordType = chordType;
         this.targetId  = targetId;
     }
 
     // Convenience constructors
     public static ChordMessage findSuccessor(int targetId, Address origin, int seq) {
-        return new ChordMessage(ChordType.FIND_SUCCESSOR, targetId, "", "", origin, origin, seq, 0);
+        return new ChordMessage(ChordType.FIND_SUCCESSOR, targetId, "", origin, seq);
     }
 
     public static ChordMessage successorReply(Address successor, Address origin, int seq) {
-        return new ChordMessage(ChordType.SUCCESSOR_REPLY, -1,"", successor.toString(), origin, origin, seq, 0);
+        return new ChordMessage(ChordType.SUCCESSOR_REPLY, 0, successor.toString(), origin, seq);
     }
 
     public static ChordMessage getPredecessor(Address origin, int seq) {
-        return new ChordMessage(ChordType.GET_PREDECESSOR, -1, "", "", origin, origin, seq, 0);
+        return new ChordMessage(ChordType.GET_PREDECESSOR, 0, "", origin, seq);
     }
 
     public static ChordMessage predecessorReply(Address predecessor, Address origin, int seq) {
         String val = (predecessor != null) ? predecessor.toString() : "";
 
-        return new ChordMessage(ChordType.PREDECESSOR_REPLY, -1,"", val, origin, origin, seq, 0);
+        return new ChordMessage(ChordType.PREDECESSOR_REPLY, 0, val, origin, seq);
     }
 
     public static ChordMessage notify(Address sender, int seq) {
-        return new ChordMessage(ChordType.NOTIFY, -1, "", "", sender, sender, seq, 0);
+        return new ChordMessage(ChordType.NOTIFY, 0, "", sender, seq);
     }
 
 

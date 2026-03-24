@@ -36,7 +36,7 @@ public class FingerTable {
             if (f == null) continue;
 
             int fId = ChordHasher.hash(f);
-            if (ChordHasher.inRangeOpen(fId, nodeId, targetId)) {
+            if (ChordHasher.inRange(fId, nodeId, targetId)) {
                 return f;
             }
         }
@@ -45,10 +45,10 @@ public class FingerTable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("FingerTable(node=" + nodeId + "):\n");
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < ChordHasher.M; i++) {
-            int start = ChordHasher.fingerStart(nodeId, i);
-            sb.append(String.format("  finger[%d]  start=%3s  node=%s%n",
+            int start = (nodeId + (1 << i)) % ChordHasher.RING_SIZE;
+            sb.append(String.format("  finger[%d] start=%2d -> %s%n",
                     i, start, fingers[i] != null ? fingers[i] + " (id=" + ChordHasher.hash(fingers[i]) + ")" : "null"));
         }
         return sb.toString();

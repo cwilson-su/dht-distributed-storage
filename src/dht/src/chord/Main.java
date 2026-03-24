@@ -17,5 +17,10 @@ public class Main {
 
         ChordNode n = new ChordNode(port, peers);
         n.start();
+
+        try { Thread.currentThread().join(); }
+        catch (InterruptedException e) { 
+            Thread.currentThread().interrupt(); 
+        }
     }
 }
