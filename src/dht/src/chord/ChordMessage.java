@@ -12,39 +12,51 @@ public class ChordMessage extends Message {
         SUCCESSOR_REPLY,
         GET_PREDECESSOR,
         PREDECESSOR_REPLY,
-        NOTIFY
+        NOTIFY,
+        TRANSFER_KEYS,
+        REQUEST_KEYS
     }
 
     private final ChordType chordType;
     private final int targetId;  
+    private final Map<String,String> data;
 
-    public ChordMessage(ChordType chordType, int targetId, String value, Address origin, int seq) {
+    public ChordMessage(ChordType chordType, int targetId, String value, Address origin, int seq, Map<String,String> data) {
         super(Type.REPLY, "", value, origin, origin, seq, 0);
         this.chordType = chordType;
         this.targetId  = targetId;
+        this.data = data;
     }
 
     // Convenience constructors
     public static ChordMessage findSuccessor(int targetId, Address origin, int seq) {
-        return new ChordMessage(ChordType.FIND_SUCCESSOR, targetId, "", origin, seq);
+        return new ChordMessage(ChordType.FIND_SUCCESSOR, targetId, "", origin, seq, null);
     }
 
     public static ChordMessage successorReply(Address successor, Address origin, int seq) {
-        return new ChordMessage(ChordType.SUCCESSOR_REPLY, 0, successor.toString(), origin, seq);
+        return new ChordMessage(ChordType.SUCCESSOR_REPLY, 0, successor.toString(), origin, seq, null);
     }
 
     public static ChordMessage getPredecessor(Address origin, int seq) {
-        return new ChordMessage(ChordType.GET_PREDECESSOR, 0, "", origin, seq);
+        return new ChordMessage(ChordType.GET_PREDECESSOR, 0, "", origin, seq, null);
     }
 
     public static ChordMessage predecessorReply(Address predecessor, Address origin, int seq) {
         String val = (predecessor != null) ? predecessor.toString() : "";
 
-        return new ChordMessage(ChordType.PREDECESSOR_REPLY, 0, val, origin, seq);
+        return new ChordMessage(ChordType.PREDECESSOR_REPLY, 0, val, origin, seq, null);
     }
 
     public static ChordMessage notify(Address sender, int seq) {
-        return new ChordMessage(ChordType.NOTIFY, 0, "", sender, seq);
+        return new ChordMessage(ChordType.NOTIFY, 0, "", sender, seq, null);
+    }
+
+    public static ChordMessage transferKeys(Map<String,String> keys, Address origin, int seq) {
+        return new ChordMessage(ChordType.TRANSFER_KEYS, 0, "", origin, seq, new HashMap<>(keys));
+    }
+
+     public static ChordMessage requestKeys(int newNodeId, Address origin, int seq) {
+        return new ChordMessage(ChordType.REQUEST_KEYS, newNodeId, "", origin, seq, null);
     }
 
 
@@ -54,6 +66,10 @@ public class ChordMessage extends Message {
 
     public int getTargetId() {
         return targetId;
+    }
+
+    public Map<String,String> getData() { 
+        return data; 
     }
 
     @Override

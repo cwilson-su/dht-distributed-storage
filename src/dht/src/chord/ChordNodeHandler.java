@@ -68,6 +68,16 @@ public class ChordNodeHandler extends NodeHandler {
         }
     }
 
+    
+    private void handleTransferKeys(ChordMessage cm) {
+        Map<String,String> received = cm.getData();
+        if (received == null || received.isEmpty()) return;
+ 
+        store.putAll(received);
+        System.out.println("[Node " + node.self.getPort() + "] reçu " + received.size()
+                + " clé(s) de " + cm.getOrigin() + " : " + received.keySet());
+    }
+
 
     private void handleDht(Message m) {
         switch (m.getType()) {
