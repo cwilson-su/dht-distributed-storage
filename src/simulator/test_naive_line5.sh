@@ -20,4 +20,4 @@ echo "Compilation successful. Launching Simulator..."
 echo "Configuration: 5 Nodes | Line Topology | Naive Flooding"
 echo "-------------------------------------------------------"
 
-java -cp bin sim.Simulator -n 20 -t lattice -r flooding
+java -cp bin sim.Simulator -n 20 -t mesh -r flooding
