@@ -45,6 +45,7 @@ public class Simulator {
             n.init();
             nodes.add(n);
         }
+        System.out.println("Successfully booted " + num + " base nodes.");
 
         try { Thread.sleep(500); } catch (Exception ignored) {}
         topology.build(nodes);
@@ -79,28 +80,28 @@ public class Simulator {
             int s = seq.incrementAndGet();
 
             switch (cmd) {
-                case "ADD" -> {
-                    boolean added = false;
-                    // Smart ADD: Loop to fill any gaps up to tgtId
-                    for (int i = 0; i <= tgtId; i++) {
-                        final int currId = i;
-                        boolean exists = nodes.stream().anyMatch(n -> n.getAddr().getId() == currId);
-                        
-                        if (!exists) {
-                            System.out.println("\n--- [+] Injecting Node " + currId + " ---");
-                            INode newNode = new PeerNode(new Address(currId), router);
-                            newNode.init();
-                            topology.addNode(newNode, nodes);
-                            added = true;
-                        }
-                    }
-                    
-                    if (added) {
-                        AsciiPrinter.print(topo, nodes);
-                    } else {
-                        System.out.println("Node " + tgtId + " and all its predecessors already exist.");
-                    }
-                }
+	            case "ADD" -> {
+	                int addedCount = 0;
+	                // Smart ADD: Loop to fill any gaps up to tgtId
+	                for (int i = 0; i <= tgtId; i++) {
+	                    final int currId = i;
+	                    boolean exists = nodes.stream().anyMatch(n -> n.getAddr().getId() == currId);
+	                    
+	                    if (!exists) {
+	                        INode newNode = new PeerNode(new Address(currId), router);
+	                        newNode.init();
+	                        topology.addNode(newNode, nodes);
+	                        addedCount++;
+	                    }
+	                }
+	                
+	                if (addedCount > 0) {
+	                    System.out.println("\n--- [+] Successfully injected " + addedCount + " node(s) up to Node " + tgtId + " ---");
+	                    AsciiPrinter.print(topo, nodes);
+	                } else {
+	                    System.out.println("Node " + tgtId + " and all its predecessors already exist.");
+	                }
+	            }
                 case "REMOVE" -> {
                     if (tgtNode == null) {
                         System.out.println("Error: Node " + tgtId + " does not exist.");
@@ -118,6 +119,8 @@ public class Simulator {
                     }
                     if (parts.length == 4) {
                         tgtNode.handleMsg(new Message(Message.Type.PUT, parts[2], parts[3], tgtNode.getAddr(), tgtNode.getAddr(), s, 0));
+                        // ADD THIS: Give the network 200ms to print its logs
+                        try { Thread.sleep(200); } catch (Exception ignored) {} 
                     } else {
                         System.out.println("Usage: PUT <id> <key> <val>");
                     }
@@ -129,6 +132,8 @@ public class Simulator {
                     }
                     if (parts.length == 3) {
                         tgtNode.handleMsg(new Message(Message.Type.GET, parts[2], "", tgtNode.getAddr(), tgtNode.getAddr(), s, 0));
+                        // ADD THIS: Give the network 200ms to print its logs
+                        try { Thread.sleep(200); } catch (Exception ignored) {}
                     } else {
                         System.out.println("Usage: GET <id> <key>");
                     }
@@ -137,7 +142,7 @@ public class Simulator {
             }
         }
 
-        System.out.println("Shutting down...");
+        System.out.println("\nShutting down " + nodes.size() + " nodes cleanly. Goodbye!");
         for (INode n : nodes) n.leave();
         sc.close();
         System.exit(0);

@@ -41,9 +41,13 @@ public class HeartbeatService {
                     }
 
                     List<Address> timedOut = peerRegistry.collectTimedOutPeers(PEER_TIMEOUT_MS);
-                    for (Address dead : timedOut) {
-                        System.out.println(C_RED + "--- Node " + dead.getId() + " TIMED OUT. Dropping." + C_RESET);
-                        peerRegistry.removePeer(dead);
+                    if (!timedOut.isEmpty()) {
+                        for (Address dead : timedOut) {
+                            System.out.println(C_RED + "\n--- Node " + dead.getId() + " TIMED OUT. Dropping." + C_RESET);
+                            peerRegistry.removePeer(dead);
+                        }
+                        // Redraw the simulator prompt!
+                        System.out.print("\033[1;32m[SIM] ❯ \033[0m");
                     }
 
                 } catch (InterruptedException e) {

@@ -41,7 +41,7 @@ public class PeerNode implements INode {
     public void init() {
         server.start();
         beat.start();
-        System.out.println("Node " + self.getId() + " initialised.");
+        // System.out.println("Node " + self.getId() + " initialised.");
     }
 
     @Override
@@ -58,7 +58,7 @@ public class PeerNode implements INode {
             send(peer, msg);
         }
         server.stop();
-        System.out.println("Node " + self.getId() + " left the network.");
+        // System.out.println("Node " + self.getId() + " left the network.");
     }
 
     @Override
@@ -79,7 +79,7 @@ public class PeerNode implements INode {
             case PONG -> { return; }
             case REPLY -> {
                 System.out.println("\n<<< Node " + self.getId() + " received REPLY: '" + msg.getKey() + "' -> '" + msg.getValue() + "' (from Node " + msg.getOrigin().getId() + ")");
-                System.out.print("\033[1;32m[SIM] ❯ \033[0m");
+                // System.out.print("\033[1;32m[SIM] ❯ \033[0m");
                 return;
             }
             case JOIN -> peers.addPeer(msg.getOrigin());

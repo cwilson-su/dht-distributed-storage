@@ -45,7 +45,7 @@ public class NodeServer {
             System.err.println("Could not listen on port " + port + ": " + e.getMessage());
         }
 
-        System.out.println("Node " + port + " stopped.");
+        // System.out.println("Node " + port + " stopped.");
     }
 
     public void stop() {
