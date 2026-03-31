@@ -13,18 +13,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ClientRunner {
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.out.println("Usage: java sim.ClientRunner <targetIP:targetPort>");
+            System.out.println("Usage: java sim.ClientRunner <targetNodeId>");
             return;
         }
 
-        String[] tParts = args[0].split(":");
-        String tIp = tParts.length == 2 ? tParts[0] : "127.0.0.1";
-        int tPort = Integer.parseInt(tParts[tParts.length - 1]);
-        Address target = new Address(tPort);
+        // Parse the target ID directly
+        int targetId = Integer.parseInt(args[0]);
+        Address target = new Address(targetId);
 
-        // Generate a random ephemeral port for the client
-        int cPort = 10000 + new Random().nextInt(50000);
-        Address myAddr = new Address(cPort);
+        // Generate a random high ID for the client so it doesn't clash with your 0, 1, 2 nodes
+        int clientId = 10000 + new Random().nextInt(10000);
+        Address myAddr = new Address(clientId);
 
         // Client acts as a lightweight node to receive replies
         INode clientNode = new PeerNode(myAddr, new Flooding());
@@ -33,8 +32,9 @@ public class ClientRunner {
         Scanner sc = new Scanner(System.in);
         AtomicInteger seq = new AtomicInteger(0);
 
-        System.out.println("--- Client (" + myAddr.getPort() + ") ---");
-        System.out.println("Connected to: " + target.getPort());
+        // Updated to use getId()
+        System.out.println("--- Client (" + myAddr.getId() + ") ---");
+        System.out.println("Connected to Node: " + target.getId());
         System.out.println("Commands: PUT <key> <val> | GET <key> | EXIT");
 
         while (true) {

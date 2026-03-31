@@ -31,7 +31,9 @@ public class PeerNode implements INode {
         this.self = addr;
         this.router = router;
         this.peers = new PeerRegistry(self);
-        this.server = new NodeServer(self.getPort(), this);
+        
+        // Calculate the TCP port locally based on the ID
+        this.server = new NodeServer(8000 + self.getId(), this);
         this.beat = new HeartbeatService(self, peers, this, seq::incrementAndGet);
     }
 
@@ -77,7 +79,7 @@ public class PeerNode implements INode {
             case PONG -> { return; }
             case REPLY -> {
                 System.out.println("\n<<< Node " + self.getId() + " received REPLY: '" + msg.getKey() + "' -> '" + msg.getValue() + "' (from Node " + msg.getOrigin().getId() + ")");
-                System.out.print("> ");
+                System.out.print("\033[1;32m[SIM] ❯ \033[0m");
                 return;
             }
             case JOIN -> peers.addPeer(msg.getOrigin());
@@ -117,8 +119,10 @@ public class PeerNode implements INode {
     @Override
     public void send(Address dest, Message msg) {
         if (dest == null || msg == null) return;
+
         try (Socket s = new Socket()) {
-            s.connect(new InetSocketAddress(dest.getIp(), dest.getPort()), 2000);
+            // Calculate the target TCP port locally based on the destination ID
+            s.connect(new InetSocketAddress("127.0.0.1", 8000 + dest.getId()), 2000);
             try (ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream())) {
                 out.writeObject(msg);
                 out.flush();

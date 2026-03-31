@@ -58,7 +58,8 @@ public class Simulator {
         AtomicInteger seq = new AtomicInteger(0);
 
         while (true) {
-            System.out.print("> ");
+        	// Bold Green prompt
+            System.out.print("\033[1;32m[SIM] ❯ \033[0m");
             String line = sc.nextLine().trim();
             if (line.equalsIgnoreCase("EXIT")) break;
 
