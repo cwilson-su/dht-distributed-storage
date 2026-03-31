@@ -1,5 +1,8 @@
 package chord;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import dht.Address;
 import dht.Message;
 
