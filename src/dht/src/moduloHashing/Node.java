@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -140,50 +141,99 @@ public class Node {
     }
 
     private Message processRequest(Message msg) {
-        if (msg == null || msg.getType() == null) {
-            return Message.error("Invalid message");
+        if (msg == null || msg.getType() == null) return Message.error("Invalid message");
+ 
+        return switch (msg.getType()) {
+            case NODE_PUT      -> handleNodePut(msg);
+            case NODE_GET      -> handleNodeGet(msg);
+            case DUMP_REQUEST  -> handleDumpRequest();
+            case CLEAR_STORE   -> handleClearStore();
+            case REBALANCE     -> handleRebalanceNotice(msg);
+            case REBALANCE_DONE -> handleRebalanceDone();
+            case TRANSFER_KEYS -> handleTransferKeys(msg);
+            default            -> Message.error("Unsupported request on storage node: " + msg.getType());
+        };
+    }
+ 
+   
+ 
+    private Message handleNodePut(Message msg) {
+        if (msg.getKey() == null) return Message.error("NODE_PUT missing key");
+        store.put(msg.getKey(), msg.getValue());
+        System.out.println("[STORE] " + self + " stored [" + msg.getKey() + " -> " + msg.getValue() + "]");
+        return Message.ack("Stored on " + self);
+    }
+ 
+    private Message handleNodeGet(Message msg) {
+        if (msg.getKey() == null) return Message.error("NODE_GET missing key");
+        String value = store.get(msg.getKey());
+        boolean found = value != null;
+        System.out.println("[READ] " + self + " lookup key=" + msg.getKey() + " found=" + found);
+        return Message.nodeResponse(found, msg.getKey(), value);
+    }
+ 
+    private Message handleDumpRequest() {
+        return Message.dumpResponse(self, new HashMap<>(store));
+    }
+ 
+    private Message handleClearStore() {
+        store.clear();
+        System.out.println("[CLEAR] " + self + " local store cleared");
+        return Message.ack("Store cleared on " + self);
+    }
+ 
+    private Message handleRebalanceNotice(Message msg) {
+        System.out.println("[REBALANCE START] " + self + " notified → " + msg.getInfo());
+        return Message.ack("Rebalance notice received by " + self);
+    }
+ 
+    private Message handleRebalanceDone() {
+        System.out.println("[REBALANCE DONE] " + self + " resuming normal operations.");
+        return Message.ack("Rebalance done acknowledged by " + self);
+    }
+    
+    private Message handleTransferKeys(Message msg) {
+        Address destination = msg.getTransferDestination();
+        List<String> keys   = msg.getTransferKeys();
+ 
+        if (destination == null || keys == null || keys.isEmpty()) {
+            return Message.error("TRANSFER_KEYS: missing destination or keys");
         }
-
-        switch (msg.getType()) {
-            case NODE_PUT -> {
-                if (msg.getKey() == null) {
-                    return Message.error("NODE_PUT missing key");
-                }
-                store.put(msg.getKey(), msg.getValue());
-                System.out.println("[STORE] " + self + " stored [" + msg.getKey() + " -> " + msg.getValue() + "]");
-                return Message.ack("Stored on " + self);
+ 
+        System.out.printf("[TRANSFER] %s → %s : %d keys%n", self, destination, keys.size());
+ 
+        int success = 0;
+        int failed  = 0;
+ 
+        for (String key : keys) {
+            String value = store.get(key);
+            if (value == null) {
+                System.err.println("[TRANSFER] Key not found locally: " + key);
+                failed++;
+                continue;
             }
-
-            case NODE_GET -> {
-                if (msg.getKey() == null) {
-                    return Message.error("NODE_GET missing key");
-                }
-                String value = store.get(msg.getKey());
-                boolean found = value != null;
-                System.out.println("[READ] " + self + " lookup key=" + msg.getKey() + " found=" + found);
-                return Message.nodeResponse(found, msg.getKey(), value);
+ 
+           
+            Message putResp = sendRequest(destination, Message.nodePut(key, value));
+ 
+            if (putResp != null && putResp.getType() == Message.Type.ACK) {
+                store.remove(key);  
+                success++;
+            } else {
+                System.err.println("[TRANSFER] Failed to push key=" + key + " to " + destination);
+                failed++;
             }
-
-            case DUMP_REQUEST -> {
-                return Message.dumpResponse(self, new HashMap<>(store));
-            }
-
-            case CLEAR_STORE -> {
-                store.clear();
-                System.out.println("[CLEAR] " + self + " local store cleared");
-                return Message.ack("Store cleared on " + self);
-            }
-
-            case REBALANCE -> {
-                System.out.println("[REBALANCE NOTICE] " + self + " -> " + msg.getInfo());
-                return Message.ack("Rebalance notice received by " + self);
-            }
-
-            default -> {
-                return Message.error("Unsupported request on storage node: " + msg.getType());
-            }
+        }
+ 
+        System.out.printf("[TRANSFER] Done: %d OK, %d FAILED%n", success, failed);
+ 
+        if (failed == 0) {
+            return Message.ack("Transferred " + success + " keys to " + destination);
+        } else {
+            return Message.error("Transfer partial: " + success + " OK, " + failed + " failed");
         }
     }
+    
 
     private Message sendRequest(Address dest, Message message) {
         try (Socket socket = new Socket()) {

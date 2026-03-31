@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -254,44 +255,96 @@ public class Coordinator {
     }
 
     private void rebalance(String reason, Map<String, String> extraData) {
-        if (storageNodes.isEmpty()) {
+    	List<Address> nodes = snapshotNodes();
+    	
+    	if (nodes.isEmpty()) {
             System.out.println("[REBALANCE] No nodes available. Rebalance skipped.");
             return;
         }
 
-        System.out.println("[REBALANCE] Starting -> " + reason);
+        System.out.println("[REBALANCE] Starting (node-to-node) -> " + reason);
 
-        // Notify nodes that rebalance is happening
-        broadcastRebalanceNotice(reason);
-
-        // Gather all current data from active nodes
-        Map<String, String> allData = new HashMap<>();
-        if (extraData != null) {
-            allData.putAll(extraData);
+        long rebalanceStart = System.currentTimeMillis();
+        
+        broadcastMessage(nodes, Message.rebalance(reason));
+ 
+        Map<Address, List<String>> keysByNode = new HashMap<>();
+        
+        if (extraData != null && !extraData.isEmpty()) {
+            for (Map.Entry<String, String> entry : extraData.entrySet()) {
+                Address dest = Hasher.getTargetNode(entry.getKey(), nodes);
+                sendRequest(dest, Message.nodePut(entry.getKey(), entry.getValue()));
+            }
+            System.out.println("[REBALANCE] Injected " + extraData.size() + " orphan keys directly to targets.");
         }
-
-        for (Address node : snapshotNodes()) {
-            Map<String, String> dump = requestDump(node);
-            allData.putAll(dump);
+ 
+        for (Address node : nodes) {
+            Message dumpResp = sendRequest(node, Message.dumpRequest());
+            if (dumpResp != null && dumpResp.getType() == Message.Type.DUMP_RESPONSE) {
+                keysByNode.put(node, new ArrayList<>(dumpResp.getData().keySet()));
+            } else {
+                keysByNode.put(node, Collections.emptyList());
+            }
         }
-
-        // Clear all stores
-        for (Address node : snapshotNodes()) {
-            sendRequest(node, Message.clearStore());
+ 
+        Map<Address, Map<Address, List<String>>> migrationPlan = new HashMap<>();
+        int keysToMove = 0;
+ 
+        for (Map.Entry<Address, List<String>> entry : keysByNode.entrySet()) {
+            Address source = entry.getKey();
+            for (String key : entry.getValue()) {
+                Address correctDest = Hasher.getTargetNode(key, nodes);
+                if (!correctDest.equals(source)) {
+                    migrationPlan.computeIfAbsent(source, k -> new HashMap<>()).computeIfAbsent(correctDest, k -> new ArrayList<>()).add(key);
+                    keysToMove++;
+                }
+            }
         }
-
-        // Redistribute every key according to the authoritative global view
-        for (Map.Entry<String, String> entry : allData.entrySet()) {
-            Address target = Hasher.getTargetNode(entry.getKey(), snapshotNodes());
-            sendRequest(target, Message.nodePut(entry.getKey(), entry.getValue()));
+ 
+        if (keysToMove == 0) {
+            System.out.println("[REBALANCE] Nothing to move. Already balanced.");
+            broadcastMessage(nodes, Message.rebalanceDone());
+            return;
         }
-
-        System.out.println("[REBALANCE] Completed. Total keys redistributed = " + allData.size());
+ 
+        System.out.println("[REBALANCE] Plan: " + keysToMove + " keys to move across "
+                + migrationPlan.size() + " source nodes.");
+ 
+        
+        int successfulTransfers = 0;
+ 
+        for (Map.Entry<Address, Map<Address, List<String>>> sourceEntry : migrationPlan.entrySet()) {
+            Address source = sourceEntry.getKey();
+ 
+            for (Map.Entry<Address, List<String>> destEntry : sourceEntry.getValue().entrySet()) {
+                Address      dest = destEntry.getKey();
+                List<String> keys = destEntry.getValue();
+ 
+                Message transferMsg = Message.transferKeys(dest, keys);
+                Message ack         = sendRequest(source, transferMsg);
+ 
+                if (ack != null && ack.getType() == Message.Type.ACK) {
+                    successfulTransfers += keys.size();
+                    System.out.printf("[REBALANCE] %s → %s : %d keys transferred OK%n",
+                            source, dest, keys.size());
+                } else {
+                    System.err.printf("[REBALANCE] FAILED transfer %s → %s : %s%n",
+                            source, dest, ack != null ? ack.getInfo() : "null response");
+                }
+            }
+        }
+ 
+        
+        broadcastMessage(nodes, Message.rebalanceDone());
+ 
+        long elapsed = System.currentTimeMillis() - rebalanceStart;
+        System.out.printf("[REBALANCE] Completed in %d ms. Keys moved: %d/%d%n",
+                elapsed, successfulTransfers, keysToMove);
     }
 
-    private void broadcastRebalanceNotice(String reason) {
-        for (Address node : snapshotNodes()) {
-            sendRequest(node, Message.rebalance(reason));
+    private void broadcastMessage(List<Address> nodes, Message msg) {
+        for (Address node : nodes) {
+            sendRequest(node, msg);
         }
     }
 
@@ -335,7 +388,7 @@ public class Coordinator {
         if (serverSocket != null && !serverSocket.isClosed()) {
             try {
                 serverSocket.close();
-            } catch (Exception ignored) {
+            } catch (Exception e) {
             }
         }
 
