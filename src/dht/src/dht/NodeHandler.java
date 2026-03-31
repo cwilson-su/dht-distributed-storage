@@ -62,54 +62,32 @@ public class NodeHandler {
     }
 
     private void handlePut(Message m) {
-        Address target = Hasher.getTargetNode(m.getKey(), self, peerRegistry.getPeersSnapshot());
-
-        if (target.equals(self)) {
-            store.put(m.getKey(), m.getValue());
-            System.out.println(">>> Stored [" + m.getKey() + " -> " + m.getValue() + "] locally at Node " + self.getPort());
-        } else {
-            System.out.println("Node " + self.getPort() + " hashing key '" + m.getKey() + "' -> routing to " + target);
-            send(target, m.withLast(self));
-        }
+        store.put(m.getKey(), m.getValue());
+        System.out.println(">>> Node " + self.getPort() + " stored [" + m.getKey() + "] locally.");
+        
+        // Continue flooding if we want other nodes also store it
+        // forward(m);
     }
 
     private void handleGet(Message m) {
-        Address target = Hasher.getTargetNode(m.getKey(), self, peerRegistry.getPeersSnapshot());
+        if (store.containsKey(m.getKey())) {
+            String val = store.get(m.getKey());
+            System.out.println(">>> Node " + self.getPort() + " HIT! Sending reply.");
 
-        if (target.equals(self)) {
-            if (store.containsKey(m.getKey())) {
-                String value = store.get(m.getKey());
-                System.out.println(">>> Node " + self.getPort() + " FOUND IT locally: " + value);
-
-                Message reply = new Message(
-                        Message.Type.REPLY,
-                        m.getKey(),
-                        value,
-                        self,
-                        self,
-                        m.getSeq(),
-                        0
-                );
-
-                send(m.getOrigin(), reply);
-            } else {
-                System.out.println("Node " + self.getPort() + " is the target, but key '" + m.getKey() + "' is missing.");
-
-                Message reply = new Message(
-                        Message.Type.REPLY,
-                        m.getKey(),
-                        "NOT_FOUND",
-                        self,
-                        self,
-                        m.getSeq(),
-                        0
-                );
-
-                send(m.getOrigin(), reply);
-            }
+            Message reply = new Message(
+                    Message.Type.REPLY,
+                    m.getKey(),
+                    val,
+                    self,
+                    self,
+                    m.getSeq(),
+                    0
+            );
+            send(m.getOrigin(), reply);
+            // We found it, so we stop flooding here.
         } else {
-            System.out.println("Node " + self.getPort() + " hashing key '" + m.getKey() + "' -> routing GET to " + target);
-            send(target, m.withLast(self));
+            System.out.println(">>> Node " + self.getPort() + " MISS. Flooding GET...");
+            forward(m);
         }
     }
 
@@ -181,7 +159,7 @@ public class NodeHandler {
         System.out.println(C_PURPLE + "[PONG <- " + m.getOrigin().getPort() + "]" + C_RESET);
     }
 
-    // Optional flooding helper kept for naive experimentation
+    // flooding helper kept for naive experimentation
     public void forward(Message m) {
         if (m.getHops() >= MAX_HOPS) {
             System.out.println("Node " + self.getPort() + ": Max hops reached for " + m.getKey());

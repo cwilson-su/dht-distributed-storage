@@ -2,7 +2,6 @@ package chord;
 
 import dht.Address;
 
-
 public class StabilizeService {
 
     private static final int INTERVAL_MS = 2000;
