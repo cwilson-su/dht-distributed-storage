@@ -125,7 +125,7 @@ public class Simulator {
                     }
                     if (parts.length == 4) {
                         tgtNode.handleMsg(new Message(Message.Type.PUT, parts[2], parts[3], tgtNode.getAddr(), tgtNode.getAddr(), s, 0));
-                        // ADD THIS: Give the network 200ms to print its logs
+                        // Give the network 200ms to print its logs
                         try { Thread.sleep(200); } catch (Exception ignored) {} 
                     } else {
                         System.out.println("Usage: PUT <id> <key> <val>");
@@ -138,7 +138,7 @@ public class Simulator {
                     }
                     if (parts.length == 3) {
                         tgtNode.handleMsg(new Message(Message.Type.GET, parts[2], "", tgtNode.getAddr(), tgtNode.getAddr(), s, 0));
-                        // ADD THIS: Give the network 200ms to print its logs
+                        // Give the network 200ms to print its logs
                         try { Thread.sleep(200); } catch (Exception ignored) {}
                     } else {
                         System.out.println("Usage: GET <id> <key>");
