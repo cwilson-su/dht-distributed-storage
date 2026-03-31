@@ -1,5 +1,10 @@
 package sim;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import core.Address;
 import core.INode;
 import core.IRouter;
@@ -8,14 +13,12 @@ import core.Message;
 import node.PeerNode;
 import routing.Flooding;
 import routing.ModuloHasher;
+import topology.HyperLatticeTopo;
+import topology.LatticeTopo;
 import topology.LineTopo;
+import topology.MeshTopo;
 import topology.RingTopo;
 import topology.StarTopo;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Simulator {
     public static void main(String[] args) {
@@ -33,9 +36,12 @@ public class Simulator {
         
         IRouter router = route.equals("flooding") ? new Flooding() : new ModuloHasher();
         ITopology topology = switch (topo) {
-            case "star" -> new StarTopo();
-            case "ring" -> new RingTopo();
-            default -> new LineTopo();
+	        case "star" -> new StarTopo();
+	        case "ring" -> new RingTopo();
+	        case "mesh" -> new MeshTopo();
+	        case "lattice" -> new LatticeTopo();
+	        case "hyperlattice" -> new HyperLatticeTopo();
+	        default -> new LineTopo();
         };
 
         List<INode> nodes = new ArrayList<>();
