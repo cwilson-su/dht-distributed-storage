@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import metrics.MetricsLogger;
+
 public class Coordinator {
     private final Address self;
     private final List<Address> storageNodes = new ArrayList<>();
@@ -141,6 +143,7 @@ public class Coordinator {
             storageNodes.add(node);
             lastSeen.put(node, System.currentTimeMillis());
             System.out.println("[JOIN] Node registered: " + node);
+            MetricsLogger.get().log("JOIN", 0, 0, "", "node=" + node);
             rebalance("Node joined: " + node, Map.of());
         } else {
             lastSeen.put(node, System.currentTimeMillis());
@@ -156,6 +159,7 @@ public class Coordinator {
         }
 
         System.out.println("[LEAVE] Node unregister request: " + leavingNode);
+        MetricsLogger.get().log("LEAVE", 0, 0, "", "node=" + leavingNode);
 
         // Try to salvage data from leaving node before removal
         Map<String, String> leavingData = requestDump(leavingNode);
@@ -185,40 +189,45 @@ public class Coordinator {
     }
 
     private Message handleClientPut(Message msg) {
-        if (msg.getKey() == null) {
-            return Message.error("CLIENT_PUT missing key");
-        }
-        if (storageNodes.isEmpty()) {
-            return Message.error("No storage nodes available");
-        }
+        if (msg.getKey() == null) return Message.error("CLIENT_PUT missing key");
+        if (storageNodes.isEmpty()) return Message.error("No storage nodes available");
 
         Address target = Hasher.getTargetNode(msg.getKey(), snapshotNodes());
-        Message nodeResp = sendRequest(target, Message.nodePut(msg.getKey(), msg.getValue()));
 
+        
+        Message nodeMsg  = Message.nodePut(msg.getKey(), msg.getValue()).withNextHop();
+        Message nodeResp = sendRequest(target, nodeMsg);
+        // hop 3 : node → coordinator  
         if (nodeResp == null || nodeResp.getType() == Message.Type.ERROR) {
             return Message.error("PUT failed on target " + target);
         }
 
-        return Message.clientResponse(true, msg.getKey(), msg.getValue(), "Stored on " + target);
+        // hop 4 : coordinator → client 
+        int finalHops = nodeMsg.getHopCount() + 1 + 1; // coord→node(2) + ack node(3) 
+        return Message.clientResponse(true, msg.getKey(), msg.getValue(),
+                "Stored on " + target, finalHops);
     }
 
     private Message handleClientGet(Message msg) {
-        if (msg.getKey() == null) {
-            return Message.error("CLIENT_GET missing key");
-        }
-        if (storageNodes.isEmpty()) {
-            return Message.error("No storage nodes available");
-        }
+        if (msg.getKey() == null) return Message.error("CLIENT_GET missing key");
+        if (storageNodes.isEmpty()) return Message.error("No storage nodes available");
 
         Address target = Hasher.getTargetNode(msg.getKey(), snapshotNodes());
-        Message nodeResp = sendRequest(target, Message.nodeGet(msg.getKey()));
+
+        // hop 2 : coordinator → node
+        Message nodeMsg  = Message.nodeGet(msg.getKey()).withNextHop();
+        Message nodeResp = sendRequest(target, nodeMsg);
+        // hop 3 : node → coordinator
 
         if (nodeResp == null || nodeResp.getType() == Message.Type.ERROR) {
             return Message.error("GET failed on target " + target);
         }
 
         if (nodeResp.getType() == Message.Type.NODE_RESPONSE) {
-            return Message.clientResponse(nodeResp.isFound(), msg.getKey(), nodeResp.getValue(), "Read from " + target);
+            // hop 4 : coordinator → client
+            int finalHops = nodeMsg.getHopCount() + 1 + 1;
+            return Message.clientResponse(nodeResp.isFound(), msg.getKey(),
+                    nodeResp.getValue(), "Read from " + target, finalHops);
         }
 
         return Message.error("Unexpected response from " + target);

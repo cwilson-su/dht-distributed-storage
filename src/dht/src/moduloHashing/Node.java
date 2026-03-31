@@ -193,7 +193,7 @@ public class Node {
     }
     
     private Message handleTransferKeys(Message msg) {
-        Address destination = msg.getTransferDestination();
+        Address destination = msg.getTransferDest();
         List<String> keys   = msg.getTransferKeys();
  
         if (destination == null || keys == null || keys.isEmpty()) {

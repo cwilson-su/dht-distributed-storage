@@ -6,6 +6,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Scanner;
 
+import metrics.MetricsLogger;
+
 public class Client {
     private static final int CONNECT_TIMEOUT_MS = 2000;
 
@@ -14,6 +16,8 @@ public class Client {
             System.out.println("Usage: java moduloHashing.Client <coordinatorIP:coordinatorPort>");
             return;
         }
+        
+        MetricsLogger.configure("results/centralized_metrics.csv");
 
         Address coordinator = Address.parse(args[0]);
         Scanner sc = new Scanner(System.in);
@@ -40,8 +44,14 @@ public class Client {
             switch (cmd) {
                 case "PUT" -> {
                     if (parts.length == 3) {
+                    	long start    = System.nanoTime();
                         Message response = sendRequest(coordinator, Message.clientPut(parts[1], parts[2]));
+                        long latencyMs = (System.nanoTime() - start) / 1_000_000L;
                         printResponse(response);
+                        
+                        int hops = (response != null) ? response.getHopCount() : 0;
+                        MetricsLogger.get().log("PUT", latencyMs, hops, parts[1], "");
+                        System.out.printf("  [metrics] latency=%dms  hops=%d%n", latencyMs, hops);
                     } else {
                         System.out.println("Usage: PUT <key> <value>");
                     }
@@ -49,8 +59,14 @@ public class Client {
 
                 case "GET" -> {
                     if (parts.length == 2) {
+                    	long start    = System.nanoTime();
                         Message response = sendRequest(coordinator, Message.clientGet(parts[1]));
+                        long latencyMs = (System.nanoTime() - start) / 1_000_000L;
                         printResponse(response);
+                        
+                        int hops = (response != null) ? response.getHopCount() : 0;
+                        MetricsLogger.get().log("GET", latencyMs, hops, parts[1], "");
+                        System.out.printf("  [metrics] latency=%dms  hops=%d%n", latencyMs, hops);
                     } else {
                         System.out.println("Usage: GET <key>");
                     }
