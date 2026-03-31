@@ -70,7 +70,7 @@ public class Simulator {
             try {
                 tgtId = Integer.parseInt(parts[1]);
             } catch (NumberFormatException e) {
-                System.out.println("Invalid Node ID.");
+                System.out.println("Invalid Node ID format.");
                 continue;
             }
 
@@ -79,19 +79,30 @@ public class Simulator {
 
             switch (cmd) {
                 case "ADD" -> {
-                    if (tgtNode != null) {
-                        System.out.println("Node " + tgtId + " already exists.");
-                        break;
+                    boolean added = false;
+                    // Smart ADD: Loop to fill any gaps up to tgtId
+                    for (int i = 0; i <= tgtId; i++) {
+                        final int currId = i;
+                        boolean exists = nodes.stream().anyMatch(n -> n.getAddr().getId() == currId);
+                        
+                        if (!exists) {
+                            System.out.println("\n--- [+] Injecting Node " + currId + " ---");
+                            INode newNode = new PeerNode(new Address(currId), router);
+                            newNode.init();
+                            topology.addNode(newNode, nodes);
+                            added = true;
+                        }
                     }
-                    System.out.println("\n--- [+] Injecting Node " + tgtId + " ---");
-                    INode newNode = new PeerNode(new Address(tgtId), router);
-                    newNode.init();
-                    topology.addNode(newNode, nodes);
-                    AsciiPrinter.print(topo, nodes);
+                    
+                    if (added) {
+                        AsciiPrinter.print(topo, nodes);
+                    } else {
+                        System.out.println("Node " + tgtId + " and all its predecessors already exist.");
+                    }
                 }
                 case "REMOVE" -> {
                     if (tgtNode == null) {
-                        System.out.println("Node " + tgtId + " not found.");
+                        System.out.println("Error: Node " + tgtId + " does not exist.");
                         break;
                     }
                     System.out.println("\n--- [-] Removing Node " + tgtId + " ---");
@@ -100,15 +111,28 @@ public class Simulator {
                     AsciiPrinter.print(topo, nodes);
                 }
                 case "PUT" -> {
-                    if (tgtNode != null && parts.length == 4) {
+                    if (tgtNode == null) {
+                        System.out.println("Error: Cannot PUT to non-existent Node " + tgtId);
+                        break;
+                    }
+                    if (parts.length == 4) {
                         tgtNode.handleMsg(new Message(Message.Type.PUT, parts[2], parts[3], tgtNode.getAddr(), tgtNode.getAddr(), s, 0));
+                    } else {
+                        System.out.println("Usage: PUT <id> <key> <val>");
                     }
                 }
                 case "GET" -> {
-                    if (tgtNode != null && parts.length == 3) {
+                    if (tgtNode == null) {
+                        System.out.println("Error: Cannot GET from non-existent Node " + tgtId);
+                        break;
+                    }
+                    if (parts.length == 3) {
                         tgtNode.handleMsg(new Message(Message.Type.GET, parts[2], "", tgtNode.getAddr(), tgtNode.getAddr(), s, 0));
+                    } else {
+                        System.out.println("Usage: GET <id> <key>");
                     }
                 }
+                default -> System.out.println("Unknown command.");
             }
         }
 

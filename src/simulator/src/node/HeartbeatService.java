@@ -36,7 +36,7 @@ public class HeartbeatService {
                     Message ping = new Message(Message.Type.PING, "", "", self, self, nextSeq.getAsInt(), 0);
 
                     for (Address peer : peerRegistry.getPeersSnapshot()) {
-                        System.out.println(C_CYAN + "[PING -> " + peer.getId() + "]" + C_RESET);
+//                         System.out.println(C_CYAN + "[PING -> " + peer.getId() + "]" + C_RESET);
                         handler.send(peer, ping);
                     }
 

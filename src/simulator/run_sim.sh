@@ -21,4 +21,4 @@ echo "Starting Simulator (Naive Implementation)"
 echo "---------------------------------------------------"
 
 # Run the simulator with 5 nodes, using the line topology and flooding router
-java -cp bin sim.Simulator -n 5 -t ring -r flooding
+java -cp bin sim.Simulator -n 5 -t line -r flooding

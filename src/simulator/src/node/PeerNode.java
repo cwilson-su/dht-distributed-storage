@@ -31,8 +31,6 @@ public class PeerNode implements INode {
         this.self = addr;
         this.router = router;
         this.peers = new PeerRegistry(self);
-        
-        // CRITICAL FIX: The server MUST bind to the actual TCP port, not the ID
         this.server = new NodeServer(self.getPort(), this);
         this.beat = new HeartbeatService(self, peers, this, seq::incrementAndGet);
     }
@@ -72,16 +70,11 @@ public class PeerNode implements INode {
 
         switch (msg.getType()) {
             case PING -> {
-                System.out.println(C_CYAN + "[PING <- " + msg.getOrigin().getId() + "]" + C_RESET);
-                System.out.println(C_PURPLE + "[PONG -> " + msg.getOrigin().getId() + "]" + C_RESET);
                 Message pong = new Message(Message.Type.PONG, "", "", self, self, seq.incrementAndGet(), 0);
                 send(msg.getOrigin(), pong);
                 return;
             }
-            case PONG -> {
-                System.out.println(C_PURPLE + "[PONG <- " + msg.getOrigin().getId() + "]" + C_RESET);
-                return;
-            }
+            case PONG -> { return; }
             case REPLY -> {
                 System.out.println("\n<<< Node " + self.getId() + " received REPLY: '" + msg.getKey() + "' -> '" + msg.getValue() + "' (from Node " + msg.getOrigin().getId() + ")");
                 System.out.print("> ");
@@ -92,7 +85,8 @@ public class PeerNode implements INode {
             default -> {}
         }
 
-        List<Address> nextHops = router.getNext(msg.getKey(), self, peers.getPeersSnapshot());
+        // We now pass the full message to the router
+        List<Address> nextHops = router.getNext(msg, self, peers.getPeersSnapshot());
         
         if (nextHops.contains(self)) {
             if (msg.getType() == Message.Type.PUT) {
@@ -100,9 +94,12 @@ public class PeerNode implements INode {
                 System.out.println(">>> Node " + self.getId() + " stored locally: " + msg.getKey());
             } else if (msg.getType() == Message.Type.GET) {
                 if (store.containsKey(msg.getKey())) {
-                    System.out.println(">>> Node " + self.getId() + " FOUND IT locally: " + store.get(msg.getKey()));
+                    System.out.println(">>> Node " + self.getId() + " FOUND IT locally! (" + store.get(msg.getKey()) + ")");
                     Message reply = new Message(Message.Type.REPLY, msg.getKey(), store.get(msg.getKey()), self, self, msg.getSeq(), 0);
                     send(msg.getOrigin(), reply);
+                    
+                    // CRITICAL FIX: Stop flooding once the data is located
+                    return; 
                 } else {
                     System.out.println(">>> Node " + self.getId() + " MISS. Flooding GET...");
                 }
@@ -120,8 +117,6 @@ public class PeerNode implements INode {
     @Override
     public void send(Address dest, Message msg) {
         if (dest == null || msg == null) return;
-
-        // CRITICAL FIX: Ensure we connect using the hidden port, not the ID
         try (Socket s = new Socket()) {
             s.connect(new InetSocketAddress(dest.getIp(), dest.getPort()), 2000);
             try (ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream())) {
@@ -132,12 +127,8 @@ public class PeerNode implements INode {
     }
 
     @Override
-    public Address getAddr() {
-        return self;
-    }
+    public Address getAddr() { return self; }
 
     @Override
-    public List<Address> getKnownPeers() {
-        return peers.getPeersSnapshot();
-    }
+    public List<Address> getKnownPeers() { return peers.getPeersSnapshot(); }
 }
