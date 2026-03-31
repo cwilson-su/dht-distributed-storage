@@ -8,13 +8,23 @@ public class LineTopo implements ITopology {
     @Override
     public void build(List<INode> nodes) {
         if (nodes == null || nodes.size() < 2) return;
-        
-        // Link nodes sequentially: A joins B, B joins C, etc.
         for (int i = 0; i < nodes.size() - 1; i++) {
-            INode curr = nodes.get(i);
-            INode next = nodes.get(i + 1);
-            curr.join(next.getAddr());
+            nodes.get(i).join(nodes.get(i + 1).getAddr());
         }
-        System.out.println("Line topology built.");
+    }
+
+    @Override
+    public void addNode(INode newNode, List<INode> network) {
+        if (!network.isEmpty()) {
+            INode tail = network.get(network.size() - 1);
+            newNode.join(tail.getAddr());
+        }
+        network.add(newNode);
+    }
+
+    @Override
+    public void removeNode(INode node, List<INode> network) {
+        node.leave();
+        network.remove(node);
     }
 }

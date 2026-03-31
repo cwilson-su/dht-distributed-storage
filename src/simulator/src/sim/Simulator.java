@@ -19,96 +19,96 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Simulator {
     public static void main(String[] args) {
-        int numNodes = 5;
-        String topoType = "line";
-        String routeType = "flooding";
+        int num = 5;
+        String topo = "line";
+        String route = "flooding";
 
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-n") && i + 1 < args.length) numNodes = Integer.parseInt(args[++i]);
-            if (args[i].equals("-t") && i + 1 < args.length) topoType = args[++i].toLowerCase();
-            if (args[i].equals("-r") && i + 1 < args.length) routeType = args[++i].toLowerCase();
+            if (args[i].equals("-n") && i + 1 < args.length) num = Integer.parseInt(args[++i]);
+            if (args[i].equals("-t") && i + 1 < args.length) topo = args[++i].toLowerCase();
+            if (args[i].equals("-r") && i + 1 < args.length) route = args[++i].toLowerCase();
         }
 
         System.out.println("=== Initialising Simulator ===");
-        System.out.println("Nodes: " + numNodes + " | Topo: " + topoType + " | Route: " + routeType);
-
-        IRouter router = switch (routeType) {
-            case "flooding" -> new Flooding();
-            default -> new ModuloHasher();
-        };
-
-        ITopology topo = switch (topoType) {
-            case "line" -> new LineTopo();
+        
+        IRouter router = route.equals("flooding") ? new Flooding() : new ModuloHasher();
+        ITopology topology = switch (topo) {
             case "star" -> new StarTopo();
-            default -> new RingTopo();
+            case "ring" -> new RingTopo();
+            default -> new LineTopo();
         };
 
         List<INode> nodes = new ArrayList<>();
-        int basePort = 8000;
 
-        for (int i = 0; i < numNodes; i++) {
-            Address addr = new Address(basePort + i);
-            INode n = new PeerNode(addr, router);
+        for (int i = 0; i < num; i++) {
+            INode n = new PeerNode(new Address(i), router);
             n.init();
             nodes.add(n);
         }
 
         try { Thread.sleep(500); } catch (Exception ignored) {}
-
-        System.out.println("Building topology...");
-        topo.build(nodes);
-
+        topology.build(nodes);
+        AsciiPrinter.print(topo, nodes);
         try { Thread.sleep(1500); } catch (Exception ignored) {}
 
         System.out.println("\n=== Network Ready ===");
-        System.out.println("Commands: PUT <port> <key> <val> | GET <port> <key> | EXIT");
+        System.out.println("Commands: PUT <id> <key> <val> | GET <id> <key> | ADD <id> | REMOVE <id> | EXIT");
         
         Scanner sc = new Scanner(System.in);
         AtomicInteger seq = new AtomicInteger(0);
 
         while (true) {
             System.out.print("> ");
-            String line = sc.nextLine();
+            String line = sc.nextLine().trim();
             if (line.equalsIgnoreCase("EXIT")) break;
 
             String[] parts = line.split(" ");
-            if (parts.length < 3) {
-                System.out.println("Usage: PUT <port> <key> <val> OR GET <port> <key>");
-                continue;
-            }
+            if (parts.length < 2) continue;
 
             String cmd = parts[0].toUpperCase();
-            int tgtPort;
+            int tgtId;
             try {
-                tgtPort = Integer.parseInt(parts[1]);
+                tgtId = Integer.parseInt(parts[1]);
             } catch (NumberFormatException e) {
-                System.out.println("Invalid port number.");
+                System.out.println("Invalid Node ID.");
                 continue;
             }
 
-            INode tgtNode = null;
-            for (INode n : nodes) {
-                if (n.getAddr().getPort() == tgtPort) {
-                    tgtNode = n;
-                    break;
-                }
-            }
-
-            if (tgtNode == null) {
-                System.out.println("Node " + tgtPort + " not found.");
-                continue;
-            }
-
+            INode tgtNode = nodes.stream().filter(n -> n.getAddr().getId() == tgtId).findFirst().orElse(null);
             int s = seq.incrementAndGet();
 
-            if (cmd.equals("PUT") && parts.length == 4) {
-                Message m = new Message(Message.Type.PUT, parts[2], parts[3], tgtNode.getAddr(), tgtNode.getAddr(), s, 0);
-                tgtNode.handleMsg(m);
-            } else if (cmd.equals("GET") && parts.length == 3) {
-                Message m = new Message(Message.Type.GET, parts[2], "", tgtNode.getAddr(), tgtNode.getAddr(), s, 0);
-                tgtNode.handleMsg(m);
-            } else {
-                System.out.println("Usage: PUT <port> <key> <val> OR GET <port> <key>");
+            switch (cmd) {
+                case "ADD" -> {
+                    if (tgtNode != null) {
+                        System.out.println("Node " + tgtId + " already exists.");
+                        break;
+                    }
+                    System.out.println("\n--- [+] Injecting Node " + tgtId + " ---");
+                    INode newNode = new PeerNode(new Address(tgtId), router);
+                    newNode.init();
+                    topology.addNode(newNode, nodes);
+                    AsciiPrinter.print(topo, nodes);
+                }
+                case "REMOVE" -> {
+                    if (tgtNode == null) {
+                        System.out.println("Node " + tgtId + " not found.");
+                        break;
+                    }
+                    System.out.println("\n--- [-] Removing Node " + tgtId + " ---");
+                    System.out.println("Summary: Node " + tgtId + " is dispatching LEAVE signals to: " + tgtNode.getKnownPeers());
+                    topology.removeNode(tgtNode, nodes);
+                    AsciiPrinter.print(topo, nodes);
+                }
+                case "PUT" -> {
+                    if (tgtNode != null && parts.length == 4) {
+                        tgtNode.handleMsg(new Message(Message.Type.PUT, parts[2], parts[3], tgtNode.getAddr(), tgtNode.getAddr(), s, 0));
+                    }
+                }
+                case "GET" -> {
+                    if (tgtNode != null && parts.length == 3) {
+                        tgtNode.handleMsg(new Message(Message.Type.GET, parts[2], "", tgtNode.getAddr(), tgtNode.getAddr(), s, 0));
+                    }
+                }
             }
         }
 

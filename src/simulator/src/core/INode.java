@@ -1,4 +1,5 @@
 package core;
+import java.util.List;
 
 public interface INode {
     void init();
@@ -7,4 +8,5 @@ public interface INode {
     void handleMsg(Message msg);
     void send(Address dest, Message msg);
     Address getAddr();
+    List<Address> getKnownPeers();
 }

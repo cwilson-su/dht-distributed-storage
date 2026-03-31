@@ -8,13 +8,24 @@ public class StarTopo implements ITopology {
     @Override
     public void build(List<INode> nodes) {
         if (nodes == null || nodes.size() < 2) return;
-        
-        // The first node in the list acts as the central hub
         INode hub = nodes.get(0);
-        
         for (int i = 1; i < nodes.size(); i++) {
             nodes.get(i).join(hub.getAddr());
         }
-        System.out.println("Star topology built around hub " + hub.getAddr().getPort() + ".");
+    }
+
+    @Override
+    public void addNode(INode newNode, List<INode> network) {
+        if (!network.isEmpty()) {
+            INode hub = network.get(0);
+            newNode.join(hub.getAddr());
+        }
+        network.add(newNode);
+    }
+
+    @Override
+    public void removeNode(INode node, List<INode> network) {
+        node.leave();
+        network.remove(node);
     }
 }

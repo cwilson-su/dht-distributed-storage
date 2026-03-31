@@ -8,13 +8,24 @@ public class RingTopo implements ITopology {
     @Override
     public void build(List<INode> nodes) {
         if (nodes == null || nodes.size() < 2) return;
-        
-        // Link nodes in a circle. The last node connects back to the first.
         for (int i = 0; i < nodes.size(); i++) {
-            INode curr = nodes.get(i);
-            INode next = nodes.get((i + 1) % nodes.size());
-            curr.join(next.getAddr());
+            nodes.get(i).join(nodes.get((i + 1) % nodes.size()).getAddr());
         }
-        System.out.println("Ring topology built.");
+    }
+
+    @Override
+    public void addNode(INode newNode, List<INode> network) {
+        if (!network.isEmpty()) {
+            INode tail = network.get(network.size() - 1);
+            newNode.join(tail.getAddr());
+            // In a ring, the new tail should also inform the head, but for naive routing, joining one peer is enough to flood presence.
+        }
+        network.add(newNode);
+    }
+
+    @Override
+    public void removeNode(INode node, List<INode> network) {
+        node.leave();
+        network.remove(node);
     }
 }
