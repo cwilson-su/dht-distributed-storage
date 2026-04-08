@@ -15,7 +15,7 @@ public class NodeHandler {
 
     private final ConcurrentMap<String, String> store = new ConcurrentHashMap<>();
 
-    // ANSI color codes for console readability
+    // ANSI colour codes for console readability
     static final String C_RESET = "\u001B[0m";
     static final String C_CYAN = "\u001B[36m";
     static final String C_PURPLE = "\u001B[35m";
@@ -46,7 +46,8 @@ public class NodeHandler {
         }
 
         if (m.getType() != Message.Type.PING && m.getType() != Message.Type.PONG) {
-            System.out.println("Node " + self.getPort() + " processing " + m.getType() + " for " + m.getKey());
+            String target = (m.getKey() == null || m.getKey().isEmpty()) ? "network" : "'" + m.getKey() + "'";
+            System.out.println("Node " + self.getPort() + " processing " + m.getType() + " for " + target);
         }
 
         switch (m.getType()) {
