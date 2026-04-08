@@ -142,7 +142,8 @@ public class NodeHandler {
         }
     }
 
-    private void handlePing(Message m) {
+    @Deprecated
+    private void handlePingv0(Message m) {
         System.out.println(C_CYAN + "[PING <- " + m.getOrigin().getPort() + "]" + C_RESET);
 
         Message pong = new Message(
@@ -158,10 +159,73 @@ public class NodeHandler {
         System.out.println(C_PURPLE + "[PONG -> " + m.getOrigin().getPort() + "]" + C_RESET);
         send(m.getOrigin(), pong);
     }
+    
+    private void handlePing(Message m) {
+        System.out.println(C_CYAN + "[PING <- " + m.getOrigin().getPort() + "]" + C_RESET); // comment out later to reduce terminal spam
 
-    private void handlePong(Message m) {
+        // Reply for ourselves. We put our Address string in the 'value' field!
+        Message selfPong = new Message(
+                Message.Type.PONG,
+                "",
+                self.toString(), 
+                self,
+                self,
+                m.getSeq(),
+                0
+        );
+        send(m.getOrigin(), selfPong);
+
+        // Pong Caching: Send up to 2 known peers to help the sender discover the network
+        List<Address> cachedPeers = peerRegistry.getPeersSnapshot();
+        int sent = 0;
+        
+        for (Address cachedPeer : cachedPeers) {
+            if (sent >= 2) break; // Limit to 2 cached peers to prevent overloading
+            if (cachedPeer.equals(m.getOrigin())) continue; // Don't bounce the sender's own address back to them
+            
+            Message cachedPong = new Message(
+                    Message.Type.PONG,
+                    "",
+                    cachedPeer.toString(), //<---
+                    self, 
+                    self,
+                    m.getSeq(),
+                    0
+            );
+            send(m.getOrigin(), cachedPong);
+            sent++;
+        }
+    }
+
+    @Deprecated
+    private void handlePongv0(Message m) {
         peerRegistry.markAlive(m.getOrigin());
         System.out.println(C_PURPLE + "[PONG <- " + m.getOrigin().getPort() + "]" + C_RESET);
+    }
+    
+    private void handlePong(Message m) {
+        Address discoveredPeer = m.getOrigin(); // Default to the node that sent it
+
+        // If the PONG contains a cached address string (e.g, 127.0.0.1:8004), parse it
+        if (m.getValue() != null && !m.getValue().isBlank()) {
+            try {
+                discoveredPeer = Address.parse(m.getValue());
+            } catch (Exception e) {
+                // Ignore gracefully if the address format is corrupted
+            }
+        }
+
+        // Attempt to add this peer to our registry
+        boolean isNew = peerRegistry.addPeer(discoveredPeer);
+        peerRegistry.markAlive(discoveredPeer);
+        
+        if (isNew) {
+            System.out.println(C_PURPLE + "+++ Discovered new peer via PONG cache: " + discoveredPeer.getPort() + C_RESET);
+            
+            // Say hello to our newly discovered friend!
+            Message hello = new Message(Message.Type.JOIN, "", "", self, self, nextSeq.getAsInt(), 0);
+            send(discoveredPeer, hello);
+        }
     }
     
     private void handleDelete(Message m) {
