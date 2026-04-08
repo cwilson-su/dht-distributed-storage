@@ -28,4 +28,14 @@ public class RingTopo implements ITopology {
         node.leave();
         network.remove(node);
     }
+    
+    @Override
+    public void repair(List<INode> network) {
+        // To repair a ring, we simply re-run the build logic on the remaining nodes.
+        // This ensures every node points to the current valid next/previous neighbours.
+        for (INode n : network) {
+            n.getPeers().clear(); // Clear old, potentially broken connections
+        }
+        build(network); 
+    }
 }

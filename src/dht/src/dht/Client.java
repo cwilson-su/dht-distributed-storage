@@ -81,6 +81,25 @@ public class Client {
                         System.out.println("Usage: GET <key>");
                     }
                 }
+                
+                case "DELETE" -> {
+                    if (parts.length == 2) {
+                        Message m = new Message(
+                                Message.Type.DELETE,
+                                parts[1],
+                                "",
+                                myAddr, // origin
+                                myAddr, // last
+                                seq,
+                                0       // hops
+                        );
+
+                        tool.send(target, m);
+                        System.out.println("DELETE request " + m.getSeq() + " sent for key: " + m.getKey());
+                    } else {
+                        System.out.println("Usage: DELETE <key>");
+                    }
+                }
 
                 default -> System.out.println("Unknown command.");
             }

@@ -11,7 +11,7 @@ Distributed storage system based on a DHT. Developed as an academic project for 
 - [x] join
 - [x] leave
 - [ ] delete
-- [ ] 
+- [ ] ...
 
 ### Naive DHT (2nd gen; Gnutella style)
 - [x] put
@@ -19,8 +19,8 @@ Distributed storage system based on a DHT. Developed as an academic project for 
 - [x] reply
 - [x] join
 - [x] leave
-- [ ] delete
-- [ ] 
+- [x] delete
+- [ ] ...
 
 ### Structured DHT (3rd gen): CHORD 
 - [x] put
@@ -29,6 +29,6 @@ Distributed storage system based on a DHT. Developed as an academic project for 
 - [ ] join
 - [ ] leave
 - [ ] delete
-- [ ] 
+- [ ] ...
 
 

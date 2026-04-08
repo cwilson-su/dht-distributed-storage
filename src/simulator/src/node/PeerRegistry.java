@@ -67,4 +67,8 @@ public class PeerRegistry {
     private String requestKey(Message m) {
         return m.getType() + "|" + m.getOrigin() + "|" + m.getSeq();
     }
+    
+    public void clear() {
+        this.peers.clear(); 
+    }
 }

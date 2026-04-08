@@ -57,6 +57,7 @@ public class NodeHandler {
             case LEAVE -> handleLeave(m);
             case PING -> handlePing(m);
             case PONG -> handlePong(m);
+            case DELETE -> handleDelete(m);
             default -> System.out.println("Unknown type");
         }
     }
@@ -90,11 +91,15 @@ public class NodeHandler {
             forward(m);
         }
     }
-
+  
     private void handleReply(Message m) {
-        System.out.println("\n<<< REPLY: Key '" + m.getKey() + "' -> '" + m.getValue()
-                + "' (from Node " + m.getOrigin().getPort() + ")");
-        System.out.print("> ");
+        if ("SUCCESSFULLY_DELETED".equals(m.getValue())) {
+            System.out.println("\n<<< REPLY: Key '" + m.getKey() + "' was DELETED by Node " + m.getOrigin().getPort());
+        } else {
+            System.out.println("\n<<< REPLY: Key '" + m.getKey() + "' -> '" + m.getValue()
+                    + "' (from Node " + m.getOrigin().getPort() + ")");
+        }
+        System.out.print("> "); // Reprint the terminal prompt
     }
 
     private void handleJoin(Message m) {
@@ -157,6 +162,31 @@ public class NodeHandler {
     private void handlePong(Message m) {
         peerRegistry.markAlive(m.getOrigin());
         System.out.println(C_PURPLE + "[PONG <- " + m.getOrigin().getPort() + "]" + C_RESET);
+    }
+    
+    private void handleDelete(Message m) {
+        if (store.containsKey(m.getKey())) {
+            store.remove(m.getKey());
+            System.out.println(">>> Node " + self.getPort() + " DELETED [" + m.getKey() + "] locally.");
+            
+            // Generate a success reply using a specific value flag
+            Message reply = new Message(
+                    Message.Type.REPLY,
+                    m.getKey(),
+                    "SUCCESSFULLY_DELETED", // We use the value field to pass the status
+                    self,
+                    self,
+                    m.getSeq(),
+                    0
+            );
+            send(m.getOrigin(), reply); // Send direct TCP reply to the client
+            
+        } else {
+            System.out.println(">>> Node " + self.getPort() + " does not have [" + m.getKey() + "]. Flooding DELETE...");
+        }
+
+        // Always forward just in case there are duplicate copies in the network
+        forward(m);
     }
 
     // flooding helper kept for naive experimentation

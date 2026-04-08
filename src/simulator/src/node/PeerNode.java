@@ -135,4 +135,9 @@ public class PeerNode implements INode {
 
     @Override
     public List<Address> getKnownPeers() { return peers.getPeersSnapshot(); }
+    
+    @Override
+    public void clearPeers() {
+        this.peers.clear(); // Assuming 'peers' is your PeerRegistry instance
+    }
 }

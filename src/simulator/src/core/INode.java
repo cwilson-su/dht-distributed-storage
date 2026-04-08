@@ -9,4 +9,5 @@ public interface INode {
     void send(Address dest, Message msg);
     Address getAddr();
     List<Address> getKnownPeers();
+    void clearPeers();
 }
