@@ -28,7 +28,8 @@ Basic tasks:
 Optimisations:
 - [x] pong caching
 - [x] Implicit Heartbeating (aka Passive Liveness Tracking)
-- [ ] Reverse Path Caching
+- [x] Reverse Path Caching (simple routing table)
+- [ ] Cache eviction
 - [ ] ...
 
 ### Structured DHT (3rd gen): CHORD 

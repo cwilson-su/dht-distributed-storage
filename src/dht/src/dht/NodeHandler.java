@@ -14,6 +14,9 @@ public class NodeHandler {
     private final IntSupplier nextSeq;
 
     private final ConcurrentMap<String, String> store = new ConcurrentHashMap<>();
+        
+    // reverse Path Routing Table: Maps "Seq:Key" -> "Previous Hop Address"
+    private final ConcurrentMap<String, Address> routingTable = new ConcurrentHashMap<>();
 
     // ANSI colour codes for console readability
     static final String C_RESET = "\u001B[0m";
@@ -71,7 +74,8 @@ public class NodeHandler {
         // forward(m);
     }
 
-    private void handleGet(Message m) {
+    @Deprecated
+    private void handleGetv0(Message m) {
         if (store.containsKey(m.getKey())) {
             String val = store.get(m.getKey());
             System.out.println(">>> Node " + self.getPort() + " HIT! Sending reply.");
@@ -92,8 +96,33 @@ public class NodeHandler {
             forward(m);
         }
     }
+    
+    // optimised Version with reverse path caching
+    private void handleGet(Message m) {
+        Address sender = (m.getLast() != null) ? m.getLast() : m.getOrigin();
+
+        if (store.containsKey(m.getKey())) {
+            String val = store.get(m.getKey());
+            System.out.println(">>> Node " + self.getPort() + " HIT! Routing reply backwards.");
+            
+            // The origin is US (the owner), but the seq and key match the GET request
+            Message reply = new Message(Message.Type.REPLY, m.getKey(), val, self, self, m.getSeq(), 0);
+            
+            // Send the reply back one step down the breadcrumb trail, NOT direct to the client
+            send(sender, reply); 
+        } else {
+            System.out.println(">>> Node " + self.getPort() + " MISS. Caching path and flooding...");
+            
+            // Leave a breadcrumb! Map this specific search to the node that handed it to us.
+            String routeID = m.getSeq() + ":" + m.getKey();
+            routingTable.put(routeID, sender); 
+            
+            forward(m);
+        }
+    }
   
-    private void handleReply(Message m) {
+    @Deprecated
+    private void handleReplyv0(Message m) {
         if ("SUCCESSFULLY_DELETED".equals(m.getValue())) {
             System.out.println("\n<<< REPLY: Key '" + m.getKey() + "' was DELETED by Node " + m.getOrigin().getPort());
         } else {
@@ -101,6 +130,38 @@ public class NodeHandler {
                     + "' (from Node " + m.getOrigin().getPort() + ")");
         }
         System.out.print("> "); // Reprint the terminal prompt
+    }
+    
+    // optimised Version with reverse path caching
+    private void handleReply(Message m) {
+        String routeID = m.getSeq() + ":" + m.getKey();
+        
+        // Check if we have a breadcrumb for this reply
+        if (routingTable.containsKey(routeID)) {
+            // We are an intermediate node. Get the next hop and remove the breadcrumb to save memory.
+            Address nextHop = routingTable.remove(routeID);
+            
+            System.out.println("<<< Node " + self.getPort() + " routing REPLY backwards to " + nextHop.getPort());
+            
+            // OTHER OPTIMISATION: Cache the file locally!
+            if (!"SUCCESSFULLY_DELETED".equals(m.getValue())) {
+                store.put(m.getKey(), m.getValue());
+                System.out.println(C_CYAN + "    -> Cached [" + m.getKey() + "] locally to stop future floods!" + C_RESET);
+            }
+            
+            // Forward it backwards
+            send(nextHop, m.withLast(self));
+            
+        } else {
+            // We have no breadcrumb. This means WE are the original requester (the Client)!
+            if ("SUCCESSFULLY_DELETED".equals(m.getValue())) {
+                System.out.println("\n<<< REPLY: Key '" + m.getKey() + "' was DELETED by Node " + m.getOrigin().getPort());
+            } else {
+                System.out.println("\n<<< REPLY: Key '" + m.getKey() + "' -> '" + m.getValue()
+                        + "' (from Node " + m.getOrigin().getPort() + " via Reverse Path)");
+            }
+            System.out.print("> ");
+        }
     }
 
     private void handleJoin(Message m) {
