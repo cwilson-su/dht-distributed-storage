@@ -64,4 +64,8 @@ public class PeerRegistry {
     private String requestKey(Message m) {
         return m.getType() + "|" + m.getOrigin() + "|" + m.getSeq();
     }
+    
+    public long getLastSeen(Address peer) {
+        return lastSeen.getOrDefault(peer, 0L);
+    }
 }
