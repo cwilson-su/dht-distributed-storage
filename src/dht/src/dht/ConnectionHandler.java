@@ -15,6 +15,8 @@ public class ConnectionHandler implements Runnable {
 
     @Override
     public void run() {
+        Message m = null;
+
         try (socket;
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
 
@@ -32,12 +34,18 @@ public class ConnectionHandler implements Runnable {
             in.setObjectInputFilter(filter);
 
             Object obj = in.readObject();
-            if (obj instanceof Message m) {
-                handler.process(m);
+            if (obj instanceof Message msg) {
+                m = msg;
             }
 
         } catch (Exception e) {
             System.err.println("Connection error: " + e.getMessage());
+        }
+
+        try {
+            handler.process(m);
+        } catch (Exception e) {
+            System.err.println("Connection error (traitement): " + e.getMessage());
         }
     }
 }

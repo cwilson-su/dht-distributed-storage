@@ -17,7 +17,8 @@ public class ChordMessage extends Message {
         PREDECESSOR_REPLY,
         NOTIFY,
         TRANSFER_KEYS,
-        REQUEST_KEYS
+        REQUEST_KEYS,
+        LEAVE_NOTIFY
     }
 
     private final ChordType chordType;
@@ -37,7 +38,8 @@ public class ChordMessage extends Message {
     }
 
     public static ChordMessage successorReply(Address successor, Address origin, int seq) {
-        return new ChordMessage(ChordType.SUCCESSOR_REPLY, 0, successor.toString(), origin, seq, null);
+        String val = (successor != null) ? successor.toString() : "";
+        return new ChordMessage(ChordType.SUCCESSOR_REPLY, 0, val, origin, seq, null);
     }
 
     public static ChordMessage getPredecessor(Address origin, int seq) {
@@ -62,6 +64,10 @@ public class ChordMessage extends Message {
         return new ChordMessage(ChordType.REQUEST_KEYS, newNodeId, "", origin, seq, null);
     }
 
+    public static ChordMessage leaveNotify(Address mySuccessor, Address origin, int seq) {
+        String val = (mySuccessor != null) ? mySuccessor.toString() : "";
+        return new ChordMessage(ChordType.LEAVE_NOTIFY, 0, val, origin, seq, null);
+    }
 
     public ChordType getChordType() {
         return chordType;
