@@ -30,11 +30,15 @@ Basic tasks:
 - [x] delete
 
 Concurrency:
-- [x] delete
-
+- [x] Multithreaded Architecture
+- [x] Thread-Safe Data Structures (ConcurrentHashMap, CopyOnWriteArrayList, AtomicInteger localSeq)
+- [x] Atomic Peer Insertion
+- [x] Atomic Data Retrieval
+- [x] Atomic Data Deletion
+- [x] Atomic Routing Table Consumption
 
 Optimisations:
-- [x] pong caching
+- [x] Pong caching
 - [x] Implicit Heartbeating (aka Passive Liveness Tracking)
 - [x] Reverse Path Caching (simple routing table)
 
