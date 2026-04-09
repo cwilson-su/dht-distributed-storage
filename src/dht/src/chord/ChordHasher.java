@@ -9,6 +9,7 @@ public class ChordHasher {
 
 
     public static int hash(Address addr) {
+        if (addr == null) return 0;
         return Math.abs(addr.toString().hashCode()) % RING_SIZE;
     }
    

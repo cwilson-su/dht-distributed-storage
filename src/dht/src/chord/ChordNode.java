@@ -3,17 +3,21 @@ package chord;
 import dht.Address;
 import dht.Message;
 import dht.NodeServer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 // Inspired by dht.Node but uses the finger table for routing.
 
 public class ChordNode {
  
+    static final int SUCCESSOR_LIST_SIZE = 2;
     final Address self;
     final int id;
     final FingerTable fingerTable;
  
     volatile Address predecessor = null;
+    final List<Address>   successorList = new ArrayList<>();
  
     private final ChordNodeHandler handler;
     private final NodeServer server;
@@ -45,6 +49,7 @@ public class ChordNode {
         }
  
         stabilizer.start();
+        registerShutdownHook();
     }
  
 
@@ -72,6 +77,10 @@ public class ChordNode {
             fingerTable.setSuccessor(succ);
             System.out.println("[ChordNode " + self.getPort() + "] successeur = " + succ
                     + " (id=" + ChordHasher.hash(succ) + ")");
+
+            if (!succ.equals(self)) {
+                handler.requestKeysFromSuccessor(succ);
+            }
         }
     }
  
@@ -90,7 +99,57 @@ public class ChordNode {
     public Address lookup(String key) {
         return findSuccessor(ChordHasher.hash(key));
     }
+
+    synchronized void updateSuccessorList(List<Address> list) {
+        successorList.clear();
+        successorList.addAll(list);
+    }
+
+    synchronized Address getNextLiveSuccessor() {
+        for (Address backup : successorList) {
+            if (!backup.equals(self) && !backup.equals(fingerTable.getSuccessor())) {
+                return backup;
+            }
+        }
+        return null;
+    }
  
+    private void leave() {
+        stabilizer.stop();
+        stabilizer.stabilize();
+ 
+        Address succ = fingerTable.getSuccessor();
+        Address pred = predecessor;
+ 
+        if (succ != null && !succ.equals(self)) {
+            handler.transferAllKeysTo(succ);
+            try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+ 
+            if (pred != null && !pred.equals(self)) {
+                System.out.println("[ChordNode " + self.getPort()
+                        + "] LEAVE — notification prédécesseur " + pred
+                        + " → nouveau successeur = " + succ);
+                handler.sendLeaveNotify(pred, succ);
+            }
+ 
+            System.out.println("[ChordNode " + self.getPort()
+                    + "] LEAVE — notification successeur " + succ);
+            handler.sendLeaveNotify(succ, succ); // value = succ lui-même (ignoré côté succ)
+ 
+            try { Thread.sleep(400); } catch (InterruptedException ignored) {}
+        }
+ 
+        server.stop();
+        System.out.println("[ChordNode " + self.getPort() + "] arrêté.");
+    }
+
+    private void registerShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("\n[ChordNode " + self.getPort() + "] arrêt en cours...");
+            leave();
+        }));
+    }
+    
     public int nextSeq() { return seqCounter.incrementAndGet(); }
  
     public void send(Address dest, Message m) { handler.send(dest, m); }
