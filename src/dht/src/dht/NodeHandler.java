@@ -101,8 +101,10 @@ public class NodeHandler {
     private void handleGet(Message m) {
         Address sender = (m.getLast() != null) ? m.getLast() : m.getOrigin();
 
-        if (store.containsKey(m.getKey())) {
-            String val = store.get(m.getKey());
+        // ATOMIC OPERATION: Get the value once. If it's not null, it means it exists!
+        String val = store.get(m.getKey());
+        
+        if (val != null) {
             System.out.println(">>> Node " + self.getPort() + " HIT! Routing reply backwards.");
             
             // The origin is US (the owner), but the seq and key match the GET request
@@ -137,10 +139,11 @@ public class NodeHandler {
         String routeID = m.getSeq() + ":" + m.getKey();
         
         // Check if we have a breadcrumb for this reply
-        if (routingTable.containsKey(routeID)) {
-            // We are an intermediate node. Get the next hop and remove the breadcrumb to save memory.
-            Address nextHop = routingTable.remove(routeID);
-            
+        // We are an intermediate node. Get the next hop and remove the breadcrumb to save memory.
+        // ATOMIC OPERATION: Try to remove it and grab the value in one step
+        Address nextHop = routingTable.remove(routeID);
+        
+        if (nextHop != null) {
             System.out.println("<<< Node " + self.getPort() + " routing REPLY backwards to " + nextHop.getPort());
             
             // OTHER OPTIMISATION: Cache the file locally!
@@ -291,8 +294,8 @@ public class NodeHandler {
     }
     
     private void handleDelete(Message m) {
-        if (store.containsKey(m.getKey())) {
-            store.remove(m.getKey());
+        // ATOMIC OPERATION: remove() returns the deleted value, or null if it didn't exist.
+        if (store.remove(m.getKey()) != null) {
             System.out.println(">>> Node " + self.getPort() + " DELETED [" + m.getKey() + "] locally.");
             
             // Generate a success reply using a specific value flag

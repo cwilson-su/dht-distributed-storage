@@ -10,7 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class PeerRegistry {
     private final Address self;
 
-    private final List<Address> peers = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<Address> peers = new CopyOnWriteArrayList<>();
     private final Map<Address, Long> lastSeen = new ConcurrentHashMap<>();
 
     // Store seen message IDs to avoid processing duplicates
@@ -19,13 +19,17 @@ public class PeerRegistry {
     public PeerRegistry(Address self) {
         this.self = self;
     }
-
+  
     public boolean addPeer(Address peer) {
-        if (peer == null || peer.equals(self) || peers.contains(peer)) {
+    	// used to be if (peer == null || peer.equals(self) || peers.contains(peer)) {
+        // We only check for null or self here
+        if (peer == null || peer.equals(self)) {
             return false;
         }
-        peers.add(peer);
-        return true;
+        
+        // ATOMIC OPERATION: addIfAbsent safely checks if it exists and adds it in one thread-safe step!
+        // It returns true if it was added, and false if it was already in the list.
+        return peers.addIfAbsent(peer);
     }
 
     public void removePeer(Address peer) {

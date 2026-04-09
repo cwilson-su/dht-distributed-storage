@@ -14,7 +14,11 @@ Basic tasks:
 - [ ] delete
 - [ ] ...
 
+Concurrency:
+
+
 Optimisations:
+
 
 ### Naive DHT (2nd gen; Gnutella style)
 Basic tasks:
@@ -25,12 +29,17 @@ Basic tasks:
 - [x] leave
 - [x] delete
 
+Concurrency:
+- [x] delete
+
+
 Optimisations:
 - [x] pong caching
 - [x] Implicit Heartbeating (aka Passive Liveness Tracking)
 - [x] Reverse Path Caching (simple routing table)
-- [ ] Cache eviction
-- [ ] ...
+
+Discarded ideas (potential future work)
+- [ ] Cache eviction {Split storage architecture: owenedStore(permanent, local PUTs) & cacheStore(intercepted Reverse Paths, LRU cache)}
 
 ### Structured DHT (3rd gen): CHORD 
 Basic tasks:
@@ -41,6 +50,9 @@ Basic tasks:
 - [ ] leave
 - [ ] delete
 - [ ] ...
+
+Concurrency:
+
 
 Optimisations:
 
