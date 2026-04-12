@@ -13,6 +13,7 @@ public class Message implements Serializable {
     public enum Type {
         CLIENT_PUT,
         CLIENT_GET,
+        CLIENT_DELETE,
         CLIENT_RESPONSE,
 
         REGISTER_NODE,
@@ -20,6 +21,7 @@ public class Message implements Serializable {
 
         NODE_PUT,
         NODE_GET,
+        NODE_DELETE,
         NODE_RESPONSE,
 
         DUMP_REQUEST,
@@ -102,7 +104,10 @@ public class Message implements Serializable {
     public static Message clientGet(String key) {
         return new Message(Type.CLIENT_GET, null, key, null, false, null, null, 1, null, null);
     }
-
+    
+    public static Message clientDelete(String key) {
+        return new Message(Type.CLIENT_DELETE, null, key, null, false, null, null, 1, null, null);
+    }
     
     public static Message clientResponse(boolean found, String key, String value,
                                          String info, int hopCount) {
@@ -129,6 +134,10 @@ public class Message implements Serializable {
 
     public static Message nodeGet(String key) {
         return new Message(Type.NODE_GET, null, key, null, false, null, null);
+    }
+    
+    public static Message nodeDelete(String key) {
+        return new Message(Type.NODE_DELETE, null, key, null, false, null, null);
     }
 
     public static Message nodeResponse(boolean found, String key, String value) {

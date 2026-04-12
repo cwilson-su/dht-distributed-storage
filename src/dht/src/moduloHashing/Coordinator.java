@@ -127,6 +127,9 @@ public class Coordinator {
             case CLIENT_GET -> {
                 return handleClientGet(msg);
             }
+            case CLIENT_DELETE -> {
+                return handleClientDelete(msg);
+            }
             default -> {
                 return Message.error("Unsupported request on coordinator: " + msg.getType());
             }
@@ -228,6 +231,29 @@ public class Coordinator {
             int finalHops = nodeMsg.getHopCount() + 1 + 1;
             return Message.clientResponse(nodeResp.isFound(), msg.getKey(),
                     nodeResp.getValue(), "Read from " + target, finalHops);
+        }
+
+        return Message.error("Unexpected response from " + target);
+    }
+    
+    private Message handleClientDelete(Message msg) {
+        if (msg.getKey() == null) return Message.error("CLIENT_DELETE missing key");
+        if (storageNodes.isEmpty()) return Message.error("No storage nodes available");
+
+        Address target = Hasher.getTargetNode(msg.getKey(), snapshotNodes());
+
+        Message nodeMsg  = Message.nodeDelete(msg.getKey()).withNextHop();
+        Message nodeResp = sendRequest(target, nodeMsg);
+
+        if (nodeResp == null || nodeResp.getType() == Message.Type.ERROR) {
+            return Message.error("DELETE failed on target " + target);
+        }
+
+        if (nodeResp.getType() == Message.Type.NODE_RESPONSE) {
+            int finalHops = nodeMsg.getHopCount() + 1 + 1;
+            boolean existed = nodeResp.isFound();
+            String info = existed ? "Deleted from " + target : "Key not found on " + target;
+            return Message.clientResponse(existed, msg.getKey(), null, info, finalHops);
         }
 
         return Message.error("Unexpected response from " + target);

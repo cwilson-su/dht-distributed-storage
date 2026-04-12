@@ -146,6 +146,7 @@ public class Node {
         return switch (msg.getType()) {
             case NODE_PUT      -> handleNodePut(msg);
             case NODE_GET      -> handleNodeGet(msg);
+            case NODE_DELETE -> handleNodeDelete(msg);
             case DUMP_REQUEST  -> handleDumpRequest();
             case CLEAR_STORE   -> handleClearStore();
             case REBALANCE     -> handleRebalanceNotice(msg);
@@ -172,6 +173,13 @@ public class Node {
         return Message.nodeResponse(found, msg.getKey(), value);
     }
  
+    private Message handleNodeDelete(Message msg) {
+        if (msg.getKey() == null) return Message.error("NODE_DELETE missing key");
+        boolean existed = store.remove(msg.getKey()) != null;
+        System.out.println("[DELETE] " + self + " delete key=" + msg.getKey() + " existed=" + existed);
+        return Message.nodeResponse(existed, msg.getKey(), null);
+    }
+    
     private Message handleDumpRequest() {
         return Message.dumpResponse(self, new HashMap<>(store));
     }
