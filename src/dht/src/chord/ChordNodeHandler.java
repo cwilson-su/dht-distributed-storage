@@ -116,12 +116,20 @@ public class ChordNodeHandler extends NodeHandler {
 
     private void handleRequestKeys(ChordMessage cm) {
         int newNodeId = cm.getTargetId();
+        int lowerBound;
+        try {
+            String val = cm.getValue();
+            lowerBound = (val != null && !val.isBlank()) ? Integer.parseInt(val) : node.id;
+        } catch (NumberFormatException e) {
+            lowerBound = node.id;
+        }
+
         Map<String,String> toTransfer = new HashMap<>();
  
         for (Map.Entry<String,String> entry : store.entrySet()) {
             int keyId = ChordHasher.hash(entry.getKey());
 
-            if (ChordHasher.inRange(keyId, node.id, newNodeId)) {
+            if (ChordHasher.inRange(keyId, lowerBound, newNodeId)) {
                 toTransfer.put(entry.getKey(), entry.getValue());
             }
         }
@@ -131,6 +139,9 @@ public class ChordNodeHandler extends NodeHandler {
             send(cm.getOrigin(), ChordMessage.transferKeys(toTransfer, node.self, node.nextSeq()));
             System.out.println("[Node " + node.self.getPort() + "] transféré " + toTransfer.size()
                     + " clé(s) -> " + cm.getOrigin() + " (id=" + newNodeId + ") : " + toTransfer.keySet());
+        } else {
+            System.out.println("[Node " + node.self.getPort() + "] aucune clé à transférer"
+                    + " pour (plage (" + lowerBound + ", " + newNodeId + "])");
         }
     }
  
@@ -232,8 +243,8 @@ public class ChordNodeHandler extends NodeHandler {
         volatile Address     result = null;
     }
 
-     public void requestKeysFromSuccessor(Address successor) {
-        send(successor, ChordMessage.requestKeys(node.id, node.self, node.nextSeq()));
+     public void requestKeysFromSuccessor(Address successor, int newNodeId, int predecessorId) {
+        send(successor, ChordMessage.requestKeys(newNodeId,predecessorId, node.self, node.nextSeq()));
         System.out.println("[Node " + node.self.getPort() + "] demande de clés -> " + successor);
     }
 

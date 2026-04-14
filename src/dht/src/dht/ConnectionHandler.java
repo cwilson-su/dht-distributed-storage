@@ -26,7 +26,10 @@ public class ConnectionHandler implements Runnable {
                 if (c == null) return ObjectInputFilter.Status.UNDECIDED;
 
                 String name = c.getName();
-                if (name.startsWith("dht.") || name.startsWith("chord.") || name.startsWith("java.lang.")) {
+                if (name.startsWith("dht.") || name.startsWith("chord.") || name.startsWith("java.lang.") || name.startsWith("java.util.") || name.startsWith("java.io.")
+                        || name.startsWith("[L")      
+                        || name.startsWith("[B")      
+                        || name.startsWith("[C")) {
                     return ObjectInputFilter.Status.ALLOWED;
                 }
                 return ObjectInputFilter.Status.REJECTED;

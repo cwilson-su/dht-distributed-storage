@@ -17,10 +17,58 @@ public class Client {
 
         Address myAddr = new Address(clientPort);
 
-        // used for send() mechanism + receiving replies
+
+        if (args.length >= 2) {
+            String cmd = args[1].toUpperCase();
+            int seq = 1;
+
+            PeerRegistry dummy = new PeerRegistry(myAddr);
+            NodeHandler sender = new NodeHandler(myAddr, dummy, () -> seq);
+
+         switch (cmd) {
+                case "PUT" -> {
+                    if (args.length == 4) {
+                        Message m = new Message(
+                                Message.Type.PUT,
+                                args[2],
+                                args[3],
+                                myAddr,
+                                myAddr,
+                                seq,
+                                0
+                        );
+                        sender.send(target, m);
+                        System.out.println("PUT " + args[2] + "=" + args[3] + " envoye -> " + target);
+
+                        try {Thread.sleep(1000); } catch(InterruptedException ignored) {}  
+                    } else {
+                        System.out.println("Usage: PUT <key> <value>");
+                    }
+                }
+                case "GET" -> {
+                    if (args.length == 3) {
+                        Message m = new Message(
+                                Message.Type.GET,
+                                args[2],
+                                "",
+                                myAddr,
+                                myAddr,
+                                seq,
+                                0
+                        );
+                        sender.send(target, m);
+                        System.out.println("GET " + args[2] + " envoye -> " + target);
+                    } else {
+                        System.out.println("Usage: GET <key>");
+                    }
+                }
+                default -> System.out.println("Commande inconnue : " + cmd);
+            }
+            return; 
+        }    
+
         Node tool = new Node(clientPort);
         tool.start();
-
         int seqNum = 0;
         Scanner sc = new Scanner(System.in);
 
