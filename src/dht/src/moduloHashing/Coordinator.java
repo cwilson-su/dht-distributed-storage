@@ -82,9 +82,13 @@ public class Coordinator {
                 Class<?> c = info.serialClass();
                 if (c == null) return ObjectInputFilter.Status.UNDECIDED;
                 String name = c.getName();
-                if (name.startsWith("moduloHashing.") || name.startsWith("java.lang.") || name.startsWith("java.util.")) {
+                if (name.startsWith("moduloHashing.")
+                        || name.startsWith("java.lang.")
+                        || name.startsWith("java.util.")
+                        || name.startsWith("[")) {
                     return ObjectInputFilter.Status.ALLOWED;
                 }
+                System.err.println("[FILTER REJECTED] " + name);
                 return ObjectInputFilter.Status.REJECTED;
             };
             in.setObjectInputFilter(filter);
@@ -183,8 +187,7 @@ public class Coordinator {
         if (!storageNodes.contains(node)) {
             // If a node sends heartbeat without being registered, re-register it logically
             storageNodes.add(node);
-            System.out.println("[HEARTBEAT] Auto-adding unknown node: " + node);
-            rebalance("Heartbeat from unknown node, auto-registered: " + node, Map.of());
+            System.out.println("[HEARTBEAT] Auto-adding unknown node (no rebalance): " + node);
         }
 
         lastSeen.put(node, System.currentTimeMillis());
@@ -204,11 +207,14 @@ public class Coordinator {
         if (nodeResp == null || nodeResp.getType() == Message.Type.ERROR) {
             return Message.error("PUT failed on target " + target);
         }
+        
+        if (nodeResp.getType() == Message.Type.REBALANCING) {
+        	return Message.rebalancing();
+        }
 
         // hop 4 : coordinator → client 
         int finalHops = nodeMsg.getHopCount() + 1 + 1; // coord→node(2) + ack node(3) 
-        return Message.clientResponse(true, msg.getKey(), msg.getValue(),
-                "Stored on " + target, finalHops);
+        return Message.clientResponse(true, msg.getKey(), msg.getValue(), "Stored on " + target, finalHops);
     }
 
     private Message handleClientGet(Message msg) {
@@ -225,12 +231,15 @@ public class Coordinator {
         if (nodeResp == null || nodeResp.getType() == Message.Type.ERROR) {
             return Message.error("GET failed on target " + target);
         }
-
+        
+        if (nodeResp.getType() == Message.Type.REBALANCING) {
+        	return Message.rebalancing();
+        }
+        
         if (nodeResp.getType() == Message.Type.NODE_RESPONSE) {
             // hop 4 : coordinator → client
             int finalHops = nodeMsg.getHopCount() + 1 + 1;
-            return Message.clientResponse(nodeResp.isFound(), msg.getKey(),
-                    nodeResp.getValue(), "Read from " + target, finalHops);
+            return Message.clientResponse(nodeResp.isFound(), msg.getKey(), nodeResp.getValue(), "Read from " + target, finalHops);
         }
 
         return Message.error("Unexpected response from " + target);
@@ -249,6 +258,10 @@ public class Coordinator {
             return Message.error("DELETE failed on target " + target);
         }
 
+        if (nodeResp.getType() == Message.Type.REBALANCING) {
+        	return Message.rebalancing();
+        }
+            
         if (nodeResp.getType() == Message.Type.NODE_RESPONSE) {
             int finalHops = nodeMsg.getHopCount() + 1 + 1;
             boolean existed = nodeResp.isFound();
@@ -290,29 +303,27 @@ public class Coordinator {
     }
 
     private void rebalance(String reason, Map<String, String> extraData) {
-    	List<Address> nodes = snapshotNodes();
-    	
-    	if (nodes.isEmpty()) {
+        List<Address> nodes = snapshotNodes();
+
+        if (nodes.isEmpty()) {
             System.out.println("[REBALANCE] No nodes available. Rebalance skipped.");
             return;
         }
 
         System.out.println("[REBALANCE] Starting (node-to-node) -> " + reason);
-
         long rebalanceStart = System.currentTimeMillis();
-        
-        broadcastMessage(nodes, Message.rebalance(reason));
- 
-        Map<Address, List<String>> keysByNode = new HashMap<>();
-        
+
+       
         if (extraData != null && !extraData.isEmpty()) {
             for (Map.Entry<String, String> entry : extraData.entrySet()) {
                 Address dest = Hasher.getTargetNode(entry.getKey(), nodes);
-                sendRequest(dest, Message.nodePut(entry.getKey(), entry.getValue()));
+                sendRequest(dest, Message.nodePutInternal(entry.getKey(), entry.getValue()));
             }
             System.out.println("[REBALANCE] Injected " + extraData.size() + " orphan keys directly to targets.");
         }
- 
+
+      
+        Map<Address, List<String>> keysByNode = new HashMap<>();
         for (Address node : nodes) {
             Message dumpResp = sendRequest(node, Message.dumpRequest());
             if (dumpResp != null && dumpResp.getType() == Message.Type.DUMP_RESPONSE) {
@@ -321,43 +332,48 @@ public class Coordinator {
                 keysByNode.put(node, Collections.emptyList());
             }
         }
- 
+
+       
         Map<Address, Map<Address, List<String>>> migrationPlan = new HashMap<>();
         int keysToMove = 0;
- 
+
         for (Map.Entry<Address, List<String>> entry : keysByNode.entrySet()) {
             Address source = entry.getKey();
             for (String key : entry.getValue()) {
                 Address correctDest = Hasher.getTargetNode(key, nodes);
                 if (!correctDest.equals(source)) {
-                    migrationPlan.computeIfAbsent(source, k -> new HashMap<>()).computeIfAbsent(correctDest, k -> new ArrayList<>()).add(key);
+                    migrationPlan
+                        .computeIfAbsent(source, k -> new HashMap<>())
+                        .computeIfAbsent(correctDest, k -> new ArrayList<>())
+                        .add(key);
                     keysToMove++;
                 }
             }
         }
- 
+
         if (keysToMove == 0) {
             System.out.println("[REBALANCE] Nothing to move. Already balanced.");
-            broadcastMessage(nodes, Message.rebalanceDone());
+            MetricsLogger.get().log("REBALANCE", System.currentTimeMillis() - rebalanceStart, 0, "", "keys_moved=0");
             return;
         }
- 
+
+      
+        broadcastMessage(nodes, Message.rebalance(reason));
+
         System.out.println("[REBALANCE] Plan: " + keysToMove + " keys to move across "
                 + migrationPlan.size() + " source nodes.");
- 
-        
+
         int successfulTransfers = 0;
- 
+
         for (Map.Entry<Address, Map<Address, List<String>>> sourceEntry : migrationPlan.entrySet()) {
             Address source = sourceEntry.getKey();
- 
             for (Map.Entry<Address, List<String>> destEntry : sourceEntry.getValue().entrySet()) {
                 Address      dest = destEntry.getKey();
                 List<String> keys = destEntry.getValue();
- 
+
                 Message transferMsg = Message.transferKeys(dest, keys);
                 Message ack         = sendRequest(source, transferMsg);
- 
+
                 if (ack != null && ack.getType() == Message.Type.ACK) {
                     successfulTransfers += keys.size();
                     System.out.printf("[REBALANCE] %s → %s : %d keys transferred OK%n",
@@ -368,13 +384,13 @@ public class Coordinator {
                 }
             }
         }
- 
-        
+
         broadcastMessage(nodes, Message.rebalanceDone());
- 
+
         long elapsed = System.currentTimeMillis() - rebalanceStart;
         System.out.printf("[REBALANCE] Completed in %d ms. Keys moved: %d/%d%n",
                 elapsed, successfulTransfers, keysToMove);
+        MetricsLogger.get().log("REBALANCE", elapsed, 0, "", "keys_moved=" + successfulTransfers);
     }
 
     private void broadcastMessage(List<Address> nodes, Message msg) {

@@ -9,7 +9,7 @@ public class Address implements Serializable {
     private static final long serialVersionUID = 1L;
     private final String ip;
     private final int port;
-  
+    
     /*
     // this version will be used later when we'll no longer test our project locally
     public Address(int port) {
