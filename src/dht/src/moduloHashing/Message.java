@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class Message implements Serializable {
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     public enum Type {
         CLIENT_PUT,
@@ -22,6 +22,8 @@ public class Message implements Serializable {
         NODE_PUT,
         NODE_GET,
         NODE_DELETE,
+        NODE_PUT_INTERNAL,  
+        NODE_BATCH_PUT,
         NODE_RESPONSE,
 
         DUMP_REQUEST,
@@ -36,7 +38,8 @@ public class Message implements Serializable {
         HEARTBEAT_ACK,
 
         ACK,
-        ERROR
+        ERROR,
+        REBALANCING
     }
 
     private final Type               type;
@@ -139,7 +142,15 @@ public class Message implements Serializable {
     public static Message nodeDelete(String key) {
         return new Message(Type.NODE_DELETE, null, key, null, false, null, null);
     }
+    
+    public static Message nodePutInternal(String key, String value) {
+        return new Message(Type.NODE_PUT_INTERNAL, null, key, value, false, null, null);
+    }
 
+    public static Message nodeBatchPut(Map<String, String> batch) {
+        return new Message(Type.NODE_BATCH_PUT, null, null, null, false, null, batch);
+    }
+    
     public static Message nodeResponse(boolean found, String key, String value) {
         return new Message(Type.NODE_RESPONSE, null, key, value, found, null, null);
     }
@@ -183,6 +194,11 @@ public class Message implements Serializable {
 
     public static Message error(String info) {
         return new Message(Type.ERROR, null, null, null, false, info, null);
+    }
+    
+    public static Message rebalancing() {
+        return new Message(Type.REBALANCING, null, null, null, false,
+                "System is rebalancing, please retry in a moment.", null);
     }
 
     @Override

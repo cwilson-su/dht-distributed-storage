@@ -135,6 +135,7 @@ public class Client {
             case ACK -> System.out.println("[ACK] " + response.getInfo());
             case HEARTBEAT_ACK -> System.out.println("[HEARTBEAT_ACK] " + response.getInfo());
             case ERROR -> System.out.println("[ERROR] " + response.getInfo());
+            case REBALANCING -> System.out.println("[WAIT] " + response.getInfo());
             default -> System.out.println("[INFO] " + response);
         }
     }

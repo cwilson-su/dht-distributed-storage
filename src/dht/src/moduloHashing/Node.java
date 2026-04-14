@@ -20,6 +20,7 @@ public class Node {
     private ServerSocket serverSocket;
     private Thread listenerThread;
     private Thread heartbeatThread;
+    private volatile boolean rebalancing = false;
 
     private static final int CONNECT_TIMEOUT_MS = 2000;
     private static final int HEARTBEAT_INTERVAL_MS = 5000;
@@ -108,7 +109,7 @@ public class Node {
     private void handleConnection(Socket socket) {
         try (socket;
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-             ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
+             ObjectInputStream  in  = new ObjectInputStream(socket.getInputStream())) {
 
             out.flush();
 
@@ -116,9 +117,13 @@ public class Node {
                 Class<?> c = info.serialClass();
                 if (c == null) return ObjectInputFilter.Status.UNDECIDED;
                 String name = c.getName();
-                if (name.startsWith("moduloHashing.") || name.startsWith("java.lang.") || name.startsWith("java.util.")) {
+                if (name.startsWith("moduloHashing.")
+                        || name.startsWith("java.lang.")
+                        || name.startsWith("java.util.")
+                        || name.startsWith("[")) {
                     return ObjectInputFilter.Status.ALLOWED;
                 }
+                System.err.println("[FILTER REJECTED] " + name);
                 return ObjectInputFilter.Status.REJECTED;
             };
             in.setObjectInputFilter(filter);
@@ -136,7 +141,12 @@ public class Node {
             out.flush();
 
         } catch (Exception e) {
-            System.err.println("Node " + self + " connection error: " + e.getMessage());
+            System.err.println("Node " + self + " connection error: "
+                    + e.getClass().getSimpleName() + ": " + e.getMessage());
+        } catch (Error e) {
+           
+            System.err.println("Node " + self + " FATAL error: "
+                    + e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
@@ -147,11 +157,13 @@ public class Node {
             case NODE_PUT      -> handleNodePut(msg);
             case NODE_GET      -> handleNodeGet(msg);
             case NODE_DELETE -> handleNodeDelete(msg);
+            case NODE_PUT_INTERNAL -> handleNodePutInternal(msg);
             case DUMP_REQUEST  -> handleDumpRequest();
             case CLEAR_STORE   -> handleClearStore();
             case REBALANCE     -> handleRebalanceNotice(msg);
             case REBALANCE_DONE -> handleRebalanceDone();
             case TRANSFER_KEYS -> handleTransferKeys(msg);
+            case NODE_BATCH_PUT -> handleNodeBatchPut(msg);
             default            -> Message.error("Unsupported request on storage node: " + msg.getType());
         };
     }
@@ -159,6 +171,7 @@ public class Node {
    
  
     private Message handleNodePut(Message msg) {
+    	if (rebalancing) return Message.rebalancing();
         if (msg.getKey() == null) return Message.error("NODE_PUT missing key");
         store.put(msg.getKey(), msg.getValue());
         System.out.println("[STORE] " + self + " stored [" + msg.getKey() + " -> " + msg.getValue() + "]");
@@ -166,6 +179,7 @@ public class Node {
     }
  
     private Message handleNodeGet(Message msg) {
+    	if (rebalancing) return Message.rebalancing();
         if (msg.getKey() == null) return Message.error("NODE_GET missing key");
         String value = store.get(msg.getKey());
         boolean found = value != null;
@@ -174,10 +188,28 @@ public class Node {
     }
  
     private Message handleNodeDelete(Message msg) {
+    	if (rebalancing) return Message.rebalancing();
         if (msg.getKey() == null) return Message.error("NODE_DELETE missing key");
         boolean existed = store.remove(msg.getKey()) != null;
         System.out.println("[DELETE] " + self + " delete key=" + msg.getKey() + " existed=" + existed);
         return Message.nodeResponse(existed, msg.getKey(), null);
+    }
+    
+    private Message handleNodePutInternal(Message msg) {
+        if (msg.getKey() == null) return Message.error("NODE_PUT_INTERNAL missing key");
+        store.put(msg.getKey(), msg.getValue());
+        System.out.println("[TRANSFER-STORE] " + self + " received [" + msg.getKey() + "]");
+        return Message.ack("Internal store on " + self);
+    }
+    
+    private Message handleNodeBatchPut(Message msg) {
+        Map<String, String> batch = msg.getData();
+        if (batch == null || batch.isEmpty()) {
+            return Message.error("NODE_BATCH_PUT: empty batch");
+        }
+        store.putAll(batch);
+        System.out.println("[BATCH-STORE] " + self + " received " + batch.size() + " keys");
+        return Message.ack("Batch stored " + batch.size() + " keys on " + self);
     }
     
     private Message handleDumpRequest() {
@@ -191,54 +223,53 @@ public class Node {
     }
  
     private Message handleRebalanceNotice(Message msg) {
-        System.out.println("[REBALANCE START] " + self + " notified → " + msg.getInfo());
+    	System.out.println("[REBALANCE START] " + self + " — blocking client requests.");
+        rebalancing = true;
         return Message.ack("Rebalance notice received by " + self);
     }
  
     private Message handleRebalanceDone() {
         System.out.println("[REBALANCE DONE] " + self + " resuming normal operations.");
+        rebalancing = false;
         return Message.ack("Rebalance done acknowledged by " + self);
     }
     
     private Message handleTransferKeys(Message msg) {
         Address destination = msg.getTransferDest();
         List<String> keys   = msg.getTransferKeys();
- 
+
         if (destination == null || keys == null || keys.isEmpty()) {
             return Message.error("TRANSFER_KEYS: missing destination or keys");
         }
- 
+
         System.out.printf("[TRANSFER] %s → %s : %d keys%n", self, destination, keys.size());
- 
-        int success = 0;
-        int failed  = 0;
- 
+
+       
+        Map<String, String> batch = new HashMap<>();
         for (String key : keys) {
             String value = store.get(key);
-            if (value == null) {
-                System.err.println("[TRANSFER] Key not found locally: " + key);
-                failed++;
-                continue;
-            }
- 
-           
-            Message putResp = sendRequest(destination, Message.nodePut(key, value));
- 
-            if (putResp != null && putResp.getType() == Message.Type.ACK) {
-                store.remove(key);  
-                success++;
+            if (value != null) {
+                batch.put(key, value);
             } else {
-                System.err.println("[TRANSFER] Failed to push key=" + key + " to " + destination);
-                failed++;
+                System.err.println("[TRANSFER] Key not found locally: " + key);
             }
         }
- 
-        System.out.printf("[TRANSFER] Done: %d OK, %d FAILED%n", success, failed);
- 
-        if (failed == 0) {
-            return Message.ack("Transferred " + success + " keys to " + destination);
+
+        if (batch.isEmpty()) {
+            return Message.error("Transfer: no keys found locally");
+        }
+
+        
+        Message putResp = sendRequest(destination, Message.nodeBatchPut(batch));
+
+        if (putResp != null && putResp.getType() == Message.Type.ACK) {
+            
+            batch.keySet().forEach(store::remove);
+            System.out.printf("[TRANSFER] Done: %d OK%n", batch.size());
+            return Message.ack("Transferred " + batch.size() + " keys to " + destination);
         } else {
-            return Message.error("Transfer partial: " + success + " OK, " + failed + " failed");
+            System.err.println("[TRANSFER] Batch failed to " + destination);
+            return Message.error("Transfer batch failed");
         }
     }
     
