@@ -28,7 +28,6 @@ public class Message implements Serializable {
 
         DUMP_REQUEST,
         DUMP_RESPONSE,
-        CLEAR_STORE,
 
         REBALANCE,
         REBALANCE_DONE,
@@ -92,13 +91,6 @@ public class Message implements Serializable {
     public Map<String,String> getData() {
         return data == null ? Collections.emptyMap() : Collections.unmodifiableMap(data);
     }
-
-  
-    public Message withNextHop() {
-        return new Message(type, source, key, value, found, info, data,
-                hopCount + 1, transferDest, transferKeys);
-    }
-
    
     public static Message clientPut(String key, String value) {
         return new Message(Type.CLIENT_PUT, null, key, value, false, null, null, 1, null, null);
@@ -163,9 +155,6 @@ public class Message implements Serializable {
         return new Message(Type.DUMP_RESPONSE, node, null, null, false, null, data);
     }
 
-    public static Message clearStore() {
-        return new Message(Type.CLEAR_STORE, null, null, null, false, null, null);
-    }
 
     public static Message rebalance(String info) {
         return new Message(Type.REBALANCE, null, null, null, false, info, null);

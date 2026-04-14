@@ -20,6 +20,7 @@ public class Coordinator {
     private final Address self;
     private final List<Address> storageNodes = new ArrayList<>();
     private final Map<Address, Long> lastSeen = new ConcurrentHashMap<>();
+    private final java.util.Set<Address> recentlyLeft = ConcurrentHashMap.newKeySet();
 
     private volatile boolean running = true;
     private ServerSocket serverSocket;
@@ -110,7 +111,7 @@ public class Coordinator {
         }
     }
 
-    private synchronized Message processRequest(Message msg) {
+    private Message processRequest(Message msg) {
         if (msg == null || msg.getType() == null) {
             return Message.error("Invalid message");
         }
@@ -142,133 +143,134 @@ public class Coordinator {
 
     private Message handleRegisterNode(Message msg) {
         Address node = msg.getSource();
-        if (node == null) {
-            return Message.error("REGISTER_NODE missing source");
-        }
+        if (node == null) return Message.error("REGISTER_NODE missing source");
 
-        if (!storageNodes.contains(node)) {
-            storageNodes.add(node);
-            lastSeen.put(node, System.currentTimeMillis());
-            System.out.println("[JOIN] Node registered: " + node);
-            MetricsLogger.get().log("JOIN", 0, 0, "", "node=" + node);
-            rebalance("Node joined: " + node, Map.of());
-        } else {
-            lastSeen.put(node, System.currentTimeMillis());
+        boolean shouldRebalance = false;
+        synchronized (this) {
+            if (!storageNodes.contains(node)) {
+                storageNodes.add(node);
+                lastSeen.put(node, System.currentTimeMillis());
+                recentlyLeft.remove(node);
+                System.out.println("[JOIN] Node registered: " + node);
+                MetricsLogger.get().log("JOIN", 0, 0, "", "node=" + node);
+                shouldRebalance = true;
+            } else {
+                lastSeen.put(node, System.currentTimeMillis());
+            }
         }
-
+        if (shouldRebalance) rebalance("Node joined: " + node, Map.of());
         return Message.ack("Node registered: " + node);
     }
 
     private Message handleUnregisterNode(Message msg) {
         Address leavingNode = msg.getSource();
-        if (leavingNode == null) {
-            return Message.error("UNREGISTER_NODE missing source");
-        }
+        if (leavingNode == null) return Message.error("UNREGISTER_NODE missing source");
 
         System.out.println("[LEAVE] Node unregister request: " + leavingNode);
         MetricsLogger.get().log("LEAVE", 0, 0, "", "node=" + leavingNode);
 
-        // Try to salvage data from leaving node before removal
         Map<String, String> leavingData = requestDump(leavingNode);
 
-        storageNodes.remove(leavingNode);
-        lastSeen.remove(leavingNode);
-
+        synchronized (this) {
+            storageNodes.remove(leavingNode);
+            lastSeen.remove(leavingNode);
+        }
+        recentlyLeft.add(leavingNode);
         rebalance("Node left: " + leavingNode, leavingData);
         return Message.ack("Node unregistered: " + leavingNode);
     }
 
     private Message handleHeartbeat(Message msg) {
         Address node = msg.getSource();
-        if (node == null) {
-            return Message.error("HEARTBEAT missing source");
-        }
+        if (node == null) return Message.error("HEARTBEAT missing source");
 
-        if (!storageNodes.contains(node)) {
-            // If a node sends heartbeat without being registered, re-register it logically
-            storageNodes.add(node);
-            System.out.println("[HEARTBEAT] Auto-adding unknown node (no rebalance): " + node);
+        synchronized (this) {
+            if (!storageNodes.contains(node)) {
+                if (recentlyLeft.contains(node)) {
+                    lastSeen.put(node, System.currentTimeMillis());
+                    return Message.heartbeatAck("Heartbeat received from " + node);
+                }
+                storageNodes.add(node);
+                System.out.println("[HEARTBEAT] Auto-adding unknown node (no rebalance): " + node);
+            }
+            lastSeen.put(node, System.currentTimeMillis());
         }
-
-        lastSeen.put(node, System.currentTimeMillis());
         return Message.heartbeatAck("Heartbeat received from " + node);
     }
 
     private Message handleClientPut(Message msg) {
         if (msg.getKey() == null) return Message.error("CLIENT_PUT missing key");
-        if (storageNodes.isEmpty()) return Message.error("No storage nodes available");
 
-        Address target = Hasher.getTargetNode(msg.getKey(), snapshotNodes());
+        Address target;
+        synchronized (this) {
+            if (storageNodes.isEmpty()) return Message.error("No storage nodes available");
+            target = Hasher.getTargetNode(msg.getKey(), snapshotNodes());
+        }
 
-        
-        Message nodeMsg  = Message.nodePut(msg.getKey(), msg.getValue()).withNextHop();
+        Message nodeMsg = new Message(Message.Type.NODE_PUT, null,msg.getKey(), msg.getValue(), false, null, null, msg.getHopCount() + 1, null, null);
         Message nodeResp = sendRequest(target, nodeMsg);
-        // hop 3 : node → coordinator  
-        if (nodeResp == null || nodeResp.getType() == Message.Type.ERROR) {
-            return Message.error("PUT failed on target " + target);
-        }
-        
-        if (nodeResp.getType() == Message.Type.REBALANCING) {
-        	return Message.rebalancing();
-        }
 
-        // hop 4 : coordinator → client 
-        int finalHops = nodeMsg.getHopCount() + 1 + 1; // coord→node(2) + ack node(3) 
-        return Message.clientResponse(true, msg.getKey(), msg.getValue(), "Stored on " + target, finalHops);
+        if (nodeResp == null || nodeResp.getType() == Message.Type.ERROR)
+            return Message.error("PUT failed on target " + target);
+
+        if (nodeResp.getType() == Message.Type.REBALANCING)
+            return Message.rebalancing();
+
+        int finalHops = nodeMsg.getHopCount() + 1 + 1;
+        return Message.clientResponse(true, msg.getKey(), msg.getValue(),
+                "Stored on " + target, finalHops);
     }
 
     private Message handleClientGet(Message msg) {
         if (msg.getKey() == null) return Message.error("CLIENT_GET missing key");
-        if (storageNodes.isEmpty()) return Message.error("No storage nodes available");
 
-        Address target = Hasher.getTargetNode(msg.getKey(), snapshotNodes());
+        Address target;
+        synchronized (this) {
+            if (storageNodes.isEmpty()) return Message.error("No storage nodes available");
+            target = Hasher.getTargetNode(msg.getKey(), snapshotNodes());
+        }
 
-        // hop 2 : coordinator → node
-        Message nodeMsg  = Message.nodeGet(msg.getKey()).withNextHop();
+        Message nodeMsg = new Message(Message.Type.NODE_GET, null,msg.getKey(), null, false, null, null, msg.getHopCount() + 1, null, null);
         Message nodeResp = sendRequest(target, nodeMsg);
-        // hop 3 : node → coordinator
 
-        if (nodeResp == null || nodeResp.getType() == Message.Type.ERROR) {
+        if (nodeResp == null || nodeResp.getType() == Message.Type.ERROR)
             return Message.error("GET failed on target " + target);
-        }
-        
-        if (nodeResp.getType() == Message.Type.REBALANCING) {
-        	return Message.rebalancing();
-        }
-        
-        if (nodeResp.getType() == Message.Type.NODE_RESPONSE) {
-            // hop 4 : coordinator → client
-            int finalHops = nodeMsg.getHopCount() + 1 + 1;
-            return Message.clientResponse(nodeResp.isFound(), msg.getKey(), nodeResp.getValue(), "Read from " + target, finalHops);
-        }
 
+        if (nodeResp.getType() == Message.Type.REBALANCING)
+            return Message.rebalancing();
+
+        if (nodeResp.getType() == Message.Type.NODE_RESPONSE) {
+            int finalHops = nodeMsg.getHopCount() + 1 + 1;
+            return Message.clientResponse(nodeResp.isFound(), msg.getKey(),
+                    nodeResp.getValue(), "Read from " + target, finalHops);
+        }
         return Message.error("Unexpected response from " + target);
     }
     
     private Message handleClientDelete(Message msg) {
         if (msg.getKey() == null) return Message.error("CLIENT_DELETE missing key");
-        if (storageNodes.isEmpty()) return Message.error("No storage nodes available");
 
-        Address target = Hasher.getTargetNode(msg.getKey(), snapshotNodes());
+        Address target;
+        synchronized (this) {
+            if (storageNodes.isEmpty()) return Message.error("No storage nodes available");
+            target = Hasher.getTargetNode(msg.getKey(), snapshotNodes());
+        }
 
-        Message nodeMsg  = Message.nodeDelete(msg.getKey()).withNextHop();
+        Message nodeMsg = new Message(Message.Type.NODE_DELETE, null,msg.getKey(), null, false, null, null, msg.getHopCount() + 1, null, null);
         Message nodeResp = sendRequest(target, nodeMsg);
 
-        if (nodeResp == null || nodeResp.getType() == Message.Type.ERROR) {
+        if (nodeResp == null || nodeResp.getType() == Message.Type.ERROR)
             return Message.error("DELETE failed on target " + target);
-        }
 
-        if (nodeResp.getType() == Message.Type.REBALANCING) {
-        	return Message.rebalancing();
-        }
-            
+        if (nodeResp.getType() == Message.Type.REBALANCING)
+            return Message.rebalancing();
+
         if (nodeResp.getType() == Message.Type.NODE_RESPONSE) {
             int finalHops = nodeMsg.getHopCount() + 1 + 1;
             boolean existed = nodeResp.isFound();
             String info = existed ? "Deleted from " + target : "Key not found on " + target;
             return Message.clientResponse(existed, msg.getKey(), null, info, finalHops);
         }
-
         return Message.error("Unexpected response from " + target);
     }
 
@@ -287,13 +289,16 @@ public class Coordinator {
                             deadNodes.add(node);
                         }
                     }
-
                     for (Address dead : deadNodes) {
                         System.out.println("[TIMEOUT] Node considered dead: " + dead);
                         storageNodes.remove(dead);
                         lastSeen.remove(dead);
-                        rebalance("Node timeout detected: " + dead, Map.of());
+                        recentlyLeft.remove(dead);
                     }
+                }
+                for (Address dead : deadNodes) {
+                    MetricsLogger.get().log("NODE_TIMEOUT", 0, 0, "", "node=" + dead);
+                    rebalance("Node timeout detected: " + dead, Map.of());
                 }
 
             } catch (InterruptedException e) {
@@ -303,7 +308,10 @@ public class Coordinator {
     }
 
     private void rebalance(String reason, Map<String, String> extraData) {
-        List<Address> nodes = snapshotNodes();
+    	List<Address> nodes;
+        synchronized (this) {
+            nodes = snapshotNodes();
+        }
 
         if (nodes.isEmpty()) {
             System.out.println("[REBALANCE] No nodes available. Rebalance skipped.");
@@ -439,7 +447,7 @@ public class Coordinator {
         if (serverSocket != null && !serverSocket.isClosed()) {
             try {
                 serverSocket.close();
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
 
