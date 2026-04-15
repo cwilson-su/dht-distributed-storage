@@ -8,11 +8,12 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class Message implements Serializable {
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     public enum Type {
         CLIENT_PUT,
         CLIENT_GET,
+        CLIENT_DELETE,
         CLIENT_RESPONSE,
 
         REGISTER_NODE,
@@ -20,11 +21,13 @@ public class Message implements Serializable {
 
         NODE_PUT,
         NODE_GET,
+        NODE_DELETE,
+        NODE_PUT_INTERNAL,  
+        NODE_BATCH_PUT,
         NODE_RESPONSE,
 
         DUMP_REQUEST,
         DUMP_RESPONSE,
-        CLEAR_STORE,
 
         REBALANCE,
         REBALANCE_DONE,
@@ -34,7 +37,8 @@ public class Message implements Serializable {
         HEARTBEAT_ACK,
 
         ACK,
-        ERROR
+        ERROR,
+        REBALANCING
     }
 
     private final Type               type;
@@ -87,13 +91,6 @@ public class Message implements Serializable {
     public Map<String,String> getData() {
         return data == null ? Collections.emptyMap() : Collections.unmodifiableMap(data);
     }
-
-  
-    public Message withNextHop() {
-        return new Message(type, source, key, value, found, info, data,
-                hopCount + 1, transferDest, transferKeys);
-    }
-
    
     public static Message clientPut(String key, String value) {
         return new Message(Type.CLIENT_PUT, null, key, value, false, null, null, 1, null, null);
@@ -102,7 +99,10 @@ public class Message implements Serializable {
     public static Message clientGet(String key) {
         return new Message(Type.CLIENT_GET, null, key, null, false, null, null, 1, null, null);
     }
-
+    
+    public static Message clientDelete(String key) {
+        return new Message(Type.CLIENT_DELETE, null, key, null, false, null, null, 1, null, null);
+    }
     
     public static Message clientResponse(boolean found, String key, String value,
                                          String info, int hopCount) {
@@ -130,7 +130,19 @@ public class Message implements Serializable {
     public static Message nodeGet(String key) {
         return new Message(Type.NODE_GET, null, key, null, false, null, null);
     }
+    
+    public static Message nodeDelete(String key) {
+        return new Message(Type.NODE_DELETE, null, key, null, false, null, null);
+    }
+    
+    public static Message nodePutInternal(String key, String value) {
+        return new Message(Type.NODE_PUT_INTERNAL, null, key, value, false, null, null);
+    }
 
+    public static Message nodeBatchPut(Map<String, String> batch) {
+        return new Message(Type.NODE_BATCH_PUT, null, null, null, false, null, batch);
+    }
+    
     public static Message nodeResponse(boolean found, String key, String value) {
         return new Message(Type.NODE_RESPONSE, null, key, value, found, null, null);
     }
@@ -143,9 +155,6 @@ public class Message implements Serializable {
         return new Message(Type.DUMP_RESPONSE, node, null, null, false, null, data);
     }
 
-    public static Message clearStore() {
-        return new Message(Type.CLEAR_STORE, null, null, null, false, null, null);
-    }
 
     public static Message rebalance(String info) {
         return new Message(Type.REBALANCE, null, null, null, false, info, null);
@@ -174,6 +183,11 @@ public class Message implements Serializable {
 
     public static Message error(String info) {
         return new Message(Type.ERROR, null, null, null, false, info, null);
+    }
+    
+    public static Message rebalancing() {
+        return new Message(Type.REBALANCING, null, null, null, false,
+                "System is rebalancing, please retry in a moment.", null);
     }
 
     @Override

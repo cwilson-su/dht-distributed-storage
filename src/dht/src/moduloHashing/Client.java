@@ -24,7 +24,7 @@ public class Client {
 
         System.out.println("--- Centralized Modulo Hashing Client ---");
         System.out.println("Connected to Coordinator: " + coordinator);
-        System.out.println("Commands: PUT <key> <value> | GET <key> | exit");
+        System.out.println("Commands: PUT <key> <value> | GET <key> | DELETE <key> | exit");
 
         while (true) {
             System.out.print("> ");
@@ -69,6 +69,20 @@ public class Client {
                         System.out.printf("  [metrics] latency=%dms  hops=%d%n", latencyMs, hops);
                     } else {
                         System.out.println("Usage: GET <key>");
+                    }
+                }
+                case "DELETE" -> {
+                    if (parts.length == 2) {
+                        long start = System.nanoTime();
+                        Message response = sendRequest(coordinator, Message.clientDelete(parts[1]));
+                        long latencyMs = (System.nanoTime() - start) / 1_000_000L;
+                        printResponse(response);
+
+                        int hops = (response != null) ? response.getHopCount() : 0;
+                        MetricsLogger.get().log("DELETE", latencyMs, hops, parts[1], "");
+                        System.out.printf("  [metrics] latency=%dms  hops=%d%n", latencyMs, hops);
+                    } else {
+                        System.out.println("Usage: DELETE <key>");
                     }
                 }
 
@@ -121,6 +135,7 @@ public class Client {
             case ACK -> System.out.println("[ACK] " + response.getInfo());
             case HEARTBEAT_ACK -> System.out.println("[HEARTBEAT_ACK] " + response.getInfo());
             case ERROR -> System.out.println("[ERROR] " + response.getInfo());
+            case REBALANCING -> System.out.println("[WAIT] " + response.getInfo());
             default -> System.out.println("[INFO] " + response);
         }
     }

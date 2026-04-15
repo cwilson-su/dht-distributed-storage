@@ -60,8 +60,8 @@ public class ChordMessage extends Message {
         return new ChordMessage(ChordType.TRANSFER_KEYS, 0, "", origin, seq, new HashMap<>(keys));
     }
 
-     public static ChordMessage requestKeys(int newNodeId, Address origin, int seq) {
-        return new ChordMessage(ChordType.REQUEST_KEYS, newNodeId, "", origin, seq, null);
+     public static ChordMessage requestKeys(int newNodeId, int predecessorId, Address origin, int seq) {
+        return new ChordMessage(ChordType.REQUEST_KEYS, newNodeId, String.valueOf(predecessorId), origin, seq, null);
     }
 
     public static ChordMessage leaveNotify(Address mySuccessor, Address origin, int seq) {

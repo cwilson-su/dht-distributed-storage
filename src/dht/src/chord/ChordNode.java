@@ -54,6 +54,10 @@ public class ChordNode {
  
 
     public Address findSuccessor(int targetId) {
+        if (targetId == id) {
+            return self;
+        }
+        
         Address succ = fingerTable.getSuccessor();
  
         if (succ != null && ChordHasher.inRange(targetId, id, ChordHasher.hash(succ))) {
@@ -77,13 +81,26 @@ public class ChordNode {
             fingerTable.setSuccessor(succ);
             System.out.println("[ChordNode " + self.getPort() + "] successeur = " + succ
                     + " (id=" + ChordHasher.hash(succ) + ")");
-
+ 
             if (!succ.equals(self)) {
-                handler.requestKeysFromSuccessor(succ);
+                ChordNodeHandler.PredecessorResult predResult =
+                        handler.remoteCallGetPredecessor(succ);
+ 
+                int lowerBound;
+                if (predResult.reachable && predResult.predecessor != null) {
+                    lowerBound = ChordHasher.hash(predResult.predecessor);
+                    System.out.println("[ChordNode " + self.getPort()
+                            + "] borne inférieure = prédécesseur du successeur id=" + lowerBound);
+                } else {
+                    lowerBound = ChordHasher.hash(succ);
+                    System.out.println("[ChordNode " + self.getPort()
+                            + "] successeur seul → borne inférieure = id successeur = " + lowerBound);
+                }
+ 
+                handler.requestKeysFromSuccessor(succ, id, lowerBound);
             }
         }
     }
- 
    
     public void notify(Address candidate) {
         int candId = ChordHasher.hash(candidate);
