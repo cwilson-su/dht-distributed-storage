@@ -102,7 +102,7 @@ public class ChordNode {
         }
     }
    
-    public void notify(Address candidate) {
+    public synchronized void notify(Address candidate) {
         int candId = ChordHasher.hash(candidate);
         if (predecessor == null
                 || ChordHasher.inRange(candId, ChordHasher.hash(predecessor), id)) {

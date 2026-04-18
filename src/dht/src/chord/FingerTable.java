@@ -1,38 +1,40 @@
 package chord;
 
 import dht.Address;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class FingerTable {
     private final int nodeId;
-    private final Address[] fingers;
+    private final AtomicReferenceArray<Address> fingers; 
+
 
     public FingerTable(int nodeId) {
         this.nodeId = nodeId;
-        this.fingers = new Address[ChordHasher.M];
+        this.fingers = new AtomicReferenceArray<>(ChordHasher.M);
     }
 
     public Address get(int i) {
-        return fingers[i];
+        return fingers.get(i);
     }
 
     public void set(int i, Address addr) {
-        fingers[i] = addr;
+        fingers.set(i, addr);
     }
 
     // The immediate successor is always fingers[0].
     public Address getSuccessor() {
-        return fingers[0];
+        return fingers.get(0);
     }
 
     public void setSuccessor(Address addr) {
-        fingers[0] = addr;
+        fingers.set(0, addr);
     }
 
 
     // Returns the closest finger that *precedes* {@code targetId} on the ring.
     public Address closestPrecedingFinger(int targetId) {
         for (int i = ChordHasher.M - 1; i >= 0; i--) {
-            Address f = fingers[i];
+            Address f = fingers.get(i);
             if (f == null) continue;
 
             int fId = ChordHasher.hash(f);
@@ -48,8 +50,9 @@ public class FingerTable {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < ChordHasher.M; i++) {
             int start = (nodeId + (1 << i)) % ChordHasher.RING_SIZE;
+            Address f = fingers.get(i);
             sb.append(String.format("  finger[%d] start=%2d -> %s%n",
-                    i, start, fingers[i] != null ? fingers[i] + " (id=" + ChordHasher.hash(fingers[i]) + ")" : "null"));
+                    i, start, f != null ? f + " (id=" + ChordHasher.hash(f) + ")" : "null"));
         }
         return sb.toString();
     }

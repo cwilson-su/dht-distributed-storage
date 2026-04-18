@@ -23,9 +23,9 @@ public class StabilizeService {
     }
 
     public void start() {
-        Thread t = new Thread(this::loop, "Stabilizer-" + node.self.getPort());
-        t.setDaemon(true);
-        t.start();
+        stabThread = new Thread(this::loop, "Stabilizer-" + node.self.getPort());
+        stabThread.setDaemon(true);
+        stabThread.start();
     }
 
     public void stop() {
@@ -127,10 +127,12 @@ public class StabilizeService {
 
 
     private Address findLiveReplacement(Address deadNode) {
-        for (Address candidate : node.successorList) {
-            if (!candidate.equals(deadNode) && !candidate.equals(node.self)) {
-                ChordNodeHandler.PredecessorResult r = handler.remoteCallGetPredecessor(candidate);
-                if (r.reachable) return candidate;
+        synchronized(node){
+            for (Address candidate : node.successorList) {
+                if (!candidate.equals(deadNode) && !candidate.equals(node.self)) {
+                    ChordNodeHandler.PredecessorResult r = handler.remoteCallGetPredecessor(candidate);
+                    if (r.reachable) return candidate;
+                }
             }
         }
  
