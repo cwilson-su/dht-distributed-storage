@@ -49,14 +49,25 @@ Discarded ideas (potential future work)
 Basic tasks:
 - [x] put
 - [x] get
-- [ ] reply
-- [ ] join
-- [ ] leave
+- [x] reply
+- [x] join
+- [x] leave
+- [x] finger table routing 
+- [x] key transfer on join/leave
 - [ ] delete
-- [ ] ...
 
 Concurrency:
-
+- [x] Multithreaded Architecture (one thread per connection + dedicated Stabilizer thread)
+- [x] Thread-Safe Finger Table (AtomicReferenceArray)
+- [x] Thread-Safe Store (ConcurrentHashMap)
+- [x] Thread-Safe Pending RPC Map (ConcurrentHashMap)
+- [x] Atomic Sequence Counter (AtomicInteger)
+- [x] Latch-based RPC synchronization (CountDownLatch with timeout)
+- [x] Synchronized Predecessor Updates (check-then-act safety)
+- [x] Thread-Safe Successor List (CopyOnWriteArrayList)
 
 Optimisations:
-
+- [x] Successor List for fault tolerance (backup successors)
+- [x] Stabilization protocol (periodic ring self-repair)
+- [x] Passive predecessor liveness check (checkPredecessorAlive)
+- [x] Graceful leave with key transfer and neighbor notification
