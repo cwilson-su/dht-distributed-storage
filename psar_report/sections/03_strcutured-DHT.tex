@@ -1,0 +1,12 @@
+\newpage
+\section{Troisième génération : DHT structurée inspirée de Chord}
+
+Cette troisième génération correspond au passage vers une DHT réellement structurée. L'idée n'est plus de compenser les limites d'un réseau non structuré par du flooding ou par une connaissance partielle des pairs, mais de reposer sur un espace d'identifiants commun et sur un routage déterministe.
+
+Plusieurs protocoles illustrent cette famille de DHT structurées. \textit{Chord} organise les n\oe uds sur un anneau logique et utilise des sauts logarithmiques à l'aide d'une \textit{finger table} pour retrouver le responsable d'une clé. \textit{Pastry} repose sur un routage par préfixes : à chaque étape, le message progresse vers un n\oe ud dont l'identifiant partage un préfixe plus long avec la clé recherchée. \textit{Kademlia}, de son côté, structure la recherche autour d'une distance XOR entre identifiants et choisit à chaque saut des n\oe uds de plus en plus proches de la cible selon cette métrique. D'autres approches comme \textit{CAN} répartissent enfin l'espace des clés dans un espace cartésien virtuel où le routage se fait de zone en zone entre voisins.
+
+Dans la suite du rapport, nous nous concentrons toutefois sur \textit{Chord}, qui sert de base à l'implémentation présentée. Les autres protocoles sont évoqués ici comme points de comparaison pour situer notre travail parmi les principales DHT structurées.
+
+\input{sections/03a_chord}
+
+\input{sections/03b_chord_implementation}

@@ -1,8 +1,8 @@
-\section{Chord}
+\subsection{Chord}
 
 Chord est un protocole DHT (\emph{Distributed Hash Table}) qui r\'esout un probl\`eme unique : trouver rapidement le n\oe ud responsable d'une cl\'e dans un r\'eseau pair-\`a-pair dynamique.
 
-\subsection{Principe de fonctionnement}
+\subsubsection{Principe de fonctionnement}
 
 Chaque n\oe ud et chaque cl\'e re\c coivent un identifiant sur \(m\) bits (souvent via SHA-1), plac\'e sur un anneau modulo \(2^m\). Une cl\'e \(k\) est stock\'ee sur son \emph{successor} : le premier n\oe ud rencontr\'e dans le sens horaire dont l'identifiant est sup\'erieur ou \`a \(k\).
 
@@ -13,7 +13,7 @@ Cette r\`egle donne trois propri\'et\'es utiles :
 \item \textbf{D\'ecentralisation} : aucun serveur central n'est requis.
 \end{itemize}
 
-\subsection{Routage efficace : Finger Table}
+\subsubsection{Routage efficace : Finger Table}
 
 Pour \`eviter un parcours lin\'eaire de l'anneau, chaque n\oe ud maintient une \textbf{finger table} de \(m\) entr\'ees. L'entr\'ee \(i\) pointe vers le premier n\oe ud joignable \`a partir de \(n + 2^{i-1}\).
 
@@ -23,7 +23,7 @@ Pour \`eviter un parcours lin\'eaire de l'anneau, chaque n\oe ud maintient une \
 
 Cette structure permet des sauts exponentiels et un co\^ut moyen de recherche en \(O(\log N)\) messages.
 
-\subsection{Algorithmes essentiels}
+\subsubsection{Algorithmes essentiels}
 
 \textbf{1) Recherche de la cl\'e : \texttt{find\_successor(id)}}
 \begin{itemize}
@@ -55,7 +55,7 @@ Cette structure permet des sauts exponentiels et un co\^ut moyen de recherche en
 \item En cas de panne du successeur principal, le routage continue via le suivant vivant.
 \end{itemize}
 
-\subsection{Complexit\'e (r\'esum\'e)}
+\subsubsection{Complexit\'e (r\'esum\'e)}
 \begin{itemize}
 \item \textbf{Lookup} : \(O(\log N)\) messages.
 \item \textbf{Maintenance d'un join/leave} : surco\^ut logarithmique (d\'epend de la politique de mise \`a jour).

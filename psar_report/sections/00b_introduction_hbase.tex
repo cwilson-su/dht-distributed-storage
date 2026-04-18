@@ -12,14 +12,7 @@ Avant de d\'etailler les op\'erations \texttt{PUT}/\texttt{GET}, il est utile de
 
 Dans cette organisation, le client n'interagit pas en continu avec le Master pour chaque requ\^ete. Le Master sert surtout \`a localiser les r\'egions et \`a g\'erer le cycle de vie du cluster (allocation, \`equilibrage, reprise sur panne), tandis que les \'echanges de lecture/\'ecriture se font ensuite directement avec le RegionServer responsable de la plage de cl\'es vis\'ee.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{images/Gemini_Generated_Image_HBaseArchitecture.png}
-\caption{Ce diagramme illustre l'architecture distribu\'ee d'Apache HBase et met en \`evidence le probl\`eme de la d\'ecouverte de l'emplacement des r\'egions. Il montre comment deux n\oe uds clients, A et B, interagissent avec le syst\`eme. Les RegionServers et HMaster sont g\'eographiquement distribu\'es sur la carte, soulignant la nature distribu\'ee du cluster. La premi\`ere \`etape, commune, est la recherche de m\'etadonn\'ees (\textbf{\'etape 1}) : les clients interrogent le coordinateur HMaster/ZooKeeper (localis\'e sur un n\oe ud de datacenter g\'en\'erique) pour trouver le RegionServer responsable de la plage de cl\'es sp\'ecifique. Pour le n\oe ud A, effectuant une op\'eration \texttt{PUT} (\'ecriture) pour une ligne d'utilisateur, HMaster localise la plage de cl\'es sur le RegionServer 1 (RS1). Le n\oe ud A effectue ensuite directement le \texttt{PUT} sur RS1 (\textbf{\'etape 2}), puis RS1 vidange son MemStore vers les HFiles sur les DataNodes HDFS (\textbf{\'etape 3}). Pour le n\oe ud B, effectuant une op\'eration \texttt{GET} (lecture) pour une ligne de logs, HMaster localise la plage de cl\'es sur le RegionServer 2 (RS2), puis le n\oe ud B effectue directement le \texttt{GET} sur RS2 (\textbf{\'etape 2}). La couche de persistance, situ\'ee en bas, d\'etaille le Write-Ahead Log (donn\'ees WAL) pour la r\'ecup\'eration logique avant persistance et les DataNodes HDFS pour le stockage physique des fichiers HFiles. }
-\label{fig:hbase_architecture_simple}
-\end{figure}
-
-La figure~\ref{fig:hbase_architecture_simple} donne une vue macro des composants et de leurs interactions. Avant de passer \`a l'analyse d\'etaill\'ee des performances, il est utile d'isoler le cycle d'une requ\^ete d'\'ecriture puis de lecture pour comprendre o\`u se situent le co\^ut de localisation, le chemin de persistance et le point de service de la donn\'ee.
+Avant de passer \`a l'analyse d\'etaill\'ee des performances, il est utile d'isoler le cycle d'une requ\^ete d'\'ecriture puis de lecture pour comprendre o\`u se situent le co\^ut de localisation, le chemin de persistance et le point de service de la donn\'ee.
 
 \begin{figure}[H]
 \centering

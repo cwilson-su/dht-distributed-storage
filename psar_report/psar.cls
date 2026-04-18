@@ -38,8 +38,18 @@
 % ---- Section formatting ----
 \RequirePackage{titlesec}
 \titleformat{\section}
-  {\bfseries}
+  {\LARGE\bfseries}
   {\thesection}
+  {1em}
+  {}
+\titleformat{\subsection}
+  {\Large\bfseries}
+  {\thesubsection}
+  {1em}
+  {}
+\titleformat{\subsubsection}
+  {\large\bfseries}
+  {\thesubsubsection}
   {1em}
   {}
 

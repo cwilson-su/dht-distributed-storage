@@ -23,6 +23,7 @@ public class Node {
     private volatile boolean rebalancing = false;
 
     private static final int CONNECT_TIMEOUT_MS = 2000;
+    private static final int TRANSFER_TIMEOUT_MS = 10000;
     private static final int HEARTBEAT_INTERVAL_MS = 5000;
 
     public Node(int port, Address coordinator) {
@@ -159,7 +160,6 @@ public class Node {
             case NODE_DELETE -> handleNodeDelete(msg);
             case NODE_PUT_INTERNAL -> handleNodePutInternal(msg);
             case DUMP_REQUEST  -> handleDumpRequest();
-            case CLEAR_STORE   -> handleClearStore();
             case REBALANCE     -> handleRebalanceNotice(msg);
             case REBALANCE_DONE -> handleRebalanceDone();
             case TRANSFER_KEYS -> handleTransferKeys(msg);
@@ -216,11 +216,6 @@ public class Node {
         return Message.dumpResponse(self, new HashMap<>(store));
     }
  
-    private Message handleClearStore() {
-        store.clear();
-        System.out.println("[CLEAR] " + self + " local store cleared");
-        return Message.ack("Store cleared on " + self);
-    }
  
     private Message handleRebalanceNotice(Message msg) {
     	System.out.println("[REBALANCE START] " + self + " — blocking client requests.");
@@ -256,11 +251,12 @@ public class Node {
         }
 
         if (batch.isEmpty()) {
-            return Message.error("Transfer: no keys found locally");
+        	System.out.println("[TRANSFER] No keys found locally — already transferred or removed.");
+            return Message.ack("Nothing to transfer (0 keys found)");
         }
 
         
-        Message putResp = sendRequest(destination, Message.nodeBatchPut(batch));
+        Message putResp = sendRequestWithTimeout(destination, Message.nodeBatchPut(batch), TRANSFER_TIMEOUT_MS);
 
         if (putResp != null && putResp.getType() == Message.Type.ACK) {
             
@@ -289,6 +285,26 @@ public class Node {
                 if (obj instanceof Message response) {
                     return response;
                 }
+                return Message.error("Invalid response type");
+            }
+        } catch (Exception e) {
+            return Message.error("Request to " + dest + " failed: " + e.getMessage());
+        }
+    }
+    
+    private Message sendRequestWithTimeout(Address dest, Message message, int timeoutMs) {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(dest.getIp(), dest.getPort()), timeoutMs);
+            socket.setSoTimeout(timeoutMs);
+
+            try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                 ObjectInputStream  in  = new ObjectInputStream(socket.getInputStream())) {
+                out.flush();
+                out.writeObject(message);
+                out.flush();
+
+                Object obj = in.readObject();
+                if (obj instanceof Message response) return response;
                 return Message.error("Invalid response type");
             }
         } catch (Exception e) {
