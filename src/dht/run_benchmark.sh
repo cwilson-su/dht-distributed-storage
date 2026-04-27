@@ -38,39 +38,74 @@ sleep 3
 echo ""
 echo "=== PHASE 2: TOPOLOGY TEST (Rebalance Cost vs Node Count) ==="
 
-# NEW: Adding many more data points (3 to 15) to get a smooth Rebalance curve
+cp results/centralized_metrics.csv results/centralized_metrics_phase1.csv
+
 for NUM_NODES in 3 4 5 6 7 8 10 12 15; do
     echo "-> Starting Cluster with $NUM_NODES Nodes..."
-    
+
+    rm -f results/centralized_metrics.csv
+
     java -cp bin moduloHashing.CoordinatorMain 9000 > /dev/null 2>&1 &
     sleep 2
-    
+
     for i in $(seq 1 $NUM_NODES); do
         PORT=$((8000 + i))
         java -cp bin moduloHashing.Main $PORT 127.0.0.1:9000 > /dev/null 2>&1 &
     done
     sleep 3
-    
+
     echo "   Injecting 5000 keys to populate the cluster..."
     java -cp bin moduloHashing.LoadClient 127.0.0.1:9000 50 100 > /dev/null
-    
-    # NEW: Wait 6 seconds so the Java SkewMonitor thread takes a full snapshot BEFORE we kill the node
-    sleep 6 
-    
+
+   # Attendre que toutes les clés soient injectées
+    sleep 5
+
+    # Prendre le snapshot BEFORE juste avant le crash — une seule fois, état stable
+    echo "   Taking DATA_SKEW_BEFORE snapshot..."
+    java -cp bin moduloHashing.SnapshotClient 127.0.0.1:9000
+
     LAST_PORT=$((8000 + NUM_NODES))
     echo "   Killing Node $LAST_PORT to force REBALANCE..."
     pkill -f "moduloHashing.Main $LAST_PORT"
-    
+
     echo "   Waiting 60s for Heartbeat Timeout and Rebalance to finish..."
     sleep 60
-    
+
+    # Copy this run's CSV into a per-run file for the rebalance graph
+    cp results/centralized_metrics.csv results/centralized_metrics_nodes${NUM_NODES}.csv
+
     pkill -f "moduloHashing"
     sleep 2
 done
 
 # ==============================================================================
-# PHASE 3 : PLOTTING
+# PHASE 3 : MERGE + PLOTTING
 # ==============================================================================
+echo ""
+echo "=== PHASE 3: MERGING CSVs ==="
+
+MERGED="results/centralized_metrics_rebalance.csv"
+FIRST_RUN="results/centralized_metrics_nodes3.csv"
+
+if [ -f "$FIRST_RUN" ]; then
+    head -1 "$FIRST_RUN" > "$MERGED"
+    for NUM_NODES in 3 4 5 6 7 8 10 12 15; do
+        FILE="results/centralized_metrics_nodes${NUM_NODES}.csv"
+        if [ -f "$FILE" ]; then
+            tail -n +2 "$FILE" >> "$MERGED"
+        fi
+    done
+    echo "Phase 2 merged CSV ready: $MERGED"
+fi
+
+
+FINAL="results/centralized_metrics.csv"
+if [ -f "results/centralized_metrics_phase1.csv" ] && [ -f "$MERGED" ]; then
+    cat results/centralized_metrics_phase1.csv > "$FINAL"
+    tail -n +2 "$MERGED" >> "$FINAL"
+    echo "Final merged CSV ready: $FINAL"
+fi
+
 echo ""
 echo "Generating comparative performance graphs..."
 python3 plot_metrics.py

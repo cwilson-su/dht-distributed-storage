@@ -35,6 +35,8 @@ public class Message implements Serializable {
 
         HEARTBEAT,
         HEARTBEAT_ACK,
+        
+        SNAPSHOT_BEFORE,
 
         ACK,
         ERROR,
@@ -188,6 +190,10 @@ public class Message implements Serializable {
     public static Message rebalancing() {
         return new Message(Type.REBALANCING, null, null, null, false,
                 "System is rebalancing, please retry in a moment.", null);
+    }
+    
+    public static Message snapshotBefore() {
+        return new Message(Type.SNAPSHOT_BEFORE, null, null, null, false, null, null);
     }
 
     @Override

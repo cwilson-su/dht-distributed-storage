@@ -46,25 +46,6 @@ public class Coordinator {
         heartbeatMonitorThread = new Thread(this::monitorHeartbeats, "Coordinator-HBMonitor-" + self.getPort());
         heartbeatMonitorThread.setDaemon(true);
         heartbeatMonitorThread.start();
-        
-        Thread skewMonitor = new Thread(() -> {
-            while (running && !Thread.currentThread().isInterrupted()) {
-                try {
-                    Thread.sleep(5000);
-                    List<Address> nodes;
-                    synchronized (this) { nodes = new ArrayList<>(storageNodes); }
-                    for (Address node : nodes) {
-                        Message dumpResp = sendRequest(node, Message.dumpRequest());
-                        if (dumpResp != null && dumpResp.getType() == Message.Type.DUMP_RESPONSE) {
-                            int size = dumpResp.getData().size();
-                            MetricsLogger.get().log("DATA_SKEW_BEFORE", 0, 0, "", "node=" + node.getPort() + ";keys_count=" + size);
-                        }
-                    }
-                } catch (InterruptedException e) { break; }
-            }
-        }, "Coordinator-SkewMonitor");
-        skewMonitor.setDaemon(true);
-        skewMonitor.start();
 
         System.out.println("Coordinator " + self + " started.");
     }
@@ -156,10 +137,28 @@ public class Coordinator {
             case CLIENT_DELETE -> {
                 return handleClientDelete(msg);
             }
+            case SNAPSHOT_BEFORE -> {
+                return handleSnapshotBefore();
+            }
             default -> {
                 return Message.error("Unsupported request on coordinator: " + msg.getType());
             }
         }
+    }
+    
+    private Message handleSnapshotBefore() {
+        List<Address> nodes;
+        synchronized (this) { nodes = snapshotNodes(); }
+        for (Address node : nodes) {
+            Message dumpResp = sendRequest(node, Message.dumpRequest());
+            if (dumpResp != null && dumpResp.getType() == Message.Type.DUMP_RESPONSE) {
+                int size = dumpResp.getData().size();
+                MetricsLogger.get().log("DATA_SKEW_BEFORE", 0, 0, "",
+                    "node=" + node.getPort() + ";keys_count=" + size);
+            }
+        }
+        System.out.println("[SNAPSHOT] DATA_SKEW_BEFORE logged for all nodes.");
+        return Message.ack("Snapshot taken");
     }
 
     private Message handleRegisterNode(Message msg) {
@@ -358,10 +357,8 @@ public class Coordinator {
             if (dumpResp != null && dumpResp.getType() == Message.Type.DUMP_RESPONSE) {
                 List<String> keys = new ArrayList<>(dumpResp.getData().keySet());
                 keysByNode.put(node, keys);
-                MetricsLogger.get().log("DATA_SKEW_AFTER", 0, 0, "", "node=" + node.getPort() + ";keys_count=" + keys.size());
             } else {
                 keysByNode.put(node, Collections.emptyList());
-                MetricsLogger.get().log("DATA_SKEW_AFTER", 0, 0, "", "node=" + node.getPort() + ";keys_count=0");
             }
         }
 
@@ -423,6 +420,19 @@ public class Coordinator {
         }
 
         broadcastMessage(nodes, Message.rebalanceDone());
+        
+        for (Address node : nodes) {
+            Message finalDump = sendRequest(node, Message.dumpRequest());
+            if (finalDump != null && finalDump.getType() == Message.Type.DUMP_RESPONSE) {
+                MetricsLogger.get().log("DATA_SKEW_AFTER", 0, 0, "",
+                    "node=" + node.getPort() + ";keys_count=" + finalDump.getData().size()
+                    + ";active_nodes=" + nodes.size());
+            } else {
+                MetricsLogger.get().log("DATA_SKEW_AFTER", 0, 0, "",
+                    "node=" + node.getPort() + ";keys_count=0;active_nodes=" + nodes.size());
+            }
+        }
+        
         long elapsed = System.currentTimeMillis() - rebalanceStart;
         System.out.printf("[REBALANCE] Completed in %d ms. Keys moved: %d/%d%n", elapsed, successfulTransfers, keysToMove);
         
