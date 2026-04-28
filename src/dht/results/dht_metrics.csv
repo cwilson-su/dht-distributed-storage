@@ -1,2 +1,0 @@
-timestamp_ms,operation,latency_ms,hop_count,key,extra
-1774973501326,PUT,0,0,22,node=8001

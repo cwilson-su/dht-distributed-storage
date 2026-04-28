@@ -122,7 +122,7 @@ public class ChordNodeHandler extends NodeHandler {
             lowerBound = (val != null && !val.isBlank()) ? Integer.parseInt(val) : node.id;
         } catch (NumberFormatException e) {
             lowerBound = node.id;
-        }
+        } 
 
         Map<String,String> toTransfer = new HashMap<>();
  

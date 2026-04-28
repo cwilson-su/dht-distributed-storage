@@ -50,7 +50,9 @@ public class Client {
                         printResponse(response);
                         
                         int hops = (response != null) ? response.getHopCount() : 0;
-                        MetricsLogger.get().log("PUT", latencyMs, hops, parts[1], "");
+                    
+                        int payloadSize = parts[1].length() + parts[2].length();
+                        MetricsLogger.get().log("PUT", latencyMs, hops, parts[1], "bytes=" + payloadSize);
                         System.out.printf("  [metrics] latency=%dms  hops=%d%n", latencyMs, hops);
                     } else {
                         System.out.println("Usage: PUT <key> <value>");
@@ -65,7 +67,9 @@ public class Client {
                         printResponse(response);
                         
                         int hops = (response != null) ? response.getHopCount() : 0;
-                        MetricsLogger.get().log("GET", latencyMs, hops, parts[1], "");
+                        
+                        int payloadSize = parts[1].length();
+                        MetricsLogger.get().log("GET", latencyMs, hops, parts[1], "bytes=" + payloadSize); 
                         System.out.printf("  [metrics] latency=%dms  hops=%d%n", latencyMs, hops);
                     } else {
                         System.out.println("Usage: GET <key>");
@@ -79,7 +83,9 @@ public class Client {
                         printResponse(response);
 
                         int hops = (response != null) ? response.getHopCount() : 0;
-                        MetricsLogger.get().log("DELETE", latencyMs, hops, parts[1], "");
+                        
+                        int payloadSize = parts[1].length();
+                        MetricsLogger.get().log("DELETE", latencyMs, hops, parts[1], "bytes=" + payloadSize);
                         System.out.printf("  [metrics] latency=%dms  hops=%d%n", latencyMs, hops);
                     } else {
                         System.out.println("Usage: DELETE <key>");

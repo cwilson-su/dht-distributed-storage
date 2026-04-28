@@ -1,25 +1,20 @@
 package metrics;
 
 import java.io.FileWriter;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
 
-
 public class MetricsLogger {
 
     private static final String HEADER = "timestamp_ms,operation,latency_ms,hop_count,key,extra";
-
     private final PrintWriter writer;
     private final Object lock = new Object();
-
     private static volatile MetricsLogger instance;
     private static String configuredPath;
 
-    
     public static void configure(String csvPath) {
         if (instance == null) {
             synchronized (MetricsLogger.class) {
@@ -35,14 +30,11 @@ public class MetricsLogger {
         }
     }
 
-    
     public static MetricsLogger get() {
         return instance != null ? instance : NOOP;
     }
 
-   
     private MetricsLogger(String csvPath) throws IOException {
-      
         Files.createDirectories(Paths.get(csvPath).getParent() != null
                 ? Paths.get(csvPath).getParent()
                 : Paths.get("."));
@@ -60,10 +52,10 @@ public class MetricsLogger {
                 writer.flush();
                 writer.close();
             }
-            System.out.println("[MetricsLogger] CSV fermé : " + csvPath);
+            System.out.println("[MetricsLogger] CSV file closed: " + csvPath);
         }, "MetricsLogger-Shutdown"));
 
-        System.out.println("[MetricsLogger] Écriture dans : " + csvPath);
+        System.out.println("[MetricsLogger] Writing to: " + csvPath);
     }
 
     public void log(String operation, long latencyMs, int hopCount, String key, String extra) {
@@ -72,13 +64,11 @@ public class MetricsLogger {
         String safeExtra = extra == null ? "" : extra.replace(',', ';');
 
         synchronized (lock) {
-            writer.printf("%d,%s,%d,%d,%s,%s%n",
-                    ts, operation, latencyMs, hopCount, safeKey, safeExtra);
+            writer.printf("%d,%s,%d,%d,%s,%s%n", ts, operation, latencyMs, hopCount, safeKey, safeExtra);
         }
     }
     
     private static final MetricsLogger NOOP = new MetricsLogger();
-
     private MetricsLogger() {
         this.writer = new PrintWriter(System.out) {
             @Override public void println(String x) {} 

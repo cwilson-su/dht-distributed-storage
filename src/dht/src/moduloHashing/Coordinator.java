@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import metrics.MetricsLogger;
 
@@ -26,10 +28,12 @@ public class Coordinator {
     private ServerSocket serverSocket;
     private Thread listenerThread;
     private Thread heartbeatMonitorThread;
+    private final ExecutorService workerPool = Executors.newFixedThreadPool(20);
 
     private static final int CONNECT_TIMEOUT_MS = 2000;
     private static final int HEARTBEAT_TIMEOUT_MS = 15000;
     private static final int HEARTBEAT_CHECK_INTERVAL_MS = 5000;
+    
 
     public Coordinator(int port) {
         this.self = new Address(port);
@@ -55,9 +59,7 @@ public class Coordinator {
                     Socket socket = ss.accept();
 
                     // One thread per accepted connection
-                    Thread worker = new Thread(() -> handleConnection(socket));
-                    worker.setName("CoordinatorConn-" + self.getPort() + "-" + System.nanoTime());
-                    worker.start();
+                    workerPool.submit(() -> handleConnection(socket));
 
                 } catch (SocketException e) {
                     if (!running) break;
@@ -135,10 +137,28 @@ public class Coordinator {
             case CLIENT_DELETE -> {
                 return handleClientDelete(msg);
             }
+            case SNAPSHOT_BEFORE -> {
+                return handleSnapshotBefore();
+            }
             default -> {
                 return Message.error("Unsupported request on coordinator: " + msg.getType());
             }
         }
+    }
+    
+    private Message handleSnapshotBefore() {
+        List<Address> nodes;
+        synchronized (this) { nodes = snapshotNodes(); }
+        for (Address node : nodes) {
+            Message dumpResp = sendRequest(node, Message.dumpRequest());
+            if (dumpResp != null && dumpResp.getType() == Message.Type.DUMP_RESPONSE) {
+                int size = dumpResp.getData().size();
+                MetricsLogger.get().log("DATA_SKEW_BEFORE", 0, 0, "",
+                    "node=" + node.getPort() + ";keys_count=" + size);
+            }
+        }
+        System.out.println("[SNAPSHOT] DATA_SKEW_BEFORE logged for all nodes.");
+        return Message.ack("Snapshot taken");
     }
 
     private Message handleRegisterNode(Message msg) {
@@ -335,7 +355,8 @@ public class Coordinator {
         for (Address node : nodes) {
             Message dumpResp = sendRequest(node, Message.dumpRequest());
             if (dumpResp != null && dumpResp.getType() == Message.Type.DUMP_RESPONSE) {
-                keysByNode.put(node, new ArrayList<>(dumpResp.getData().keySet()));
+                List<String> keys = new ArrayList<>(dumpResp.getData().keySet());
+                keysByNode.put(node, keys);
             } else {
                 keysByNode.put(node, Collections.emptyList());
             }
@@ -386,6 +407,11 @@ public class Coordinator {
                     successfulTransfers += keys.size();
                     System.out.printf("[REBALANCE] %s → %s : %d keys transferred OK%n",
                             source, dest, keys.size());
+                    
+                    
+                    int estimatedBytes = keys.size() * 64; 
+                    MetricsLogger.get().log("TRANSFER_BATCH", 0, 1, "", 
+                        "source=" + source.getPort() + ";dest=" + dest.getPort() + ";keys=" + keys.size() + ";bytes=" + estimatedBytes);
                 } else {
                     System.err.printf("[REBALANCE] FAILED transfer %s → %s : %s%n",
                             source, dest, ack != null ? ack.getInfo() : "null response");
@@ -394,11 +420,25 @@ public class Coordinator {
         }
 
         broadcastMessage(nodes, Message.rebalanceDone());
-
+        
+        for (Address node : nodes) {
+            Message finalDump = sendRequest(node, Message.dumpRequest());
+            if (finalDump != null && finalDump.getType() == Message.Type.DUMP_RESPONSE) {
+                MetricsLogger.get().log("DATA_SKEW_AFTER", 0, 0, "",
+                    "node=" + node.getPort() + ";keys_count=" + finalDump.getData().size()
+                    + ";active_nodes=" + nodes.size());
+            } else {
+                MetricsLogger.get().log("DATA_SKEW_AFTER", 0, 0, "",
+                    "node=" + node.getPort() + ";keys_count=0;active_nodes=" + nodes.size());
+            }
+        }
+        
         long elapsed = System.currentTimeMillis() - rebalanceStart;
-        System.out.printf("[REBALANCE] Completed in %d ms. Keys moved: %d/%d%n",
-                elapsed, successfulTransfers, keysToMove);
-        MetricsLogger.get().log("REBALANCE", elapsed, 0, "", "keys_moved=" + successfulTransfers);
+        System.out.printf("[REBALANCE] Completed in %d ms. Keys moved: %d/%d%n", elapsed, successfulTransfers, keysToMove);
+        
+        
+        MetricsLogger.get().log("REBALANCE", elapsed, 0, "", "keys_moved=" + successfulTransfers + ";active_nodes=" + nodes.size());
+    
     }
 
     private void broadcastMessage(List<Address> nodes, Message msg) {
@@ -443,20 +483,12 @@ public class Coordinator {
 
     public void stop() {
         running = false;
-
-        if (serverSocket != null && !serverSocket.isClosed()) {
-            try {
-                serverSocket.close();
-            } catch (Exception ignored) {
-            }
-        }
-
-        if (listenerThread != null) {
-            listenerThread.interrupt();
-        }
-
-        if (heartbeatMonitorThread != null) {
-            heartbeatMonitorThread.interrupt();
+        if (serverSocket != null && !serverSocket.isClosed()) { try { serverSocket.close(); } catch (Exception ignored) {} }
+        if (listenerThread != null) listenerThread.interrupt();
+        if (heartbeatMonitorThread != null) heartbeatMonitorThread.interrupt();
+        
+        if (workerPool != null && !workerPool.isShutdown()) {
+            workerPool.shutdown();
         }
     }
 }
