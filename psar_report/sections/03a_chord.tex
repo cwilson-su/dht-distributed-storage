@@ -1,6 +1,13 @@
-\subsection{Chord}
+\subsection{Vue d'ensemble de l'architecture}
 
-Chord est un protocole DHT (\emph{Distributed Hash Table}) qui r\'esout un probl\`eme unique : trouver rapidement le n\oe ud responsable d'une cl\'e dans un r\'eseau pair-\`a-pair dynamique.
+Cette troisi\`eme impl\'ementation adopte une architecture DHT structur\'ee inspir\'ee de Chord. Contrairement aux g\'en\'erations pr\'ec\'edentes, il n'existe ni \emph{coordinator} central ni \emph{flooding} : chaque n\oe ud s'auto-organise dans un anneau logique et route de mani\`ere d\'eterministe les requ\^etes vers le n\oe ud responsable, sans connaissance globale du r\'eseau.
+
+Cette troisi\`eme impl\'ementation repose sur deux concepts fondamentaux :
+\begin{itemize}
+    \item Un \textbf{anneau logique} : chaque n\oe ud occupe une position fixe sur un anneau de taille \(2^6 = 64\), calcul\'ee par hachage de son adresse. Les cl\'es sont distribu\'ees sur cet anneau via \emph{consistent hashing}.
+    \item Une \textbf{finger table} : table de routage locale de \(M = 6\) entr\'ees permettant \`a chaque n\oe ud de router les requ\^etes en \(O(\log N)\) messages sans connaissance globale du r\'eseau.
+\end{itemize}
+La coh\'erence de l'anneau est assur\'ee par un service de stabilisation p\'eriodique qui corrige les pointeurs \emph{successor} et \emph{predecessor} et maintient une liste de successeurs de secours pour la tol\'erance aux pannes.
 
 \subsubsection{Principe de fonctionnement}
 
@@ -9,7 +16,7 @@ Chaque n\oe ud et chaque cl\'e re\c coivent un identifiant sur \(m\) bits (souve
 Cette r\`egle donne trois propri\'et\'es utiles :
 \begin{itemize}
 \item \textbf{R\'epartition} : le \emph{consistent hashing} distribue les cl\'es de mani\`ere quasi uniforme.
-\item \textbf{Scalabilit\'e} : l'ajout/retrait d'un n\oe ud ne d\'eplace qu'une fraction des cl\'es.
+\item \textbf{Scalabilit\'e} : l'ajout/retrait d'un n\oe ud ne d\'eplace qu'une fraction des cl\'es contrairement au \texttt{hash(key) \% N} des g\'en\'erations pr\'ec\'edentes.
 \item \textbf{D\'ecentralisation} : aucun serveur central n'est requis.
 \end{itemize}
 
@@ -21,45 +28,36 @@ Pour \`eviter un parcours lin\'eaire de l'anneau, chaque n\oe ud maintient une \
 \text{finger}[i].\text{start} = (n + 2^{i-1}) \bmod 2^m
 \]
 
-Cette structure permet des sauts exponentiels et un co\^ut moyen de recherche en \(O(\log N)\) messages.
+Cette structure permet des sauts exponentiels et un co\^ut moyen de recherche en \(O(\log N)\) messages : le routage consiste \`a s\'electionner le finger le plus proche pr\'ec\'edant la cl\'e cible (\texttt{closestPrecedingFinger}), et \`a d\'el\'eguer la requ\^ete \`a ce n\oe ud, jusqu'\`a atteindre le \emph{successor} de la cl\'e.
 
-\subsubsection{Algorithmes essentiels}
 
-\textbf{1) Recherche de la cl\'e : \texttt{find\_successor(id)}}
-\begin{itemize}
-\item Si \texttt{id} est entre le n\oe ud courant et son \emph{successor}, on retourne ce \emph{successor}.
-\item Sinon, on avance vers le \emph{closest\_preceding\_node(id)} dans la finger table et on r\'ep\`ete.
-\end{itemize}
+\subsubsection{Op\'eration PUT}
 
-\textbf{2) Choix du prochain saut : \texttt{closest\_preceding\_node(id)}}
-\begin{itemize}
-\item Parcours de la finger table du plus grand saut au plus petit.
-\item Retour du premier doigt situ\'e strictement avant \texttt{id} sur l'anneau.
-\end{itemize}
+Lorsqu'un n\oe ud re\c{c}oit une requ\^ete \texttt{PUT} pour une paire \((key, value)\), il calcule le \emph{hash} de la cl\'e et appelle \emph{lookup} pour identifier le \emph{successor} responsable. Si ce \emph{successor} est le n\oe ud lui-m\^eme, la paire est stock\'ee localement. Sinon, la requ\^ete est rout\'ee vers le n\oe ud d\'esign\'e via la \emph{finger table}. Le message transite ainsi de n\oe ud en n\oe ud jusqu'\`a atteindre le responsable, qui effectue le stockage final.
 
-\textbf{3) Arriv\'ee d'un n\oe ud : \texttt{join(n')}}
-\begin{itemize}
-\item Le nouveau n\oe ud contacte un n\oe ud connu \(n'\).
-\item Il initialise son \emph{successor} via \texttt{find\_successor} puis construit sa finger table.
-\end{itemize}
+\textbf{Nombre total de messages \'echang\'es :} \(O(\log N)\)
 
-\textbf{4) Stabilisation : \texttt{stabilize()} et \texttt{notify()}}
-\begin{itemize}
-\item Ex\'ecution p\'eriodique pour corriger les pointeurs \emph{successor}/\emph{predecessor}.
-\item Garantit la convergence vers un anneau coh\'erent apr\`es churn mod\'er\'e.
-\end{itemize}
+\subsubsection{Op\'eration GET}
 
-\textbf{5) Tol\'erance aux pannes : \texttt{successor list}}
-\begin{itemize}
-\item Chaque n\oe ud conserve plusieurs successeurs de secours.
-\item En cas de panne du successeur principal, le routage continue via le suivant vivant.
-\end{itemize}
+La lecture suit exactement la m\^eme logique que le \texttt{PUT}. Le n\oe ud recevant la requ\^ete \texttt{GET} calcule le \emph{hash} de la cl\'e et identifie le \emph{successor} responsable via \emph{lookup}. Si c'est lui-m\^eme, il retourne la valeur depuis son \emph{store} local, ou \texttt{NOT\_FOUND} si la cl\'e est absente. Sinon, la requ\^ete est rout\'ee vers le n\oe ud responsable, qui r\'epond directement \`a l'\'emetteur original.
 
-\subsubsection{Complexit\'e (r\'esum\'e)}
-\begin{itemize}
-\item \textbf{Lookup} : \(O(\log N)\) messages.
-\item \textbf{Maintenance d'un join/leave} : surco\^ut logarithmique (d\'epend de la politique de mise \`a jour).
-\item \textbf{M\'emoire par n\oe ud} : \(O(\log N)\) entr\'ees de routage.
-\end{itemize}
+\textbf{Nombre total de messages \'echang\'es :} \(O(\log N)\)
 
-En pratique, Chord fournit une base simple et robuste pour le \emph{lookup} distribu\'e : routage logarithmique, maintenance locale p\'eriodique et bonne r\'esilience aux variations du r\'eseau.
+
+\subsubsection{Int\'egration d'un nouveau n\oe ud (JOIN)}
+
+Lorsqu'un nouveau n\oe ud d\'emarre, il contacte un n\oe ud existant pass\'e en param\`etre (\texttt{bootstrapPeer}) et appelle \texttt{remoteCallFindSuccessor} pour identifier sa position sur l'anneau. Une fois son \emph{successor} d\'etermin\'e, il lui envoie un message \texttt{REQUEST\_KEYS} pour r\'ecup\'erer les cl\'es dont il devient responsable. Contrairement \`a la premi\`ere g\'en\'eration, ce transfert est cibl\'e : seules les cl\'es appartenant \`a la plage \((\text{pr\'ed\'ecesseur du successor}, \text{id du nouveau n\oe ud}]\) sont d\'eplac\'ees. Le service de stabilisation se charge ensuite de propager progressivement la connaissance du nouveau n\oe ud aux autres membres de l'anneau via \texttt{notify}.
+
+\subsubsection{Retrait d'un n\oe ud (LEAVE)}
+
+Lors d'un d\'epart volontaire, le \texttt{ShutdownHook} d\'eclenche la proc\'edure de sortie propre. Le n\oe ud transf\`ere d'abord l'int\'egralit\'e de son \emph{store} local \`a son \emph{successor} via \texttt{transferAllKeysTo}. Il envoie ensuite un message \texttt{LEAVE\_NOTIFY} \`a son \emph{successor} et \`a son \emph{predecessor} pour qu'ils mettent \`a jour leurs pointeurs et maintiennent la coh\'erence de l'anneau.
+
+\subsubsection{D\'etection des pannes et stabilisation}
+
+Le service de stabilisation (\texttt{StabilizeService}) s'ex\'ecute toutes les 2 secondes. \`A chaque cycle, il v\'erifie la vivacit\'e du \emph{successor} via \texttt{remoteCallGetPredecessor} : si celui-ci ne r\'epond pas, il cherche un rempla\c{c}ant dans la liste de successeurs de secours, puis dans la \emph{finger table}. Le \emph{predecessor} est v\'erifi\'e tous les 3 cycles. En cas de panne, il est remis \`a \texttt{null} et l'anneau se reconfigure progressivement. La \emph{finger table} est quant \`a elle mise \`a jour entr\'ee par entr\'ee \`a chaque cycle via \texttt{fixFingers}.
+
+\subsubsection{Avantages et limites de l'approche Chord}
+
+L'architecture Chord pr\'esente plusieurs avantages majeurs par rapport aux g\'en\'erations pr\'ec\'edentes. Le \emph{consistent hashing} garantit une distribution quasi uniforme des cl\'es et limite les transferts lors des changements de topologie : un \emph{JOIN} ou \emph{LEAVE} ne d\'eplace qu'une fraction des cl\'es, contre une redistribution massive dans la premi\`ere g\'en\'eration. Le routage d\'eterministe via la \emph{finger table} offre un \emph{lookup} en \(O(\log N)\) messages, sans \emph{flooding} ni \emph{coordinator} central. Enfin, la liste de successeurs de secours et la stabilisation p\'eriodique assurent une tol\'erance aux pannes que les g\'en\'erations pr\'ec\'edentes ne permettaient pas.
+
+Cependant, cette architecture pr\'esente \'egalement des limites. La stabilisation p\'eriodique introduit un d\'elai de convergence : dans une p\'eriode de \emph{churn} intense, l'anneau peut temporairement \^etre dans un \'etat incoh\'erent, rendant certaines cl\'es introuvables le temps que les pointeurs se corrigent. Par ailleurs, notre impl\'ementation utilise un espace d'adressage de taille \(2^6 = 64\), ce qui limite le nombre de n\oe uds distincts pouvant coexister sur l'anneau. Enfin, comme dans la premi\`ere g\'en\'eration, l'absence de r\'eplication implique qu'une panne non d\'etect\'ee avant la stabilisation peut entra\^iner une perte temporaire de donn\'ees.

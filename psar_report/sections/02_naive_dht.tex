@@ -44,7 +44,7 @@ Le premier problème rencontré ne vient pas du transport réseau, mais du place
     \label{fig:naive_dht_global_view}
 \end{figure}
 
-Ce constat a motivé un premier choix d'implémentation : tester explicitement une \textbf{structure en mesh} afin d'améliorer la cohérence de la vue réseau. Les schémas présentés dans cette section ne sont donc pas seulement illustratifs ; ils correspondent à des scénarios de test que nous avons utilisés pour vérifier le comportement du système lorsque tous les n\oe uds se connaissent, puis lorsqu'un n\oe ud disparaît.
+Ce constat a motivé un premier choix d'implémentation : tester explicitement une \textbf{structure en mesh} afin d'améliorer la cohérence de la vue réseau. Les schémas présentés dans cette section ne sont donc pas seulement illustratifs ; ils correspondent à des scénarios de test utilisés pour vérifier le comportement du système lorsque tous les n\oe uds se connaissent, puis lorsqu'un n\oe ud disparaît.
 
 On peut formaliser cette intuition simplement. Si l'on note \(V\) l'ensemble des n\oe uds actifs et \(E\) l'ensemble des liens de voisinage, alors un mesh complet correspond au graphe non orienté
 \[
@@ -101,9 +101,22 @@ N(N-1)
 \]
 messages de contrôle par période si l'on compte chaque émission directionnelle. Le coût de maintenance croît donc quadratiquement avec la taille du réseau.
 
+Cette convergence vers un mesh plus dense n'a toutefois pas été obtenue d'emblée. Dans la pratique, il a fallu faire évoluer le mécanisme de découverte pour que les n\oe uds convergent rapidement vers une vue commune des participants actifs. Dans la version la plus simple, la vivacité du réseau reposait sur des messages \texttt{PING}/\texttt{PONG} et sur un \textit{heartbeat} périodique : un n\oe ud apprenait surtout l'existence de ses voisins immédiats, puis relayait éventuellement l'information de proche en proche. Ce fonctionnement suffisait pour maintenir un réseau connexe, mais la convergence restait lente et partielle si la topologie de départ était clairsemée.
+
+Un mécanisme que l'on peut décrire comme du \textit{pong caching} ou \textit{peer exchange} a alors été introduit. Lorsqu'un n\oe ud reçoit un \texttt{PING}, il ne répond plus seulement par un \texttt{PONG} attestant de sa propre présence. Il peut aussi renvoyer, dans la charge utile, l'adresse d'un petit nombre d'autres pairs déjà connus localement. Le pair initiateur enrichit alors son propre registre à partir de ces informations sans attendre une nouvelle inondation complète du réseau.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.94\textwidth]{figures/naive-dht-pong-caching.drawio.pdf}
+    \caption{Principe du \textit{pong caching}. En plus d'annoncer sa propre présence, un n\oe ud répondant à un \texttt{PING} peut transmettre quelques adresses supplémentaires issues de son registre local. Par diffusion répétée de ces informations, les pairs convergent plus vite vers une vue commune des participants actifs.}
+    \label{fig:naive_dht_pong_caching}
+\end{figure}
+
+Dans notre contexte de simulation, ce mécanisme produit un effet important : une topologie initialement pauvre converge rapidement vers un maillage beaucoup plus dense, voire quasi complet à petite échelle. Cette convergence améliore à la fois la robustesse et la latence. D'une part, chaque n\oe ud dispose de davantage de chemins alternatifs en cas de panne. D'autre part, le nombre de sauts nécessaires pour atteindre une grande partie des pairs diminue fortement, ce qui rend la diffusion des requêtes plus rapide et plus fiable.
+
 \subsection{Le flooding comme correction partielle}
 
-Une fois ce problème observé, la question n'était plus seulement \og où stocker ? \fg{}, mais aussi \og comment retrouver une donnée quand le calcul local du propriétaire devient faux ou incomplet ? \fg{}. C'est là que l'inondation limitée joue un rôle utile.
+Une fois ce problème observé, la question n'était plus seulement "où stocker ?", mais aussi "comment retrouver une donnée quand le calcul local du propriétaire devient faux ou incomplet ?". C'est là que l'inondation limitée joue un rôle utile.
 
 Dans cette version, lorsqu'un n\oe ud reçoit une requête \texttt{GET} et qu'il ne possède pas localement la donnée recherchée, il la retransmet à l'ensemble de ses voisins connus. Le mécanisme est donc une \textbf{inondation contrôlée}. Ce n'est pas une solution parfaite au problème de placement, mais c'est une \textbf{solution de rattrapage} : même si un n\oe ud se trompe sur le propriétaire logique, la requête peut encore atteindre le bon détenteur effectif de la donnée à force de propagation dans le mesh.
 
@@ -152,33 +165,28 @@ ce qui explique pourquoi le flooding y est particulièrement efficace : tant que
 
 D'un autre côté, cette propriété se paie cher. Le flooding ne résout le problème que partiellement : il compense une mauvaise localisation par davantage de trafic réseau. Le système devient donc plus tolérant aux incohérences, mais au prix d'un coût en messages qui croît vite avec la taille du réseau. Cette tension entre \emph{robustesse de découverte} et \emph{coût quadratique ou pire} résume précisément la limite de l'approche naïve.
 
-\subsection{Réponse directe, protocole et concurrence}
+\subsection{Réponse directe, puis \textit{reverse path caching}}
 
-Un point positif de l'implémentation est que la phase de réponse est plus efficace que la phase de recherche. Lorsqu'un n\oe ud trouve la clé demandée, il n'inonde pas le réseau avec la réponse. Il exploite le champ \texttt{origin} du message pour renvoyer directement un \texttt{REPLY} au demandeur au moyen d'une connexion TCP dédiée. On obtient ainsi un schéma classique : découverte diffuse, retour ciblé.
+Une fois le mécanisme de flooding validé, la manière dont les réponses revenaient vers le demandeur a ensuite été modifiée. L'idée n'a pas été de transformer la recherche elle-même, mais plutôt de partir des limites de la réponse directe pour introduire une variante fondée sur la réutilisation du chemin de retour.
 
-Toutes les communications utilisent TCP afin d'assurer une livraison fiable des messages. Les objets Java sont sérialisés par \texttt{ObjectOutputStream} et désérialisés via \texttt{ObjectInputStream}. Afin de réduire les risques liés à la désérialisation, le \texttt{ConnectionHandler} applique un filtre minimal qui n'accepte que des classes issues d'espaces sûrs, par exemple \texttt{dht.*} et \texttt{java.lang.*}.
+Dans la première version, lorsqu'un n\oe ud trouvait la clé demandée après propagation d'une requête \texttt{GET}, il renvoyait la valeur directement au demandeur en ouvrant une connexion TCP dédiée grâce au champ \texttt{origin}. Ce choix était simple et plutôt efficace à petite échelle : la recherche restait diffuse, mais la réponse suivait un chemin direct.
 
-Le traitement des connexions suit un modèle \textit{thread-per-connection} :
+Cette stratégie présentait toutefois une limite importante. Si une donnée devenait populaire, le n\oe ud qui la détenait restait le seul à répondre à toutes les requêtes. La charge réseau et la charge de service se concentraient donc sur un unique point, tandis que les n\oe uds intermédiaires ne faisaient que relayer la recherche sans rien apprendre des données traversant le réseau. En pratique, le système restait fonctionnel, mais il ne tirait aucun bénéfice de la répétition des requêtes.
 
-\begin{itemize}
-    \item chaque socket accepté par \texttt{NodeServer} est confié à un \texttt{ConnectionHandler} exécuté dans son propre thread ;
-    \item le service \texttt{HeartbeatService} tourne en arrière-plan comme thread démon afin de vérifier périodiquement la vivacité des voisins ;
-    \item les structures partagées sont rendues sûres vis-à-vis de la concurrence grâce à une \texttt{ConcurrentHashMap} pour le stockage local et à une \texttt{CopyOnWriteArrayList} pour la liste des pairs.
-\end{itemize}
+C'est précisément cette limite qui a conduit à l'introduction d'une deuxième version du mécanisme de réponse, fondée sur le \textit{reverse path caching}. Au lieu de laisser le n\oe ud propriétaire répondre directement au client par un nouveau canal, le chemin effectivement parcouru par la requête \texttt{GET} a été réutilisé.
 
-Cette organisation permet de gérer plusieurs pairs simultanément sans bloquer la logique applicative principale, tout en restant relativement simple à implémenter.
+Lors de la propagation de la requête, chaque n\oe ud intermédiaire enregistre temporairement de quel voisin elle provient. Concrètement, une table de routage locale associe un identifiant de route, par exemple \texttt{seq:key}, à l'adresse du saut précédent. Ces entrées jouent le rôle de \textit{breadcrumbs} : elles ne décrivent pas toute la topologie, mais elles suffisent à reconstruire un chemin de retour déterministe pour la réponse.
 
-\subsection{Découverte et maintien de la vivacité}
+Lorsque le n\oe ud propriétaire produit le message \texttt{REPLY}, celui-ci remonte alors exactement ce chemin inverse. À chaque saut, le n\oe ud intermédiaire lit l'entrée correspondante, la supprime pour libérer la mémoire, met en cache localement la paire \texttt{(key, value)}, puis transmet la réponse au saut précédent. La réponse ne suit donc plus un chemin direct indépendant ; elle exploite désormais la trace laissée par la requête initiale.
 
-Le maintien du réseau repose sur une gestion active de la présence des pairs.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.94\textwidth]{figures/naive-dht-reverse-path-caching.drawio.pdf}
+    \caption{Lecture détaillée du \textit{reverse path caching}. Dans la partie haute (\textit{Lookup 1}), le chemin rouge correspond au \texttt{lookup} initial émis par le client connecté à \texttt{8005} pour obtenir \texttt{user1}. La donnée n'étant pas présente localement, il s'agit d'un \textit{cache miss} : la requête progresse de pair en pair jusqu'au n\oe ud \texttt{8001}, qui possède la valeur dans son stockage local. Le chemin vert représente ensuite la réponse \texttt{REPLY} qui remonte en sens inverse ; à chaque saut, les n\oe uds intermédiaires utilisent les \textit{breadcrumbs} laissés par le \texttt{lookup} pour relayer la réponse et mettre immédiatement la donnée en cache. Dans la partie basse (\textit{Lookup 2}), une nouvelle requête pour la même clé repart de \texttt{8005}, mais elle rencontre cette fois un \textit{cache hit} sur un n\oe ud intermédiaire proche, ici \texttt{8004}. Le \texttt{lookup} rouge est alors plus court, et la réponse verte revient directement sans devoir remonter jusqu'au propriétaire initial \texttt{8001}. Le schéma montre ainsi à la fois le premier \textit{cache miss}, la phase d'amorçage du cache le long du chemin inverse, puis le second \textit{cache hit} qui réduit la distance de résolution.}
+    \label{fig:naive_dht_reverse_path_caching}
+\end{figure}
 
-\begin{itemize}
-    \item \textbf{Propagation des arrivées et départs.} Lorsqu'un n\oe ud rejoint le système, il annonce sa présence et ses voisins relaient l'information afin d'améliorer progressivement la convergence de la vue réseau.
-    \item \textbf{Heartbeat.} Toutes les 5 secondes, \texttt{HeartbeatService} envoie des messages \texttt{PING} aux pairs connus.
-    \item \textbf{Détection de panne.} Un pair est retiré du \texttt{PeerRegistry} s'il ne répond plus, ou s'il reste silencieux pendant plus de \texttt{15} secondes (\texttt{PEER\_TIMEOUT\_MS}).
-\end{itemize}
-
-Ces mécanismes rendent le réseau dynamique et autonome, mais ils confirment également qu'une topologie non structurée reste sensible au \textit{churn}. La découverte et le mesh améliorent la connectivité ; ils ne suffisent pas à produire un placement stable des clés.
+Cette modification change sensiblement le comportement du système, et la Figure~\ref{fig:naive_dht_reverse_path_caching} permet de le voir pas à pas. Lors du premier \texttt{GET}, le réseau est encore dans une situation de \textit{cache miss} : le \texttt{lookup} rouge doit aller jusqu'au détenteur réel de la donnée, puis la réponse verte remonte tout le chemin inverse. C'est précisément pendant cette phase de retour que le cache se construit, puisque chaque n\oe ud intermédiaire conserve une copie de la valeur avant de relayer le \texttt{REPLY}. Lors d'une requête ultérieure, on bascule alors vers un \textit{cache hit} : le \texttt{lookup} peut être intercepté plus tôt, la réponse part depuis un n\oe ud plus proche, et le chemin total devient plus court. Autrement dit, on passe d'une logique où chaque demande repart presque de zéro à une logique d'apprentissage progressif du réseau. La recherche reste fondée sur le flooding, mais son coût effectif peut diminuer fortement pour les données populaires grâce à cette mise en cache opportuniste.
 
 \subsection{Usages réels et intérêt pratique}
 
@@ -196,7 +204,7 @@ Autrement dit, l'approche naïve inspirée de Gnutella reste pertinente comme br
 
 \subsection{Bilan}
 
-Cette première version a permis de valider plusieurs briques essentielles : communication TCP fiable, sérialisation des messages, gestion des connexions concurrentes, découverte des pairs, surveillance de la vivacité et recherche distribuée. Surtout, elle nous a permis de tester deux idées importantes : d'une part, une structure en mesh améliore nettement la cohérence de la vue réseau ; d'autre part, le flooding permet de retrouver une donnée même lorsque le calcul local du propriétaire devient faux.
+Cette deuxième génération a permis de valider plusieurs briques essentielles : communication TCP fiable, sérialisation des messages, gestion des connexions concurrentes, découverte des pairs, surveillance de la vivacité et recherche distribuée. Elle a surtout montré une progression expérimentale claire : d'abord, le mécanisme de découverte a permis au réseau de converger vers un mesh beaucoup plus cohérent ; ensuite, le \textit{reverse path caching} a permis de réutiliser les chemins de retour pour diffuser des copies utiles des données.
 
 Du point de vue des performances, cette architecture a toutefois un comportement très contrasté. Dans le meilleur cas, si la donnée est locale ou si le bon pair est immédiatement accessible, une requête \texttt{GET} se résout en pratique en \(O(1)\) sauts. Dans le pire cas, au contraire, la recherche doit explorer une grande partie du réseau ; sur un mesh complet, son coût atteint alors \(\Theta(N^2)\) en nombre de transmissions. De la même manière, la topologie complète offre un diamètre minimal égal à \(1\), ce qui maximise la rapidité de découverte, mais son coût structurel reste quadratique : chaque pair maintient \(N-1\) voisins, soit une mémoire en \(\Theta(N)\) localement et en \(\Theta(N^2)\) à l'échelle du système.
 

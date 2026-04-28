@@ -4,34 +4,30 @@
 
 La croissance du volume de donn\'ees a rendu les architectures centralis\'ees insuffisantes. Les syst\`emes distribu\'es sont devenus la norme, mais posent un d\'efi central : garantir un \emph{lookup} efficace, la \emph{consistency} et la \emph{fault tolerance} dans un environnement de n\oe uds peu fiables.
 
-Dans ce projet Master, nous comparons deux architectures de r\'ef\'erence pour le stockage distribu\'e, bas\'ees sur des paradigmes diff\'erents :
+Dans ce projet Master, nous explorons l'\'evolution des architectures de stockage distribu\'e \`a travers trois g\'en\'erations successives, chacune r\'epondant aux limites de la pr\'ec\'edente :
 
-\paragraph{1. L'architecture P2P structur\'ee (Les DHTs)}
-Paradigme d\'ecentralis\'e (architecture \emph{symmetric}) : les n\oe uds ont un r\^ole homog\`ene et s'auto-organisent dans un \emph{overlay} structur\'e. Nous consid\'erons plusieurs DHT (Chord, CAN, Pastry, Kademlia) qui r\'esolvent le \emph{lookup} en g\'en\'eral en $O(\log N)$, avec des compromis diff\'erents entre topologie logique, latence de routage, taille des tables d'\'etat et r\'esilience au \emph{churn}.
+\paragraph{1. L'architecture centralis\'ee (inspir\'ee de Napster)}
+Un serveur central coordonne l'ensemble du r\'eseau, mais cette approche reste vuln\'erable \`a un point de d\'efaillance unique (\emph{single point of failure}).
 
-\paragraph{2. L'architecture hi\'erarchis\'ee orient\'ee colonnes (Mod\`ele HBase)}
-\`A l'oppos\'e du P2P pur, ce paradigme suit une architecture \emph{master-worker} inspir\'ee de Bigtable. HBase vise une coh\'erence forte, un mod\`ele orient\'e colonnes/versionn\'e, et conserve une centralisation partielle (HMaster) pour la gestion des m\'etadonn\'ees et des transactions, en \'echange de meilleures performances d'\'ecriture et de scan.
+\paragraph{2. L'architecture pair-\`a-pair non structur\'ee (inspir\'ee de Gnutella)}
+Elle supprime la d\'ependance au serveur central au profit d'un mod\`ele P2P (architecture \emph{symmetric}) o\`u chaque n\oe ud est \`a la fois client et serveur, au prix d'un \emph{overhead} de communication \'elev\'e et de r\'esultats non garantis.
 
-La suite du document pr\'esente d'abord le routage et la maintenance des DHTs, puis l'architecture interne de HBase et ses m\'ecanismes de persistance.
+\paragraph{3. L'architecture DHT structur\'ee (inspir\'ee de Chord)}
+Elle structure l'\emph{overlay} pour garantir un routage d\'eterministe en $O(\log N)$, offrant le meilleur compromis entre scalabilit\'e, r\'esilience au \emph{churn} et co\^ut de maintenance.
+
 
 \input{sections/00a_introduction_dht}
 
-\newpage
-\input{sections/00b_introduction_hbase}
+\subsection{Conclusion et fil conducteur du projet}
 
-\subsection{Conclusion et justification du choix architectural}
+Ces trois générations forment une progression naturelle, chacune répondant aux limitations précises de la précédente. Pour en saisir pleinement les enjeux, nous allons les étudier chacune en détail.
 
-DHT et HBase r\'epondent au m\^eme objectif (stockage distribu\'e \`a grande \'echelle) avec des choix oppos\'es : d\'ecentralisation + \emph{consistent hashing} d'un c\^ot\'e, coordination centralis\'ee + \emph{range partitioning} de l'autre.
+\paragraph{Notre progression dans le document}
+Nous commencerons par l'architecture centralisée inspirée de Napster, dont la simplicité sert de point de départ et de référence.
 
-\subsubsection*{Crit\`ere d'\'evaluation : gestion du data skew}
+Nous verrons ensuite comment l'architecture non structurée inspirée de Gnutella tente de s'affranchir du point central de défaillance, et quelles nouvelles limitations elle introduit.
 
-Le \emph{data skew} est d\'eterminant : HBase peut concentrer charge/stockage si les cl\'es sont mal con\c{c}ues, alors que les DHT r\'eduisent structurellement ce risque via une distribution pseudo-al\'eatoire des identifiants.
+Enfin, nous présenterons l'architecture DHT structurée inspirée de Chord, qui résout les problèmes fondamentaux de placement et de routage identifiés dans les deux générations précédentes.
 
-\subsubsection*{Motivation du choix}
-
-Notre objectif est d'impl\'ementer un syst\`eme totalement d\'ecentralis\'e en anneau logique. Les DHT sont mieux align\'ees avec cet objectif (routage distribu\'e, auto-organisation, joins/leaves, absence de ma\^itre), tandis qu'une approche HBase d\'eplacerait le projet vers l'ing\'enierie d'un cluster hi\'erarchis\'e.
-
-\subsubsection*{Conclusion du choix}
-
-HBase reste excellent pour des besoins de coh\'erence forte et de scans massifs, mais pour nos objectifs p\'edagogiques/exp\'erimentaux, l'approche DHT est plus pertinente.
-En cons\'equence, nous retenons l'architecture DHT comme base de la suite du projet.
+\paragraph{Ouverture vers l'évaluation}
+Pour clore cette étude, une section dédiée aux mesures de performances mettra en regard les trois architectures, afin de mettre en lumière leurs différences concrètes en terme de scalabilité et rapidité.

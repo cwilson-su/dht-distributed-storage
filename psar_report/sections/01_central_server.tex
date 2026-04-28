@@ -1,2 +1,93 @@
 \newpage
 \section{Première génération : architecture centralisée inspirée de Napster}
+
+\subsection{Vue d’ensemble de l’architecture}
+
+Cette première implémentation adopte une architecture centralisée inspirée de \textit{Napster}. L'objectif est de proposer un système de stockage clé-valeur simple à raisonner, dans lequel un composant central conserve une vue globale des nœuds actifs et décide du placement des données. Cette approche sert de point de départ pour comparer ensuite ses limites avec des architectures plus distribuées.
+
+Cette première architecture repose sur deux types de composants :
+\begin{itemize}
+    \item Un coordinator : composant unique jouant le rôle de point d’entrée pour toutes les requêtes clientes. Il calcule le nœud responsable d’une clé et relaie les opérations vers celui-ci.
+    \item Des nœuds de stockage : Connu et accessible uniquement par le coordinator, sert à stocker les données des clients.
+\end{itemize}
+
+La distribution des données repose sur une fonction de hachage modulaire : pour une clé donnée, le nœud responsable est identifié par \texttt{hash(key) \% N}, où \texttt{N} désigne le nombre courant de nœuds actifs. Mathématiquement, si l'on note \((k)\) la clé et \((N)\) le nombre de nœuds actifs, alors le nœud responsable est donné par :
+
+\[
+    node(k) = h(k) \bmod N
+\]
+
+L'ensemble des communications entre les composants s'effectue via des sockets TCP. Chaque message est sérialisé en Java et typé, encapsulant toutes les informations nécessaires au traitement de la requête : clé, valeur, source et compteur de sauts. Côté nœud de stockage, chaque connexion entrante est traitée dans un thread dédié créé dynamiquement, ce qui permet au nœud de gérer plusieurs requêtes simultanées sans blocage.
+
+
+\subsection{Fonctionnement des opérations fondamentales}
+
+\subsubsection{Opération PUT}
+
+La Figure~\ref{fig:centralised_put} illustre le déroulement d'une requête d'écriture. Lorsque le client 1 souhaite insérer la paire \((40, 25)\), il envoie un message \texttt{CLIENT\_PUT} au coordinator. Ce dernier applique la fonction de hachage modulaire \texttt{hash(40) \% 5 = 0} ce qui désigne le nœud \texttt{8001} comme unique responsable de cette clé. Le coordinator transmet alors un message \texttt{NODE\_PUT} directement à ce nœud. Le nœud \texttt{8001} stocke la paire localement et répond par un \texttt{ACK}. Le coordinator retransmet enfin une \texttt{CLIENT\_RESPONSE(OK)} au client pour confirmer le succès de l'opération. On observe que les nœuds \texttt{8002} à \texttt{8005}, représentés en tirets, ne sont à aucun moment sollicités.
+
+À noter que si aucun nœud actif n'est disponible au moment de la requête, le coordinator retourne directement une erreur au client.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{images/01_centralised_put.png}
+    \caption{Déroulement d'une opération \texttt{PUT} dans l'architecture centralisée.}
+    \label{fig:centralised_put}
+\end{figure}
+
+Nombre total de message échangé au sein du réseau = 4 (client $\rightarrow$ coordinator $\rightarrow$ node $\rightarrow$ coordinator $\rightarrow$ client)
+
+\subsubsection{Opération GET}
+
+La Figure~\ref{fig:centralised_get} illustre le déroulement d'une requête de lecture. Le client 2 envoie un \texttt{CLIENT\_GET} portant la clé \texttt{40}. Le coordinator recalcule \texttt{hash(40) \% 5 = 0} et identifie de nouveau le nœud \texttt{8001} comme responsable. Un \texttt{NODE\_GET} est transmis au nœud \texttt{8001}, qui effectue une recherche dans son store local et retourne la valeur \texttt{25} via un \texttt{NODE\_RESPONSE}. Le coordinator retransmet enfin une \texttt{CLIENT\_RESPONSE(value : 25)} correspondant à la valeur associée à la clé \texttt{40}.
+
+À noter que si la clé recherchée n'existe pas, le coordinator envoie tout de même un \texttt{NODE\_GET} au nœud responsable. Ce dernier effectue la recherche dans son store local, ne trouve pas la clé et retourne un \texttt{NODE\_RESPONSE} indiquant que la clé est absente. Le coordinator retransmet alors cette information au client sous la forme d'une \texttt{CLIENT\_RESPONSE} signalant que la clé n'existe pas.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{images/01_centralised_get.png}
+    \caption{Déroulement d'une opération \texttt{GET} dans l'architecture centralisée.}
+    \label{fig:centralised_get}
+\end{figure}
+
+Nombre total de Message = 4
+
+\subsubsection{Opération Delete}
+
+La suppression d'une clé suit exactement la même logique que le GET. Le client envoie un \texttt{CLIENT\_DELETE} avec la clé de la donnée que le client souhaite supprimer, le coordinator calcule le nœud responsable et lui transmet un \texttt{NODE\_DELETE}. Si la clé existe, le nœud supprime la clé de son store local et indique dans sa réponse au coordinator que la clé à bien été supprimé. Si la clé n’existe pas, le nœud envoie au coordinator que la clé n’existe pas. Le coordinator transmet cette réponse reçue au client avec \texttt{CLIENT\_RESPONSE}.
+
+Nombre total de Message = 4
+
+\subsection{Gestion dynamique des nœuds}
+
+La principale problématique avec un système distribué basé sur un calcule hachage modulaire est la valeur \texttt{N} désignant le nombre de nœuds présent dans le réseau. En effet, si un nœud rejoint ou quitte le réseau, cela modifie le résultat du calcule hachage modulaire et donc provoque un échange massif de flux de donnée. En effet, étant donné que le résultat a changé les données stockées doivent migrer vers le bon node auquels ils appartiennet apres la modification du calcule hachage modulaire.
+
+\subsubsection{Intégration d’un nouveau nœud (JOIN)}
+
+Lorsqu'un nouveau nœud démarre, il s'enregistre auprès du coordinator en envoyant un message \texttt{REGISTER\_NODE}. Le coordinator l'ajoute à sa liste de nœuds actifs et déclenche immédiatement un rebalance. En effet, l'ajout d'un nœud fait passer le modulo de \texttt{N} à \texttt{N+1}, ce qui modifie le nœud responsable des clés existantes. Le rebalance ne s'agit pas uniquement d’envoyer les données au nouveau venu. En effet, les emplacements de toutes les données sont recalculés et certaines peuvent migrer entre deux nœuds déjà présents sans impliquer le nouveau nœud.
+
+Le rebalance commence par un inventaire complet : le coordinator envoie un \texttt{DUMP\_REQUEST} à chaque nœud actif, qui lui retourne la liste de ses clés. À partir de cet inventaire, le coordinator recalcule pour chaque clé le nœud qui devrait en être responsable avec le nouveau \texttt{N+1} et construit un plan de migration précis indiquant, pour chaque nœud source, quelles clés doivent être envoyées à quel nœud destination.
+
+Pour chaque entrée de ce plan, le coordinator envoie un message \texttt{TRANSFER\_KEYS} au nœud source, en lui communiquant la destination et la liste des clés concernées. Le nœud source collecte les valeurs correspondantes dans son store local, les regroupe en un seul message \texttt{NODE\_BATCH\_PUT} et l'envoie directement au nœud destination, sans que les valeurs ne transitent par le coordinator. Le nœud destination stocke le batch et répond \texttt{ACK}. Le nœud source supprime alors les clés transférées de son propre store.
+
+Pendant toute la durée de ces transferts, les requêtes clients sont temporairement bloquées. Lorsque le plan de migration contient des déplacements à effectuer, le coordinator envoie au préalable un message \texttt{REBALANCE} à tous les nœuds, qui positionnent un flag interne \texttt{rebalancing = true}. Toute requête \texttt{NODE\_PUT}, \texttt{NODE\_GET} ou \texttt{NODE\_DELETE} reçue pendant cet état retourne immédiatement un message \texttt{REBALANCING} au coordinator, qui le propage au client. Ce blocage garantit qu'aucun client ne tente de lire une clé en cours de déplacement, ce qui éviterait une réponse incorrecte de type \texttt{NOT\_FOUND} sur une donnée qui existe. À la fin du rebalance, le coordinator diffuse un \texttt{REBALANCE\_DONE} à tous les nœuds. A la réception de ce message, les nœuds vont positionner leur flag interne \texttt{rebalancing = false} pour débloquer les requêtes clients.
+
+\subsubsection{Retrait d’un nœud (LEAVE)}
+
+Lorsqu'un nœud quitte volontairement le réseau, son ShutdownHook envoie un message \texttt{UNREGISTER\_NODE} au coordinator. La première action du coordinator, avant de retirer ce nœud de sa liste, est d'envoyer un \texttt{DUMP\_REQUEST} pour récupérer l'intégralité des données qu'il détient. Cette étape est critique : si le dump est effectué après la déconnexion, les données sont définitivement perdues. Une fois les données orphelines récupérées, le coordinator retire le nœud de sa liste et déclenche le rebalance.
+
+Le traitement des données orphelines diffère légèrement du JOIN. Ces données, récupérées par dump avant la déconnexion, sont injectées directement par le coordinator via des messages \texttt{NODE\_PUT\_INTERNAL} vers les nœuds cibles car le nœud source est désormais hors ligne et ne peut plus émettre de \texttt{TRANSFER\_KEYS}. En revanche, pour les clés déjà présentes sur les nœuds restants qui se retrouvent mal placées suite au changement de modulo de \texttt{N} à \texttt{N-1}, le mécanisme est identique au JOIN : le coordinator envoie des \texttt{TRANSFER\_KEYS} aux nœuds sources, qui transfèrent directement leurs données aux nœuds destinations via \texttt{NODE\_BATCH\_PUT}. Le blocage des clients via le flag \texttt{rebalancing} est activé pour les mêmes raisons que lors d'un JOIN.
+
+\subsubsection{Détection des pannes par heartbeat}
+
+Chaque nœud envoie périodiquement un message \texttt{HEARTBEAT} au coordinator toutes les cinq secondes. Un thread de surveillance vérifie régulièrement ces timestamps : si un nœud n'a pas donné signe de vie depuis plus de quinze secondes, il est considéré comme mort et retiré de la liste des nœuds actifs. Le coordinator déclenche alors un rebalance pour redistribuer les clés selon le nouveau \texttt{N}.
+
+A noter que lors du retrait d’un nœud à cause d’une panne, celui-ci quitte le réseau de manière involontaire. Le nœud étant mort, il est impossible d'effectuer un dump préalable de ses données. Les clés qu'il détenait sont donc définitivement perdues. C'est une des limitations de cette implémentation, qui ne dispose pas de mécanisme de réplication.
+
+\subsection{Analyse des performances}
+
+\subsection{Avantages et limites de l’approche centralisée}
+
+L'architecture centralisée présente plusieurs avantages notables. Sa simplicité conceptuelle facilite le débogage et la compréhension du système : un seul composant détient la vue globale du cluster, ce qui rend le routage déterministe et prévisible. La cohérence des données est naturellement garantie puisque toutes les décisions de placement transitent par un unique point de calcul. Le rebalance node-to-node améliore par ailleurs la redistribution en évitant que le coordinator ne transporte les données.
+
+Cependant, cette architecture présente des limites structurelles importantes. Le coordinator constitue un point de défaillance unique. En effet, si le coordinator tombe en panne, l'ensemble du système devient inaccessible. L'absence de réplication représente également une faiblesse majeure : en cas de panne d'un nœud, les données qu'il détenait sont irrémédiablement perdues. Enfin, le hachage modulaire classique entraîne une redistribution massive des données à chaque changement de topologie, comportement qui sera directement comparé à l'approche par hachage cohérent implémentée dans les versions DHT suivantes.
