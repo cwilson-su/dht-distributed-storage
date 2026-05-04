@@ -10,12 +10,12 @@ public class MetricLog {
     private final Object mtx = new Object();
     private static volatile MetricLog inst;
 
-    public static void init(String path) {
+    public static void init(String pth) {
         if (inst == null) {
             synchronized (MetricLog.class) {
                 if (inst == null) {
                     try {
-                        inst = new MetricLog(path);
+                        inst = new MetricLog(pth);
                     } catch (IOException e) {
                         System.err.println("CSV init fail: " + e.getMessage());
                     }
@@ -24,33 +24,26 @@ public class MetricLog {
         }
     }
 
-    public static MetricLog get() {
-        return inst != null ? inst : NOOP;
-    }
+    public static MetricLog get() { return inst != null ? inst : NOOP; }
 
-    private MetricLog(String path) throws IOException {
-        Files.createDirectories(Paths.get(path).getParent() != null ? Paths.get(path).getParent() : Paths.get("."));
-        boolean ex = Files.exists(Paths.get(path));
-        this.pw = new PrintWriter(new FileWriter(path, true), true);
+    private MetricLog(String pth) throws IOException {
+        Files.createDirectories(Paths.get(pth).getParent() != null ? Paths.get(pth).getParent() : Paths.get("."));
+        boolean ex = Files.exists(Paths.get(pth));
+        this.pw = new PrintWriter(new FileWriter(pth, true), true);
 
         if (!ex) pw.println(HDR);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            synchronized (mtx) {
-                pw.flush();
-                pw.close();
-            }
+            synchronized (mtx) { pw.flush(); pw.close(); }
         }));
     }
 
-    public void log(String op, long lat, int hops, String k, String ext) {
+    public void log(String op, long lat, int hps, String k, String ext) {
         long ts = Instant.now().toEpochMilli();
         String sK = k == null ? "" : k.replace(',', ';');
         String sE = ext == null ? "" : ext.replace(',', ';');
 
-        synchronized (mtx) {
-            pw.printf("%d,%s,%d,%d,%s,%s%n", ts, op, lat, hops, sK, sE);
-        }
+        synchronized (mtx) { pw.printf("%d,%s,%d,%d,%s,%s%n", ts, op, lat, hps, sK, sE); }
     }
 
     private static final MetricLog NOOP = new MetricLog();
