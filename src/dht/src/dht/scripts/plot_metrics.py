@@ -22,7 +22,6 @@ def format_ax(ax, title, xlabel, ylabel):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
-# Filter for standard metrics
 df_std = df[df["op"] == "GET"].copy()
 if not df_std.empty:
     agg = df_std.groupby("reqs").agg(
@@ -39,32 +38,23 @@ if not df_std.empty:
 
     # Latency Graph
     fig_lat, ax_lat = plt.subplots(figsize=(10, 6))
-    ax_lat.plot(agg["reqs"], agg["avg_lat"], marker="o", lw=2.5, color="#DD8452", label="Naive DHT")
+    ax_lat.plot(agg["reqs"], agg["avg_lat"], marker="o", lw=2.5, color="orange", label="Naive DHT")
     format_ax(ax_lat, "Average Request Latency vs Load", "Concurrent Requests", "Latency (ms)")
     ax_lat.legend(loc="upper left")
     fig_lat.savefig("results/graphs/dht_latency.png", dpi=150)
 
     # Throughput Graph
     fig_tpt, ax_tpt = plt.subplots(figsize=(10, 6))
-    ax_tpt.plot(agg["reqs"], agg["tpt"], marker="s", lw=2.5, color="#55A868", label="Naive DHT")
+    ax_tpt.plot(agg["reqs"], agg["tpt"], marker="s", lw=2.5, color="orange", label="Naive DHT")
     format_ax(ax_tpt, "Global System Throughput vs Load", "Concurrent Requests", "Requests / Second")
     ax_tpt.legend(loc="upper left")
     fig_tpt.savefig("results/graphs/dht_throughput.png", dpi=150)
 
     # Hops Graph
     fig_hop, ax_hop = plt.subplots(figsize=(10, 6))
-    ax_hop.plot(agg["reqs"], agg["avg_hops"], marker="^", lw=2.5, color="#4C72B0", label="Naive DHT")
+    ax_hop.plot(agg["reqs"], agg["avg_hops"], marker="^", lw=2.5, color="orange", label="Naive DHT")
     format_ax(ax_hop, "Network Efficiency (Hops per Request)", "Concurrent Requests", "Average Hop Count")
     ax_hop.legend(loc="upper left")
     fig_hop.savefig("results/graphs/dht_hops.png", dpi=150)
 
-# Convergence Graph
-df_c = df[df["op"] == "CONV"].copy()
-if not df_c.empty:
-    fig_c, ax_c = plt.subplots(figsize=(10, 6))
-    ax_c.plot(df_c["lat_ms"], df_c["hops"], drawstyle="steps-post", lw=2.5, color="#9B59B6", label="Discovery Rate")
-    format_ax(ax_c, "Topology Convergence Time", "Elapsed Time (ms)", "Known Peers Count")
-    ax_c.legend(loc="lower right")
-    fig_c.savefig("results/graphs/dht_convergence.png", dpi=150)
-
-print("✓ 4 Analytical graphs generated successfully.")
+print("✓ 3 High-resolution analytical graphs generated successfully.")

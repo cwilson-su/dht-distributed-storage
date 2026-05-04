@@ -1,20 +1,10 @@
 package dht;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 public class BenchClient {
     public static void main(String[] args) throws InterruptedException {
-        // Intercept and destroy all console output streams to prevent JVM locking inside the client
-        System.setOut(new PrintStream(new OutputStream() {
-            @Override public void write(int b) { /* discard */ }
-        }));
-        System.setErr(new PrintStream(new OutputStream() {
-            @Override public void write(int b) { /* discard */ }
-        }));
-
         int reqs = Integer.parseInt(args[0]);
         MetricLog.init("results/dht_metrics.csv");
         
