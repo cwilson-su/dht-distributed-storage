@@ -12,7 +12,11 @@ df["hops"] = pd.to_numeric(df["hops"], errors="coerce")
 df["ts_ms"] = pd.to_numeric(df["ts_ms"], errors="coerce")
 df["reqs"] = df["ext"].str.extract(r'reqs=(\d+)').astype(float)
 
-Path("results/graphs").mkdir(parents=True, exist_ok=True)
+# Create the specific subdirectories for PNG and PDF
+png_dir = Path("results/graphs/png")
+pdf_dir = Path("results/graphs/pdf")
+png_dir.mkdir(parents=True, exist_ok=True)
+pdf_dir.mkdir(parents=True, exist_ok=True)
 
 def format_ax(ax, title, xlabel, ylabel):
     ax.set_title(title, fontsize=14, fontweight="bold", pad=15)
@@ -41,20 +45,23 @@ if not df_std.empty:
     ax_lat.plot(agg["reqs"], agg["avg_lat"], marker="o", lw=2.5, color="orange", label="Naive DHT")
     format_ax(ax_lat, "Average Request Latency vs Load", "Concurrent Requests", "Latency (ms)")
     ax_lat.legend(loc="upper left")
-    fig_lat.savefig("results/graphs/dht_latency.png", dpi=150)
+    fig_lat.savefig(png_dir / "dht_latency.png", dpi=150, bbox_inches="tight")
+    fig_lat.savefig(pdf_dir / "dht_latency.pdf", bbox_inches="tight")
 
     # Throughput Graph
     fig_tpt, ax_tpt = plt.subplots(figsize=(10, 6))
     ax_tpt.plot(agg["reqs"], agg["tpt"], marker="s", lw=2.5, color="orange", label="Naive DHT")
     format_ax(ax_tpt, "Global System Throughput vs Load", "Concurrent Requests", "Requests / Second")
     ax_tpt.legend(loc="upper left")
-    fig_tpt.savefig("results/graphs/dht_throughput.png", dpi=150)
+    fig_tpt.savefig(png_dir / "dht_throughput.png", dpi=150, bbox_inches="tight")
+    fig_tpt.savefig(pdf_dir / "dht_throughput.pdf", bbox_inches="tight")
 
     # Hops Graph
     fig_hop, ax_hop = plt.subplots(figsize=(10, 6))
     ax_hop.plot(agg["reqs"], agg["avg_hops"], marker="^", lw=2.5, color="orange", label="Naive DHT")
     format_ax(ax_hop, "Network Efficiency (Hops per Request)", "Concurrent Requests", "Average Hop Count")
     ax_hop.legend(loc="upper left")
-    fig_hop.savefig("results/graphs/dht_hops.png", dpi=150)
+    fig_hop.savefig(png_dir / "dht_hops.png", dpi=150, bbox_inches="tight")
+    fig_hop.savefig(pdf_dir / "dht_hops.pdf", bbox_inches="tight")
 
-print("✓ 3 High-resolution analytical graphs generated successfully.")
+print("✓ 3 High-resolution analytical graphs generated in PNG and PDF formats.")

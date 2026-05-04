@@ -10,7 +10,11 @@ df.columns = df.columns.str.strip()
 df["lat_ms"] = pd.to_numeric(df["lat_ms"], errors="coerce")
 df["hops"] = pd.to_numeric(df["hops"], errors="coerce")
 
-Path("results/graphs").mkdir(parents=True, exist_ok=True)
+# Create the specific subdirectories for PNG and PDF
+png_dir = Path("results/graphs/png")
+pdf_dir = Path("results/graphs/pdf")
+png_dir.mkdir(parents=True, exist_ok=True)
+pdf_dir.mkdir(parents=True, exist_ok=True)
 
 df_c = df[df["op"] == "CHAIN_CONV"].copy()
 if not df_c.empty:
@@ -29,5 +33,6 @@ if not df_c.empty:
     ax.spines['right'].set_visible(False)
     ax.legend(loc="upper left")
     
-    fig.savefig("results/graphs/dht_chain_convergence.png", dpi=150)
-    print("✓ Chain convergence graph generated.")
+    fig.savefig(png_dir / "dht_chain_convergence.png", dpi=150, bbox_inches="tight")
+    fig.savefig(pdf_dir / "dht_chain_convergence.pdf", bbox_inches="tight")
+    print("✓ Chain convergence graph generated in PNG and PDF formats.")
