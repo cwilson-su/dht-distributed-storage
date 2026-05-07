@@ -4,6 +4,7 @@ import dht.Address;
 import dht.Message;
 import dht.NodeHandler;
 import dht.PeerRegistry;
+import metrics.MetricsLogger;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class ChordNodeHandler extends NodeHandler {
     private static final int RPC_TIMEOUT_MS = 3000;
 
     private final ChordNode             node;
-    private final Map<String, String>   store   = new ConcurrentHashMap<>();
+    final Map<String, String>           store   = new ConcurrentHashMap<>();
     private final Map<Integer, Pending> pending = new ConcurrentHashMap<>();
 
     public ChordNodeHandler(ChordNode node) {
@@ -70,7 +71,7 @@ public class ChordNodeHandler extends NodeHandler {
             case NOTIFY -> node.notify(cm.getOrigin());
 
             case TRANSFER_KEYS -> handleTransferKeys(cm);
- 
+
             case REQUEST_KEYS -> handleRequestKeys(cm);
 
             case LEAVE_NOTIFY -> handleLeaveNotify(cm);
@@ -78,10 +79,10 @@ public class ChordNodeHandler extends NodeHandler {
     }
 
     private void handleLeaveNotify(ChordMessage cm) {
-        Address leaving   = cm.getOrigin();
-        String  valStr    = cm.getValue();
-        Address newSucc   = (valStr != null && !valStr.isBlank()) ? Address.parse(valStr) : null;
- 
+        Address leaving = cm.getOrigin();
+        String  valStr  = cm.getValue();
+        Address newSucc = (valStr != null && !valStr.isBlank()) ? Address.parse(valStr) : null;
+
         if (leaving.equals(node.fingerTable.getSuccessor())) {
             if (newSucc != null && !newSucc.equals(node.self)) {
                 node.fingerTable.setSuccessor(newSucc);
@@ -95,7 +96,7 @@ public class ChordNodeHandler extends NodeHandler {
                         + " est parti → anneau à un seul nœud");
             }
         }
- 
+
         if (leaving.equals(node.predecessor)) {
             node.predecessor = null;
             System.out.println("[Node " + node.self.getPort()
@@ -103,16 +104,15 @@ public class ChordNodeHandler extends NodeHandler {
                     + " est parti → prédécesseur remis à null");
         }
     }
-    
+
     private void handleTransferKeys(ChordMessage cm) {
         Map<String,String> received = cm.getData();
         if (received == null || received.isEmpty()) return;
- 
+
         store.putAll(received);
         System.out.println("[Node " + node.self.getPort() + "] reçu " + received.size()
                 + " clé(s) de " + cm.getOrigin() + " : " + received.keySet());
     }
-
 
     private void handleRequestKeys(ChordMessage cm) {
         int newNodeId = cm.getTargetId();
@@ -122,18 +122,17 @@ public class ChordNodeHandler extends NodeHandler {
             lowerBound = (val != null && !val.isBlank()) ? Integer.parseInt(val) : node.id;
         } catch (NumberFormatException e) {
             lowerBound = node.id;
-        } 
+        }
 
         Map<String,String> toTransfer = new HashMap<>();
- 
+
         for (Map.Entry<String,String> entry : store.entrySet()) {
             int keyId = ChordHasher.hash(entry.getKey());
-
             if (ChordHasher.inRange(keyId, lowerBound, newNodeId)) {
                 toTransfer.put(entry.getKey(), entry.getValue());
             }
         }
- 
+
         if (!toTransfer.isEmpty()) {
             store.keySet().removeAll(toTransfer.keySet());
             send(cm.getOrigin(), ChordMessage.transferKeys(toTransfer, node.self, node.nextSeq()));
@@ -144,16 +143,33 @@ public class ChordNodeHandler extends NodeHandler {
                     + " pour (plage (" + lowerBound + ", " + newNodeId + "])");
         }
     }
- 
 
     private void handleDht(Message m) {
+        // Interception snapshot — AVANT tout routing Chord
+        // Le message est envoyé directement en TCP à ce nœud,
+        // on le traite localement sans jamais appeler node.lookup()
+        if (m.getKey() != null && m.getKey().startsWith("__snapshot_")) {
+            String inner = m.getKey()
+                    .replaceFirst("^__snapshot_", "")
+                    .replaceAll("__$", "");        // ex: "before_3" ou "after_5"
+            String[] parts = inner.split("_");
+            String phase      = parts.length > 0 ? parts[0] : "before";
+            int    totalNodes = parts.length > 1 ? Integer.parseInt(parts[1]) : 1;
+            handleSnapshotControl(phase + ":" + totalNodes);
+            return;
+        }
+
         switch (m.getType()) {
             case PUT -> {
+
                 Address target = node.lookup(m.getKey());
                 if (target.equals(node.self)) {
                     store.put(m.getKey(), m.getValue());
+                    int totalHops = m.getHops() + 1;
                     System.out.println(">>> Stocké [" + m.getKey() + "=" + m.getValue()
                             + "] sur nœud " + node.self.getPort() + " (id=" + node.id + ")");
+                    // Log hop count on the storage side (latency is logged by ChordLoadClient)
+                    MetricsLogger.get().log("PUT_HOP", 0, totalHops, m.getKey(), "");
                 } else {
                     System.out.println("--- Routage PUT '" + m.getKey() + "' -> " + target);
                     send(target, m.withLast(node.self));
@@ -163,8 +179,9 @@ public class ChordNodeHandler extends NodeHandler {
                 Address target = node.lookup(m.getKey());
                 if (target.equals(node.self)) {
                     String value = store.getOrDefault(m.getKey(), "NOT_FOUND");
+                    int totalHops = m.getHops() + 1;
                     send(m.getOrigin(), new Message(Message.Type.REPLY, m.getKey(), value,
-                            node.self, node.self, m.getSeq(), 0));
+                            node.self, node.self, m.getSeq(), totalHops));
                 } else {
                     System.out.println("--- Routage GET '" + m.getKey() + "' -> " + target);
                     send(target, m.withLast(node.self));
@@ -175,8 +192,58 @@ public class ChordNodeHandler extends NodeHandler {
         }
     }
 
+    // ---------------------------------------------------------------
+    // Metrics helpers — called by ChordSnapshotClient & StabilizeService
+    // ---------------------------------------------------------------
 
-    
+    /** Handles the snapshot control message from ChordSnapshotClient. */
+    private void handleSnapshotControl(String value) {
+        // value format: "before:totalNodes" or "after:totalNodes"
+        String phase      = "before";
+        int    totalNodes = 1;
+        if (value != null) {
+            String[] parts = value.split(":");
+            if (parts.length >= 1) phase = parts[0];
+            if (parts.length >= 2) {
+                try { totalNodes = Integer.parseInt(parts[1]); } catch (NumberFormatException ignored) {}
+            }
+        }
+        if ("after".equals(phase)) {
+            logSnapshotAfter(totalNodes);
+        } else {
+            logSnapshotBefore(totalNodes);
+        }
+    }
+
+    public void logSnapshotBefore(int totalNodes) {
+        int keysCount = store.size();
+        MetricsLogger.get().log("DATA_SKEW_BEFORE", 0, 0, "",
+                "node=" + node.id + ";keys_count=" + keysCount + ";active_nodes=" + totalNodes);
+        System.out.println("[SNAPSHOT-BEFORE] Node " + node.self.getPort()
+                + " (id=" + node.id + ") : " + keysCount + " keys");
+    }
+
+    public void logSnapshotAfter(int totalNodes) {
+        int keysCount = store.size();
+        MetricsLogger.get().log("DATA_SKEW_AFTER", 0, 0, "",
+                "node=" + node.id + ";keys_count=" + keysCount + ";active_nodes=" + totalNodes);
+        System.out.println("[SNAPSHOT-AFTER] Node " + node.self.getPort()
+                + " (id=" + node.id + ") : " + keysCount + " keys");
+    }
+
+    public void logRebalance(long durationMs, int keysMoved, int activeNodes) {
+        MetricsLogger.get().log("REBALANCE", durationMs, 0, "",
+                "keys_moved=" + keysMoved + ";active_nodes=" + activeNodes);
+    }
+
+    public int getStoreSize() {
+        return store.size();
+    }
+
+    // ---------------------------------------------------------------
+    // Remote calls
+    // ---------------------------------------------------------------
+
     public Address remoteCallFindSuccessor(Address dest, int targetId) {
         int seq = node.nextSeq();
         Pending p = new Pending();
@@ -194,7 +261,6 @@ public class ChordNodeHandler extends NodeHandler {
         return p.result;
     }
 
-    
     public PredecessorResult remoteCallGetPredecessor(Address dest) {
         int seq = node.nextSeq();
         Pending p = new Pending();
@@ -204,9 +270,7 @@ public class ChordNodeHandler extends NodeHandler {
 
         try {
             boolean responded = p.latch.await(RPC_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-            if (!responded){
-                return PredecessorResult.unreachable();
-            }
+            if (!responded) return PredecessorResult.unreachable();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return PredecessorResult.unreachable();
@@ -218,17 +282,16 @@ public class ChordNodeHandler extends NodeHandler {
 
     public static class PredecessorResult {
         public final boolean reachable;
-        public final Address predecessor; 
- 
+        public final Address predecessor;
+
         private PredecessorResult(boolean reachable, Address predecessor) {
             this.reachable   = reachable;
             this.predecessor = predecessor;
         }
- 
+
         public static PredecessorResult of(Address p) { return new PredecessorResult(true, p); }
         public static PredecessorResult unreachable()  { return new PredecessorResult(false, null); }
     }
-
 
     public void sendNotify(Address dest) {
         send(dest, ChordMessage.notify(node.self, node.nextSeq()));
@@ -243,8 +306,8 @@ public class ChordNodeHandler extends NodeHandler {
         volatile Address     result = null;
     }
 
-     public void requestKeysFromSuccessor(Address successor, int newNodeId, int predecessorId) {
-        send(successor, ChordMessage.requestKeys(newNodeId,predecessorId, node.self, node.nextSeq()));
+    public void requestKeysFromSuccessor(Address successor, int newNodeId, int predecessorId) {
+        send(successor, ChordMessage.requestKeys(newNodeId, predecessorId, node.self, node.nextSeq()));
         System.out.println("[Node " + node.self.getPort() + "] demande de clés -> " + successor);
     }
 
