@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Cleanup
 echo "Cleaning up..."
-pkill -f "chord.Main"
+pkill -f "chord.Main" 2>/dev/null
+sleep 2
 rm -rf bin results/chord_metrics.csv
 mkdir -p bin results/graphs
 
@@ -14,135 +14,118 @@ if [ $? -ne 0 ]; then
 fi
 
 # ==============================================================================
-# PHASE 1 : LOAD & STRESS TESTING (Fixed 5 Nodes)
+# PHASE 1 : STRESS TEST — 5 nœuds fixes, charge croissante
 # ==============================================================================
 echo ""
-echo "=== PHASE 1: STRESS TEST (Load vs Latency/Throughput/Hops) ==="
-echo "Starting 5 Chord nodes..."
+echo "=== PHASE 1: STRESS TEST ==="
 
 java -cp bin chord.Main 8001 > /dev/null 2>&1 &
 sleep 3
-
 for port in 8002 8003 8004 8005; do
     java -cp bin chord.Main $port 127.0.0.1:8001 > /dev/null 2>&1 &
     sleep 1
 done
 
-echo "Waiting 15s for Chord ring to stabilise..."
+echo "Attente stabilisation ring (15s)..."
 sleep 15
 
 for clients in 10 25 50 100 150 200 300 400 600 800 1000; do
-    echo "-> Firing $clients concurrent clients..."
+    echo "-> $clients clients..."
     java -cp bin chord.ChordLoadClient 127.0.0.1:8001 $clients 20
     sleep 2
 done
 
-echo "Stopping infrastructure for Phase 1..."
-pkill -f "chord.Main"
+pkill -f "chord.Main" 2>/dev/null
 sleep 3
-
-# ==============================================================================
-# PHASE 2 : TOPOLOGY & CHURN TESTING (Varying Node Count)
-# ==============================================================================
-echo ""
-echo "=== PHASE 2: TOPOLOGY TEST (Rebalance Cost vs Node Count) ==="
-
 cp results/chord_metrics.csv results/chord_metrics_phase1.csv
 
-for NUM_NODES in 3 4 5 6 7 8 10 12 15; do
-    echo "-> Starting Chord cluster with $NUM_NODES nodes..."
+# ==============================================================================
+# PHASE 2 : REBALANCE & SKEW — taille de cluster variable
+# ==============================================================================
+echo ""
+echo "=== PHASE 2: REBALANCE & DATA SKEW ==="
 
+for NUM_NODES in 3 4 5 6 7 8 10 12 15; do
+    echo ""
+    echo "-> Cluster $NUM_NODES nœuds..."
     rm -f results/chord_metrics.csv
 
-    java -cp bin chord.Main 8001 > /dev/null 2>&1 &
-    sleep 3
+    ACTIVE_AFTER=$((NUM_NODES - 1))
 
+    # Temps de stabilisation proportionnel à la taille du cluster
+    # Plus le cluster est grand, plus il faut de cycles pour que
+    # tous les nœuds se connaissent (finger tables complètes)
+    STAB_TIME=$((15 + NUM_NODES * 2))
+
+    java -Dchord.active_nodes=$ACTIVE_AFTER -cp bin chord.Main 8001 > /dev/null 2>&1 &
+    sleep 3
     for i in $(seq 2 $NUM_NODES); do
         PORT=$((8000 + i))
-        java -cp bin chord.Main $PORT 127.0.0.1:8001 > /dev/null 2>&1 &
+        java -Dchord.active_nodes=$ACTIVE_AFTER -cp bin chord.Main $PORT 127.0.0.1:8001 > /dev/null 2>&1 &
         sleep 1
     done
 
-    echo "   Waiting 15s for ring to stabilise..."
-    sleep 15
+    echo "   Stabilisation (${STAB_TIME}s)..."
+    sleep $STAB_TIME
 
-    echo "   Injecting 5000 keys to populate the cluster (50 clients x 100 req)..."
+    echo "   Injection de clés (50 clients x 100 req)..."
     java -cp bin chord.ChordLoadClient 127.0.0.1:8001 50 100 > /dev/null
+    sleep 3
 
-    sleep 5
-
-    # Build port list for snapshot
+    # Snapshot BEFORE
     PORTS=""
-    for i in $(seq 1 $NUM_NODES); do
-        PORTS="$PORTS $((8000 + i))"
-    done
-
-    # Snapshot BEFORE crash
-    echo "   Taking DATA_SKEW_BEFORE snapshot..."
+    for i in $(seq 1 $NUM_NODES); do PORTS="$PORTS $((8000 + i))"; done
+    echo "   Snapshot BEFORE..."
     java -cp bin chord.ChordSnapshotClient before $PORTS
     sleep 1
 
-    # Kill last node to force rebalance — mesure le temps depuis le shell
-    LAST_PORT=$((8000 + NUM_NODES))
-    echo "   Killing Node $LAST_PORT to force ring repair..."
-    REBALANCE_START=$(date +%s%3N)
-    pkill -f "chord.Main $LAST_PORT"
+    # Kill BRUTAL (SIGKILL) — empêche le LEAVE propre de Chord
+    # On tue le PREMIER nœud (8001) car c'est le bootstrap,
+    # tous les autres ont 8001 ou son successeur dans leur finger table
+    # → garantit que quelqu'un détecte le crash
+    KILL_PORT=8001
+    KILL_PID=$(pgrep -f "chord.Main $KILL_PORT")
+    echo "   Kill -9 node $KILL_PORT (pid=$KILL_PID)..."
+    kill -9 $KILL_PID 2>/dev/null
 
-    ACTIVE_AFTER=$((NUM_NODES - 1))
-    echo "   Waiting 60s for Stabilize to converge..."
-    sleep 60
+    # Stabilize tourne toutes les 2s — 30s = ~15 cycles
+    echo "   Attente convergence Stabilize (30s)..."
+    sleep 30
 
-    REBALANCE_END=$(date +%s%3N)
-    REBALANCE_DURATION=$((REBALANCE_END - REBALANCE_START))
-
-    # Log REBALANCE directement depuis le script (fiable pour tous les cluster sizes)
-    echo "   REBALANCE logged: duration=${REBALANCE_DURATION}ms active_nodes=${ACTIVE_AFTER}"
-    TIMESTAMP=$(date +%s%3N)
-    echo "${TIMESTAMP},REBALANCE,${REBALANCE_DURATION},0,,active_nodes=${ACTIVE_AFTER}" >> results/chord_metrics.csv
-
-    # Snapshot AFTER rebalance
+    # Snapshot AFTER sur tous les nœuds restants (8002..8NUM_NODES)
     PORTS_AFTER=""
-    for i in $(seq 1 $((NUM_NODES - 1))); do
-        PORTS_AFTER="$PORTS_AFTER $((8000 + i))"
-    done
-    echo "   Taking DATA_SKEW_AFTER snapshot..."
+    for i in $(seq 2 $NUM_NODES); do PORTS_AFTER="$PORTS_AFTER $((8000 + i))"; done
+    echo "   Snapshot AFTER..."
     java -cp bin chord.ChordSnapshotClient after $PORTS_AFTER
     sleep 1
 
     cp results/chord_metrics.csv results/chord_metrics_nodes${NUM_NODES}.csv
-
-    pkill -f "chord.Main"
+    pkill -f "chord.Main" 2>/dev/null
     sleep 2
 done
 
 # ==============================================================================
-# PHASE 3 : MERGE + PLOTTING
+# PHASE 3 : FUSION + GRAPHES
 # ==============================================================================
 echo ""
-echo "=== PHASE 3: MERGING CSVs ==="
+echo "=== PHASE 3: FUSION CSV + GRAPHES ==="
 
-MERGED="results/chord_metrics_rebalance.csv"
-FIRST_RUN="results/chord_metrics_nodes3.csv"
-
-if [ -f "$FIRST_RUN" ]; then
-    head -1 "$FIRST_RUN" > "$MERGED"
+MERGED="results/chord_metrics_phase2.csv"
+FIRST="results/chord_metrics_nodes3.csv"
+if [ -f "$FIRST" ]; then
+    head -1 "$FIRST" > "$MERGED"
     for NUM_NODES in 3 4 5 6 7 8 10 12 15; do
         FILE="results/chord_metrics_nodes${NUM_NODES}.csv"
-        if [ -f "$FILE" ]; then
-            tail -n +2 "$FILE" >> "$MERGED"
-        fi
+        [ -f "$FILE" ] && tail -n +2 "$FILE" >> "$MERGED"
     done
-    echo "Phase 2 merged CSV ready: $MERGED"
 fi
 
 FINAL="results/chord_metrics.csv"
-if [ -f "results/chord_metrics_phase1.csv" ] && [ -f "$MERGED" ]; then
-    cat results/chord_metrics_phase1.csv > "$FINAL"
-    tail -n +2 "$MERGED" >> "$FINAL"
-    echo "Final merged CSV ready: $FINAL"
-fi
+cat results/chord_metrics_phase1.csv > "$FINAL"
+[ -f "$MERGED" ] && tail -n +2 "$MERGED" >> "$FINAL"
 
+echo "CSV final prêt : $FINAL"
 echo ""
-echo "Generating comparative performance graphs..."
+echo "Génération des graphes..."
 python3 plot_metrics_chord.py
-echo "✓ All analytical graphs have been generated in: results/graphs/"
+echo "✓ Graphes générés dans results/graphs/"

@@ -16,11 +16,12 @@ public class StabilizeService {
     private int nextFinger = 1;
     private int cycleCount = 0;
 
-    // Rebalance detection state
-    private Address  lastKnownSuccessor = null;
-    private boolean  rebalanceInProgress = false;
-    private long     rebalanceStartMs    = 0;
-    private int      storeBeforeRebalance = 0;
+    // --- Rebalance tracking ---
+    // On chronomètre depuis le premier cycle où le successeur ne répond plus
+    // jusqu'au premier cycle où il répond à nouveau (ou un remplaçant est trouvé).
+    private boolean rebalancing      = false;
+    private long    rebalanceStartMs = 0;
+    private Address deadSuccessor    = null;
 
     private volatile Thread stabThread = null;
 
@@ -36,9 +37,7 @@ public class StabilizeService {
     }
 
     public void stop() {
-        if (stabThread != null) {
-            stabThread.interrupt();
-        }
+        if (stabThread != null) stabThread.interrupt();
     }
 
     private void loop() {
@@ -58,7 +57,6 @@ public class StabilizeService {
         System.out.println("[Stabilizer-" + node.self.getPort() + "] arrêté.");
     }
 
-
     void stabilize() {
         Address succ = node.fingerTable.getSuccessor();
 
@@ -72,27 +70,22 @@ public class StabilizeService {
             if (pred != null && !pred.equals(node.self)) {
                 node.fingerTable.setSuccessor(pred);
                 succ = pred;
-                System.out.println("[Stabilize " + node.self.getPort()
-                        + "] successeur initialise depuis predecesseur -> " + succ);
             } else {
                 return;
             }
         }
 
-        // Detect successor failure → start rebalance tracking
         ChordNodeHandler.PredecessorResult res = handler.remoteCallGetPredecessor(succ);
-        if (!res.reachable) {
-            System.out.println("[Stabilize " + node.self.getPort()
-                    + "] successeur " + succ + " ne répond pas → recherche d'un backup");
 
-            // Start rebalance measurement if this is a new failure
-            if (!rebalanceInProgress || !succ.equals(lastKnownSuccessor)) {
-                rebalanceInProgress  = true;
-                rebalanceStartMs     = System.currentTimeMillis();
-                storeBeforeRebalance = handler.getStoreSize();
-                lastKnownSuccessor   = succ;
+        if (!res.reachable) {
+            // --- Début du rebalance : on note l'heure du premier échec ---
+            if (!rebalancing) {
+                rebalancing      = true;
+                rebalanceStartMs = System.currentTimeMillis();
+                deadSuccessor    = succ;
                 System.out.println("[Stabilize " + node.self.getPort()
-                        + "] REBALANCE started (successor crash detected)");
+                        + "] CRASH DÉTECTÉ : successeur " + succ
+                        + " ne répond plus — chrono rebalance démarré");
             }
 
             Address replacement = findLiveReplacement(succ);
@@ -100,46 +93,35 @@ public class StabilizeService {
                 node.fingerTable.setSuccessor(replacement);
                 succ = replacement;
                 System.out.println("[Stabilize " + node.self.getPort()
-                        + "] nouveau successeur : " + replacement);
+                        + "] nouveau successeur trouvé : " + replacement);
                 res = handler.remoteCallGetPredecessor(succ);
                 if (!res.reachable) return;
+
+                // Remplaçant trouvé et joignable → rebalance terminé
+                logRebalanceCompleted();
             } else {
                 node.fingerTable.setSuccessor(node.self);
                 System.out.println("[Stabilize " + node.self.getPort()
-                        + "] aucun backup vivant → anneau réduit à ce nœud");
-
-                // Log rebalance as completed (degenerate case: ring shrank to 1)
-                if (rebalanceInProgress) {
-                    long duration = System.currentTimeMillis() - rebalanceStartMs;
-                    int keysMoved = handler.getStoreSize() - storeBeforeRebalance;
-                    handler.logRebalance(duration, Math.max(0, keysMoved), 1);
-                    rebalanceInProgress = false;
-                }
+                        + "] aucun backup → anneau réduit à ce nœud");
+                logRebalanceCompleted();
                 return;
             }
-        } else if (rebalanceInProgress) {
-            // Successor is now reachable again — rebalance has converged
-            long duration  = System.currentTimeMillis() - rebalanceStartMs;
-            int  keysMoved = handler.getStoreSize() - storeBeforeRebalance;
-            // Count live nodes on the ring (approximation via successor list)
-            int activeNodes = node.successorList.size() + 1;
-            handler.logRebalance(duration, Math.max(0, keysMoved), activeNodes);
-            System.out.println("[Stabilize " + node.self.getPort()
-                    + "] REBALANCE completed in " + duration + "ms — keys gained: " + keysMoved);
-            rebalanceInProgress = false;
-            lastKnownSuccessor  = null;
+
+        } else if (rebalancing && succ.equals(deadSuccessor)) {
+            // Le successeur mort répond à nouveau (cas peu probable mais possible)
+            logRebalanceCompleted();
+        } else if (rebalancing) {
+            // Un nouveau successeur valide est en place et joignable
+            logRebalanceCompleted();
         }
 
         Address x = res.predecessor;
-
         if (x != null && !x.equals(node.self)) {
             int xId    = ChordHasher.hash(x);
             int succId = ChordHasher.hash(succ);
             if (ChordHasher.inRange(xId, node.id, succId)) {
                 node.fingerTable.setSuccessor(x);
                 succ = x;
-                System.out.println("[Stabilize " + node.self.getPort()
-                        + "] successeur mis à jour -> " + succ);
             }
         }
 
@@ -147,11 +129,36 @@ public class StabilizeService {
         updateSuccessorList(succ);
     }
 
+    /**
+     * Log le REBALANCE avec la vraie durée mesurée depuis la détection du crash.
+     * active_nodes est lu depuis -Dchord.active_nodes si dispo (passé par le script),
+     * sinon estimé depuis la successorList.
+     */
+    private void logRebalanceCompleted() {
+        if (!rebalancing) return;
+        long duration = System.currentTimeMillis() - rebalanceStartMs;
+        rebalancing   = false;
+        deadSuccessor = null;
+
+        int activeNodes;
+        String prop = System.getProperty("chord.active_nodes");
+        if (prop != null) {
+            try { activeNodes = Integer.parseInt(prop); }
+            catch (NumberFormatException e) { activeNodes = node.successorList.size() + 1; }
+        } else {
+            activeNodes = node.successorList.size() + 1;
+        }
+
+        MetricsLogger.get().log("REBALANCE", duration, 0, "",
+                "active_nodes=" + activeNodes);
+        System.out.println("[Stabilize " + node.self.getPort()
+                + "] REBALANCE terminé en " + duration + "ms"
+                + " — active_nodes=" + activeNodes);
+    }
 
     private void checkPredecessorAlive() {
         Address pred = node.predecessor;
         if (pred == null || pred.equals(node.self)) return;
-
         ChordNodeHandler.PredecessorResult r = handler.remoteCallGetPredecessor(pred);
         if (!r.reachable) {
             System.out.println("[Stabilize " + node.self.getPort()
@@ -160,9 +167,8 @@ public class StabilizeService {
         }
     }
 
-
     private Address findLiveReplacement(Address deadNode) {
-        synchronized(node){
+        synchronized (node) {
             for (Address candidate : node.successorList) {
                 if (!candidate.equals(deadNode) && !candidate.equals(node.self)) {
                     ChordNodeHandler.PredecessorResult r = handler.remoteCallGetPredecessor(candidate);
@@ -170,22 +176,18 @@ public class StabilizeService {
                 }
             }
         }
-
         for (int i = 0; i < ChordHasher.M; i++) {
             Address finger = node.fingerTable.get(i);
             if (finger == null || finger.equals(deadNode) || finger.equals(node.self)) continue;
             ChordNodeHandler.PredecessorResult r = handler.remoteCallGetPredecessor(finger);
             if (r.reachable) return finger;
         }
-
         return null;
     }
-
 
     private void updateSuccessorList(Address succ) {
         List<Address> list = new ArrayList<>();
         list.add(succ);
-
         Address current = succ;
         while (list.size() < ChordNode.SUCCESSOR_LIST_SIZE) {
             Address next = handler.remoteCallFindSuccessor(current, ChordHasher.hash(current) + 1);
@@ -193,18 +195,14 @@ public class StabilizeService {
             if (!list.contains(next)) list.add(next);
             current = next;
         }
-
         node.updateSuccessorList(list);
     }
 
-
     void fixFingers() {
         if (nextFinger >= ChordHasher.M) nextFinger = 1;
-
-        int start  = (node.id + (1 << nextFinger)) % ChordHasher.RING_SIZE;
+        int start = (node.id + (1 << nextFinger)) % ChordHasher.RING_SIZE;
         Address target = node.findSuccessor(start);
         node.fingerTable.set(nextFinger, target);
-
         System.out.println("[FixFingers " + node.self.getPort() + "] finger[" + nextFinger
                 + "] start=" + start + " -> " + target);
         nextFinger++;
