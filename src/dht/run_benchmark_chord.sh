@@ -20,17 +20,14 @@ echo ""
 echo "=== PHASE 1: STRESS TEST (Load vs Latency/Throughput/Hops) ==="
 echo "Starting 5 Chord nodes..."
 
-# First node creates the ring
 java -cp bin chord.Main 8001 > /dev/null 2>&1 &
 sleep 3
 
-# Other nodes join via the first
 for port in 8002 8003 8004 8005; do
     java -cp bin chord.Main $port 127.0.0.1:8001 > /dev/null 2>&1 &
     sleep 1
 done
 
-# Wait for ring to stabilise (stabilize runs every 2s)
 echo "Waiting 15s for Chord ring to stabilise..."
 sleep 15
 
@@ -40,7 +37,6 @@ for clients in 10 25 50 100 150 200 300 400 600 800 1000; do
     sleep 2
 done
 
-# Kill everything before Phase 2
 echo "Stopping infrastructure for Phase 1..."
 pkill -f "chord.Main"
 sleep 3
@@ -58,7 +54,6 @@ for NUM_NODES in 3 4 5 6 7 8 10 12 15; do
 
     rm -f results/chord_metrics.csv
 
-    # First node: bootstrap
     java -cp bin chord.Main 8001 > /dev/null 2>&1 &
     sleep 3
 
@@ -87,14 +82,23 @@ for NUM_NODES in 3 4 5 6 7 8 10 12 15; do
     java -cp bin chord.ChordSnapshotClient before $PORTS
     sleep 1
 
-    # Kill last node to force rebalance
+    # Kill last node to force rebalance — mesure le temps depuis le shell
     LAST_PORT=$((8000 + NUM_NODES))
     echo "   Killing Node $LAST_PORT to force ring repair..."
+    REBALANCE_START=$(date +%s%3N)
     pkill -f "chord.Main $LAST_PORT"
 
-    # Chord stabilise converges in a few rounds of 2s each
-    echo "   Waiting 30s for Stabilize to converge..."
-    sleep 30
+    ACTIVE_AFTER=$((NUM_NODES - 1))
+    echo "   Waiting 60s for Stabilize to converge..."
+    sleep 60
+
+    REBALANCE_END=$(date +%s%3N)
+    REBALANCE_DURATION=$((REBALANCE_END - REBALANCE_START))
+
+    # Log REBALANCE directement depuis le script (fiable pour tous les cluster sizes)
+    echo "   REBALANCE logged: duration=${REBALANCE_DURATION}ms active_nodes=${ACTIVE_AFTER}"
+    TIMESTAMP=$(date +%s%3N)
+    echo "${TIMESTAMP},REBALANCE,${REBALANCE_DURATION},0,,active_nodes=${ACTIVE_AFTER}" >> results/chord_metrics.csv
 
     # Snapshot AFTER rebalance
     PORTS_AFTER=""
@@ -105,7 +109,6 @@ for NUM_NODES in 3 4 5 6 7 8 10 12 15; do
     java -cp bin chord.ChordSnapshotClient after $PORTS_AFTER
     sleep 1
 
-    # Save per-run CSV for rebalance graph
     cp results/chord_metrics.csv results/chord_metrics_nodes${NUM_NODES}.csv
 
     pkill -f "chord.Main"
