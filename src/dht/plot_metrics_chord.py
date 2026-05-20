@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-plot_metrics.py — Generates 5 Comparative Analytical Graphs for all implementations.
+plot_metrics_chord.py — Generates 5 Analytical Graphs for Chord implementation.
 """
 
-import os
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -12,12 +11,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 CONFIGS = {
-    "chord":       {"csv": "results/chord_metrics.csv",       "color": "#2ECC71", "label": "Chord"},
+    "chord": {"csv": "results/chord_metrics.csv", "color": "#2ECC71", "label": "Chord"},
 }
 
-
 SKEW_CONFIGS = {
-    "chord":       {"csv": "results/chord_metrics_nodes15.csv",       "color": "#2ECC71", "label": "Chord"},
+    "chord": {"csv": "results/chord_metrics_nodes15.csv", "color": "#2ECC71", "label": "Chord"},
 }
 
 OUTPUT_DIR = Path("results/graphs")
@@ -41,12 +39,11 @@ def load_data(csv_path: str) -> pd.DataFrame:
     df["extra"]        = df["extra"].fillna("")
 
     df["clients"]      = df["extra"].str.extract(r'clients=(\d+)').astype(float)
+    df["nodes"]        = df["extra"].str.extract(r'nodes=(\d+)').astype(float)
     df["active_nodes"] = df["extra"].str.extract(r'active_nodes=(\d+)').astype(float)
     df["keys_count"]   = df["extra"].str.extract(r'keys_count=(\d+)').astype(float)
     df["node"]         = df["extra"].str.extract(r'node=(\d+)')
 
-    # For Chord: PUT_HOP rows carry the hop count; merge them with PUT rows for hop graph
-    # We treat PUT_HOP as a PUT with hop_count, ignoring latency (which is 0 there)
     df.loc[df["operation"] == "PUT_HOP", "operation"] = "PUT"
 
     return df
@@ -60,7 +57,7 @@ def format_ax(ax, title, xlabel, ylabel):
     ax.spines['right'].set_visible(False)
 
 if __name__ == "__main__":
-    print("=== PSAR Comparative Performance Plotter ===")
+    print("=== PSAR Chord Performance Plotter ===")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     datasets = {}
@@ -87,8 +84,7 @@ if __name__ == "__main__":
 
     for idx, (arch, (df, color, label)) in enumerate(datasets.items()):
 
-        # --- 1. Latency & Throughput (Stress Test) ---
-        # For latency: use PUT and GET rows that have a real latency_ms > 0
+        # --- 1. Latency & Throughput (Phase 1 — clients=N) ---
         stress_df = df[df["clients"].notnull() & (df["latency_ms"] > 0)]
         if not stress_df.empty:
             agg = stress_df.groupby("clients").agg(
@@ -103,40 +99,58 @@ if __name__ == "__main__":
             agg["throughput"] = agg["count"] / agg["duration_s"]
 
             agg = agg.sort_values("clients")
-            ax_lat.plot(agg["clients"], agg["avg_lat"], marker="o", lw=2.5, markersize=8, color=color, label=label)
-            ax_tpt.plot(agg["clients"], agg["throughput"], marker="s", lw=2.5, markersize=8, color=color, label=label)
+            ax_lat.plot(agg["clients"], agg["avg_lat"], marker="o", lw=2.5,
+                        markersize=8, color=color, label=label)
+            ax_tpt.plot(agg["clients"], agg["throughput"], marker="s", lw=2.5,
+                        markersize=8, color=color, label=label)
 
-        # --- 2. Hops ---
+        # --- 2. Hops vs nombre de nœuds (Phase 2 — nodes=N) ---
         hops_df = df[df["hop_count"].notnull() & (df["hop_count"] > 0)]
         if not hops_df.empty:
-            if "clients" in hops_df.columns and not hops_df["clients"].dropna().empty:
-                hop_agg = hops_df.groupby("clients")["hop_count"].mean().reset_index()
-                ax_hop.plot(hop_agg["clients"], hop_agg["hop_count"], marker="^", lw=2.5, markersize=8, color=color, label=label)
+            nodes_df = hops_df[hops_df["nodes"].notnull()]
+            if not nodes_df.empty:
+                # Phase 2 : hops en fonction du nombre de nœuds actifs
+                hop_agg = (nodes_df.groupby("nodes")["hop_count"]
+                                   .mean()
+                                   .reset_index()
+                                   .sort_values("nodes"))
+                ax_hop.plot(hop_agg["nodes"], hop_agg["hop_count"],
+                            marker="^", lw=2.5, markersize=8, color=color, label=label)
             else:
-                avg_h = hops_df["hop_count"].mean()
-                ax_hop.axhline(y=avg_h, color=color, linestyle="--", lw=2.5, label=f"{label} (Avg: {avg_h:.1f})")
+                # Fallback Phase 1 si pas de données Phase 2
+                clients_df = hops_df[hops_df["clients"].notnull()]
+                if not clients_df.empty:
+                    hop_agg = (clients_df.groupby("clients")["hop_count"]
+                                         .mean()
+                                         .reset_index()
+                                         .sort_values("clients"))
+                    ax_hop.plot(hop_agg["clients"], hop_agg["hop_count"],
+                                marker="^", lw=2.5, markersize=8, color=color, label=label)
 
         # --- 3. Rebalance Cost ---
         reb_data = df[(df["operation"] == "REBALANCE") & df["active_nodes"].notnull()]
         if not reb_data.empty:
             has_reb_data = True
-            reb_agg = reb_data.groupby("active_nodes")["latency_ms"].mean().reset_index().sort_values("active_nodes")
-            ax_reb.plot(reb_agg["active_nodes"], reb_agg["latency_ms"], marker="D", lw=2.5, markersize=8, color=color, label=label)
+            reb_agg = (reb_data.groupby("active_nodes")["latency_ms"]
+                               .mean()
+                               .reset_index()
+                               .sort_values("active_nodes"))
+            ax_reb.plot(reb_agg["active_nodes"], reb_agg["latency_ms"],
+                        marker="D", lw=2.5, markersize=8, color=color, label=label)
 
         # --- 4. Data Skew (Before vs After Crash) ---
         skew_before = df[df["operation"] == "DATA_SKEW_BEFORE"].copy()
         skew_after  = df[df["operation"] == "DATA_SKEW_AFTER"].copy()
 
         if not skew_after.empty and not skew_before.empty:
-            final_after = skew_after.sort_values("timestamp_ms").groupby("node").last().reset_index()
-
+            final_after   = skew_after.sort_values("timestamp_ms").groupby("node").last().reset_index()
             first_after_ts = skew_after["timestamp_ms"].min()
-            valid_before = skew_before[skew_before["timestamp_ms"] < first_after_ts]
+            valid_before  = skew_before[skew_before["timestamp_ms"] < first_after_ts]
 
             if not valid_before.empty:
                 final_before = valid_before.sort_values("timestamp_ms").groupby("node").last().reset_index()
-
-                skew_merged = pd.merge(final_before, final_after, on="node", how="outer", suffixes=('_before', '_after'))
+                skew_merged  = pd.merge(final_before, final_after, on="node",
+                                        how="outer", suffixes=('_before', '_after'))
                 skew_merged["keys_count_before"] = skew_merged["keys_count_before"].fillna(0)
                 skew_merged["keys_count_after"]  = skew_merged["keys_count_after"].fillna(0)
 
@@ -171,24 +185,29 @@ if __name__ == "__main__":
                     f"Before: {total_before} keys — After: {total_after} keys",
                     fontsize=13, fontweight="bold", pad=12)
 
-# --- Formatting & Saving ---
-    format_ax(ax_lat, "Average Request Latency vs Load", "Concurrent Clients", "Latency (ms)")
+    # --- Formatting & Saving ---
+    format_ax(ax_lat, "Average Request Latency vs Load",
+              "Concurrent Clients", "Latency (ms)")
     ax_lat.legend(loc="upper left")
     fig_lat.tight_layout()
     fig_lat.savefig(OUTPUT_DIR / "compare_latency_chord.png", dpi=150)
 
-    format_ax(ax_tpt, "Global System Throughput vs Load", "Concurrent Clients", "Requests / Second")
+    format_ax(ax_tpt, "Global System Throughput vs Load",
+              "Concurrent Clients", "Requests / Second")
     ax_tpt.legend(loc="upper left")
     fig_tpt.tight_layout()
     fig_tpt.savefig(OUTPUT_DIR / "compare_throughput_chord.png", dpi=150)
 
-    format_ax(ax_hop, "Network Efficiency (Hops per Request)", "Concurrent Clients", "Average Hop Count")
+    # Hops vs nombre de nœuds (comme le centralisé)
+    format_ax(ax_hop, "Network Efficiency (Hops per Request)",
+              "Number of Active Storage Nodes", "Average Hop Count")
     ax_hop.legend(loc="upper left")
     fig_hop.tight_layout()
     fig_hop.savefig(OUTPUT_DIR / "compare_hops_chord.png", dpi=150)
 
     if has_reb_data:
-        format_ax(ax_reb, "Rebalance Cost vs Node Count", "Number of Active Storage Nodes", "Rebalance Duration (ms)")
+        format_ax(ax_reb, "Rebalance Cost vs Node Count",
+                  "Number of Active Storage Nodes", "Rebalance Duration (ms)")
         ax_reb.legend(loc="upper left")
         fig_reb.tight_layout()
         fig_reb.savefig(OUTPUT_DIR / "compare_rebalance_chord.png", dpi=150)
@@ -212,15 +231,16 @@ if __name__ == "__main__":
         if skew_after.empty or skew_before.empty:
             continue
 
-        final_after = skew_after.sort_values("timestamp_ms").groupby("node").last().reset_index()
+        final_after    = skew_after.sort_values("timestamp_ms").groupby("node").last().reset_index()
         first_after_ts = skew_after["timestamp_ms"].min()
-        valid_before = skew_before[skew_before["timestamp_ms"] < first_after_ts]
+        valid_before   = skew_before[skew_before["timestamp_ms"] < first_after_ts]
 
         if valid_before.empty:
             continue
 
         final_before = valid_before.sort_values("timestamp_ms").groupby("node").last().reset_index()
-        skew_merged = pd.merge(final_before, final_after, on="node", how="outer", suffixes=('_before', '_after'))
+        skew_merged  = pd.merge(final_before, final_after, on="node",
+                                how="outer", suffixes=('_before', '_after'))
         skew_merged["keys_count_before"] = skew_merged["keys_count_before"].fillna(0)
         skew_merged["keys_count_after"]  = skew_merged["keys_count_after"].fillna(0)
         skew_merged = skew_merged.sort_values("node")

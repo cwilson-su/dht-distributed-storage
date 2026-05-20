@@ -2,13 +2,12 @@ package chord;
 
 import dht.Address;
 import dht.Message;
-import dht.NodeHandler;
-import dht.PeerRegistry;
 import metrics.MetricsLogger;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -17,14 +16,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * ChordLoadClient — Phase 1 stress test for Chord.
+ * ChordLoadClient — stress test et mesure de hops pour Chord.
  *
- * Usage: java chord.ChordLoadClient <nodeIP:port> <numClients> <reqPerClient>
+ * Usage Phase 1 : java chord.ChordLoadClient <nodeIP:port> <numClients> <reqPerClient>
+ * Usage Phase 2 : java chord.ChordLoadClient <nodeIP:port> <numClients> <reqPerClient> nodes=N
  *
- * Sends concurrent PUT requests directly to a Chord node and logs:
- *   - latency_ms  (end-to-end round-trip, measured here at client side)
- *   - hop_count   (from the REPLY message's hops field — set by ChordNodeHandler)
- *   - extra       clients=N  (to match the grouping used by plot_metrics.py)
+ * Sans 4ème argument  → tag extra = "clients=N" (latence/débit vs charge)
+ * Avec "nodes=N"      → tag extra = "nodes=N"   (hops vs taille de cluster)
  */
 public class ChordLoadClient {
 
@@ -33,71 +31,66 @@ public class ChordLoadClient {
 
     public static void main(String[] args) throws InterruptedException {
         if (args.length < 3) {
-            System.out.println("Usage: java chord.ChordLoadClient <nodeIP:port> <numClients> <reqPerClient>");
+            System.out.println("Usage: java chord.ChordLoadClient <nodeIP:port> <numClients> <reqPerClient> [nodes=N]");
             return;
         }
 
         MetricsLogger.configure("results/chord_metrics.csv");
 
-        Address entryNode   = Address.parse(args[0]);
-        int     numClients  = Integer.parseInt(args[1]);
+        Address entryNode    = Address.parse(args[0]);
+        int     numClients   = Integer.parseInt(args[1]);
         int     reqPerClient = Integer.parseInt(args[2]);
 
+        // Paramètre optionnel : "nodes=N" pour mesure hops vs taille de cluster (Phase 2)
+        // Si absent, on utilise "clients=N" pour la mesure charge vs latence (Phase 1)
+        String extraTag = (args.length >= 4 && args[3].startsWith("nodes="))
+                ? args[3]
+                : "clients=" + numClients;
+
         System.out.println("--- Chord Load Benchmark ---");
-        System.out.printf("Entry node: %s | Concurrent clients: %d | Requests/client: %d%n",
-                entryNode, numClients, reqPerClient);
+        System.out.printf("Entry node: %s | Clients: %d | Req/client: %d | tag: %s%n",
+                entryNode, numClients, reqPerClient, extraTag);
 
         ExecutorService pool = Executors.newFixedThreadPool(numClients);
+        AtomicInteger seqBase = new AtomicInteger(0);
         long globalStart = System.currentTimeMillis();
 
-        AtomicInteger seqBase = new AtomicInteger(0);
-
         for (int i = 0; i < numClients; i++) {
-            final int clientId = i;
             pool.submit(() -> {
-                // Each thread gets its own ephemeral listening port for replies
-                int replyPort = 20000 + (int)(Math.random() * 30000);
-                Address clientAddr = null;
-                try { clientAddr = new Address(replyPort); } catch (Exception e) {
-                    replyPort = 20000 + (int)(Math.random() * 30000);
-                    clientAddr = new Address(replyPort);
-                }
-                final Address myAddr = clientAddr;
-
                 for (int r = 0; r < reqPerClient; r++) {
-                    String key = "chordKey_" + clientId + "_" + r;
+                    String key = UUID.randomUUID().toString();
                     String val = UUID.randomUUID().toString().substring(0, 16);
                     int seq = seqBase.incrementAndGet();
 
-                    Message putMsg = new Message(
-                            Message.Type.PUT, key, val,
-                            myAddr, myAddr, seq, 0);
+                    try (ServerSocket ss = new ServerSocket(0)) {
+                        int replyPort = ss.getLocalPort();
+                        Address myAddr = new Address(replyPort);
 
-                    long t0 = System.nanoTime();
-                    // For Chord, PUT is fire-and-forget (the node routes it internally).
-                    // We send and don't wait for a reply — just measure dispatch latency.
-                    // To also capture hop counts we piggyback a GET immediately after.
-                    sendFireAndForget(entryNode, putMsg);
-                    long putLatencyMs = (System.nanoTime() - t0) / 1_000_000L;
+                        // PUT — fire and forget, mesure latence dispatch
+                        Message putMsg = new Message(Message.Type.PUT, key, val,
+                                myAddr, myAddr, seq, 1);
+                        long t0 = System.nanoTime();
+                        sendFireAndForget(entryNode, putMsg);
+                        long putLatMs = (System.nanoTime() - t0) / 1_000_000L;
+                        MetricsLogger.get().log("PUT", putLatMs, 0, key, extraTag);
 
-                    // Log PUT latency; hop count captured on the node side (PUT_HOP rows)
-                    // We store clients= in extra so plot_metrics.py can group by load level.
-                    MetricsLogger.get().log("PUT", putLatencyMs, 0, key,
-                            "clients=" + numClients);
+                        // GET — mesure latence + hops via reply
+                        int getSeq = seqBase.incrementAndGet();
+                        Message getMsg = new Message(Message.Type.GET, key, "",
+                                myAddr, myAddr, getSeq, 1);
 
-                    // GET to measure routing hops end-to-end
-                    int getSeq = seqBase.incrementAndGet();
-                    Message getMsg = new Message(
-                            Message.Type.GET, key, "",
-                            myAddr, myAddr, getSeq, 0);
+                        ss.setSoTimeout(REPLY_TIMEOUT_MS);
+                        long tg0 = System.nanoTime();
+                        sendFireAndForget(entryNode, getMsg);
+                        Message reply = waitReply(ss);
+                        long getLatMs = (System.nanoTime() - tg0) / 1_000_000L;
 
-                    long tg0 = System.nanoTime();
-                    Message reply = sendAndReceive(entryNode, getMsg, replyPort);
-                    long getLatencyMs = (System.nanoTime() - tg0) / 1_000_000L;
+                        int hops = (reply != null) ? reply.getHops() : 0;
+                        MetricsLogger.get().log("GET", getLatMs, hops, key, extraTag);
 
-                    int hops = (reply != null) ? reply.getHops() : 0;
-                    MetricsLogger.get().log("GET", getLatencyMs, hops, key,
-                            "clients=" + numClients);
+                    } catch (Exception e) {
+                        // port occupé ou timeout — on continue
+                    }
                 }
             });
         }
@@ -106,12 +99,11 @@ public class ChordLoadClient {
         pool.awaitTermination(15, TimeUnit.MINUTES);
         long totalMs = System.currentTimeMillis() - globalStart;
 
-        System.out.println("--- Chord Benchmark Completed in " + totalMs + " ms ---");
-        double throughput = ((double)(numClients * reqPerClient * 2) / totalMs) * 1000;
-        System.out.printf("Global Average Throughput: %.2f req/sec%n", throughput);
+        System.out.println("--- Benchmark terminé en " + totalMs + " ms ---");
+        System.out.printf("Throughput: %.2f req/sec%n",
+                ((double)(numClients * reqPerClient * 2) / totalMs) * 1000);
     }
 
-    /** Send a message and do not wait for a reply (fire-and-forget). */
     private static void sendFireAndForget(Address dest, Message msg) {
         try (Socket s = new Socket()) {
             s.connect(new InetSocketAddress(dest.getIp(), dest.getPort()), CONNECT_TIMEOUT_MS);
@@ -119,34 +111,15 @@ public class ChordLoadClient {
                 out.writeObject(msg);
                 out.flush();
             }
-        } catch (Exception e) {
-            // silently ignore — node may be temporarily busy
-        }
+        } catch (Exception ignored) {}
     }
 
-    /**
-     * Send a GET and wait for the REPLY on a temporary server socket.
-     * The ChordNode will route the GET to the responsible node, which replies
-     * directly to m.getOrigin() (the client address).
-     */
-    private static Message sendAndReceive(Address dest, Message msg, int listenPort) {
-        // Open a server socket to catch the reply, then send the GET
-        try (java.net.ServerSocket ss = new java.net.ServerSocket(listenPort)) {
-            ss.setSoTimeout(REPLY_TIMEOUT_MS);
-
-            // Send GET in a separate thread so we can accept() immediately
-            Thread sender = new Thread(() -> sendFireAndForget(dest, msg));
-            sender.setDaemon(true);
-            sender.start();
-
-            try (Socket conn = ss.accept();
-                 ObjectInputStream in = new ObjectInputStream(conn.getInputStream())) {
-                Object obj = in.readObject();
-                if (obj instanceof Message m) return m;
-            }
-        } catch (Exception e) {
-            // timeout or error — return null (caller handles it)
-        }
+    private static Message waitReply(ServerSocket ss) {
+        try (Socket conn = ss.accept();
+             ObjectInputStream in = new ObjectInputStream(conn.getInputStream())) {
+            Object obj = in.readObject();
+            if (obj instanceof Message m) return m;
+        } catch (Exception ignored) {}
         return null;
     }
 }

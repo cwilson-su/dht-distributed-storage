@@ -4,8 +4,8 @@ import dht.Address;
 
  
 public class ChordHasher {
-    public static final int M = 6;
-    public static final int RING_SIZE = 1 << M; // 2^M = 64
+    public static final int M = 8;
+    public static final int RING_SIZE = 1 << M; 
 
 
     public static int hash(Address addr) {
