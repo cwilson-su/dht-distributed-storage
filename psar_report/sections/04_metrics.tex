@@ -1,5 +1,68 @@
 \section{Analyse des métriques}
 
+Cette section présente les résultats expérimentaux obtenus pour chacune des implémentations développées dans le cadre du projet. Pour chaque architecture, nous analysons quatre dimensions : la latence moyenne des requêtes sous charge croissante, le débit global du système, l'efficacité du routage mesurée en nombre de sauts, et lorsque applicable  le comportement du système face aux changements de topologie. L'objectif est de relier la forme des courbes aux choix architecturaux de chaque implémentation et d'en dégager les avantages et limites observés expérimentalement.
+
+\subsection{Analyse des métriques pour la version centralisée}
+
+\subsubsection{Latence moyenne des requêtes en fonction de la charge}
+
+\begin{wrapfigure}{r}{0.44\textwidth}
+    \centering
+    \includegraphics[width=0.40\textwidth]{graphs/compare_latency.png}
+    \caption{Latence moyenne des requêtes en fonction de la charge pour la version centralisée.}
+    \label{fig:central_metrics_latency}
+\end{wrapfigure}
+
+La Figure~\ref{fig:central_metrics_latency} montre une croissance quasi linéaire de la latence moyenne en fonction du nombre de clients concurrents, passant d'environ 80 ms sous faible charge à plus de 2000 ms sous charge maximale de 1000 clients. Ce comportement est directement imputable au goulot d'étranglement structurel du coordinator central : toutes les requêtes transitent obligatoirement par lui avant d'être routées vers le nœud de stockage responsable. Sous forte charge, les requêtes s'accumulent dans la file d'attente du coordinator, et le temps d'attente devient dominant par rapport au temps de traitement effectif. La latence reflète donc directement la saturation progressive du coordinator, qui constitue le point de contention unique de cette architecture.
+
+\newpage
+
+\subsubsection{Débit global du système en fonction de la charge}
+
+\begin{wrapfigure}{l}{0.44\textwidth}
+    \centering
+    \includegraphics[width=0.40\textwidth]{graphs/compare_throughput.png}
+    \caption{Débit global du système en fonction de la charge pour la version centralisée.}
+    \label{fig:central_metrics_throughput}
+\end{wrapfigure}
+
+La Figure~\ref{fig:central_metrics_throughput} présente une anomalie notable aux faibles charges : le débit oscille de manière irrégulière entre 10 et 50 clients avant de converger brusquement vers un plateau stable d'environ 480 requêtes par seconde, maintenu jusqu'à 1000 clients concurrents. L'irrégularité initiale s'explique par la phase de warm-up du système : à très faible charge, les fenêtres de mesure sont courtes et les variations statistiques sont amplifiées. Le plateau à 480 req/sec correspond à la capacité maximale de traitement du coordinator, limité par son pool de threads et par le fait qu'il sérialise le routage de chaque requête. Une fois ce plafond atteint, l'ajout de clients supplémentaires n'augmente plus le débit il allonge uniquement les files d'attente, ce qui explique la croissance continue de la latence observée précédemment.
+
+\subsubsection{Efficacité du réseau : nombre moyen de sauts par requête}
+
+\begin{wrapfigure}{r}{0.44\textwidth}
+    \centering
+    \includegraphics[width=0.40\textwidth]{graphs/compare_hops.png}
+    \caption{Nombre moyen de sauts par requête pour la version centralisée.}
+    \label{fig:central_metrics_hops}
+\end{wrapfigure}
+
+La Figure~\ref{fig:central_metrics_hops} présente une ligne parfaitement plate à 4 hops, indépendante de la charge. Ce résultat est une conséquence directe de l'architecture centralisée : chaque requête emprunte invariablement le même chemin en quatre étapes client vers coordinator, coordinator vers nœud de stockage, nœud vers coordinator, coordinator vers client. Ce nombre est déterminé uniquement par la topologie fixe du système et ne dépend ni du nombre de clients simultanés ni de l'état de charge. C'est à la fois un avantage le comportement réseau est parfaitement prévisible et une limite : l'architecture ne peut pas optimiser ce chemin sans modifier sa topologie fondamentale.
+
+\subsubsection{Coût du rebalance en fonction du nombre de nœuds}
+
+\begin{wrapfigure}{l}{0.44\textwidth}
+    \centering
+    \includegraphics[width=0.40\textwidth]{graphs/compare_rebalance.png}
+    \caption{Coût du rebalance en fonction du nombre de nœuds pour la version centralisée.}
+    \label{fig:central_metrics_rebalance}
+\end{wrapfigure}
+
+La Figure~\ref{fig:central_metrics_rebalance} montre une décroissance marquée du temps de rebalance lorsque le nombre de nœuds actifs augmente, passant de plus de 53 secondes pour 3 nœuds à environ 29 secondes pour 9 nœuds, suivie d'une légère remontée au-delà. Lorsque le cluster est petit, chaque nœud survivant reçoit une proportion élevée des clés orphelines, ce qui génère des transferts unitaires plus volumineux. À mesure que le cluster grandit, la charge orpheline se répartit sur davantage de nœuds destinataires, réduisant la taille de chaque transfert individuel. La légère remontée au-delà de 9 nœuds s'explique par l'augmentation du nombre de messages de coordination nécessaires pour orchestrer les transferts entre de nombreux nœuds.
+
+/newpage
+
+\subsubsection{Distribution des clés avant et après crash}
+
+\begin{wrapfigure}{r}{0.44\textwidth}
+    \centering
+    \includegraphics[width=0.40\textwidth]{graphs/compare_skew.png}
+    \caption{Distribution des clés avant et après crash pour la version centralisée.}
+    \label{fig:central_metrics_skew}
+\end{wrapfigure}
+
+La Figure~\ref{fig:central_metrics_skew} illustre la distribution des clés dans un cluster de 15 nœuds avant le crash du nœud 8015, puis après le rebalance. Avant le crash, la distribution est quasi uniforme entre 309 et 360 clés par nœud ce qui valide l'efficacité du hachage modulo comme mécanisme de répartition. Après le rebalance, les clés orphelines sont redistribuées et la distribution reste équilibrée, avec un total de clés identique avant et après. Ce résultat confirme que le mécanisme de rebalance node-to-node préserve l'intégralité des données et rétablit une distribution homogène sans perte, ce qui constitue l'avantage principal de cette architecture centralisée.
+
 \subsection{Analyse des métriques pour la DHT naïve}
 
 Cette sous-section regroupe les mesures obtenues pour la deuxième génération, c'est-à-dire l'architecture non structurée inspirée de \textit{Gnutella}. L'objectif n'est pas seulement de présenter les courbes expérimentales, mais aussi de relier leur forme aux mécanismes introduits dans l'implémentation : \textit{flooding}, \textit{pong caching}, \textit{reverse path caching} et convergence progressive vers un maillage dense.
@@ -90,3 +153,91 @@ Cette mesure confirme donc une limite structurelle importante de la DHT naïve. 
 \subsubsection{Synthèse}
 
 Pris ensemble, ces quatre graphes montrent que la DHT naïve ne doit pas être analysée comme un simple réseau d'inondation brut. Les mécanismes ajoutés au cours de son évolution --- en particulier le \textit{pong caching} pour la convergence topologique et le \textit{reverse path caching} pour la mise en cache opportuniste --- modifient profondément son comportement observé. La latence diminue lorsque le cache devient efficace, le débit croît jusqu'à une saturation imposée par les ressources d'exécution, le nombre moyen de sauts reste presque constant dans un cluster dense, et le temps de convergence révèle en même temps la limite fondamentale de passage à l'échelle d'une architecture non structurée. Cette lecture métrique éclaire donc directement la transition vers la génération suivante : malgré les gains obtenus, la nécessité d'un routage déterministe et d'une meilleure scalabilité motive naturellement l'adoption d'une DHT structurée.
+
+
+\subsection{Analyse des métriques pour la version Chord}
+
+\subsubsection{Latence moyenne des requêtes en fonction de la charge} 
+
+\begin{wrapfigure}{r}{0.44\textwidth}
+    \centering
+    \includegraphics[width=0.40\textwidth]{prism-uploads/compare_latency_chord.png}
+    \caption{Latence moyenne des requêtes en fonction de la charge pour Chord.}
+    \label{fig:chord_metrics_latency}
+\end{wrapfigure}
+
+La Figure~\ref{fig:chord_metrics_latency} montre une croissance régulière de la latence, passant d'environ 35 ms sous faible charge à plus de 1070 ms à 1000 clients. Ce qui s'explique par le routage Chord : chaque requête traverse en moyenne \(O(\log N)\) nœuds intermédiaires avant d'atteindre le responsable. Sous faible charge, ce surcoût est négligeable. Quand la charge augmente, les files d'attente s'allongent à chaque nœud traversé, et les délais s'accumulent. Contrairement au centralisé dont la contention est concentrée sur un unique coordinator, Chord distribue cette contention sur l'ensemble de l'anneau --- ce qui atténue la dégradation mais ne l'élimine pas.
+
+
+\vspace{1.0em}
+\subsubsection{Débit global du système en fonction de la charge}            
+
+\begin{wrapfigure}{l}{0.44\textwidth}
+    \centering
+    \includegraphics[width=0.40\textwidth]{prism-uploads/compare_throughput_chord.png}
+    \caption{Débit global du système en fonction de la charge pour Chord.}
+    \label{fig:chord_metrics_throughput}
+\end{wrapfigure}
+
+La Figure~\ref{fig:chord_metrics_throughput} présente au début une instabilité marquée entre 10 et 100 clients, avec une chute brutale à 45 req/s à 50 clients suivie d'un pic à 340 req/s à 100 clients, avant une progression régulière de 200 à 480 req/s jusqu'à 1000 clients. Cela s'explique par la phase de préparation de l'anneau : à très faible charge, la finger table n'est pas encore complètement stabilisée et certaines requêtes sont mal routées, ce qui dégrade ponctuellement le débit mesuré. Une fois le service de stabilisation convergé, le comportement devient régulier.
+La charge est répartie sur les cinq nœuds de l'anneau, chacun ne traitant qu'une fraction des requêtes, ce qui repousse le seuil de saturation.
+
+
+
+
+\subsubsection{Efficacité du réseau : nombre moyen de sauts par requête}            
+
+\begin{wrapfigure}{r}{0.44\textwidth}
+    \centering
+    \includegraphics[width=0.40\textwidth]{prism-uploads/compare_hops_chord.png}
+    \caption{Nombre moyen de sauts par requête pour Chord.}
+    \label{fig:chord_metrics_hops}
+\end{wrapfigure}
+
+La Figure~\ref{fig:chord_metrics_hops} montre une courbe stable, oscillant dans un intervalle très étroit entre 1,97 et 2,00 sauts, indépendamment de la charge. C'est la validation expérimentale de la propriété fondamentale de Chord : le routage via la finger table garantit un nombre de sauts en \(O(\log N)\), déterminé uniquement par la topologie de l'anneau et non par le niveau de charge. La valeur observée de \(\approx 2\) sauts est légèrement supérieure à la valeur théorique pour \(N = 5\) nœuds, ce qui s'explique par la taille réduite de l'espace d'adressage \(2^6 = 64\) qui limite l'efficacité de la finger table.
+
+
+\vspace{2.5em}
+
+
+\subsubsection{Coût du rebalance en fonction du nombre de nœuds}
+
+\begin{figure}[!ht]
+    \centering
+    \begin{minipage}[t]{0.44\textwidth}
+        \vspace{0pt}
+        \centering
+        \includegraphics[width=0.95\textwidth]{prism-uploads/compare_rebalance_chord.png}
+        \caption{Coût du rebalance en fonction du nombre de nœuds pour Chord.}
+        \label{fig:chord_metrics_rebalance}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.52\textwidth}
+        \vspace{0pt}
+        La Figure~\ref{fig:chord_metrics_rebalance} présente un pic à 34 ms pour 3 nœuds actifs, suivi d'une décroissance rapide vers une courbe stable entre 5 et 8 ms pour tous les clusters de taille supérieure. Le pic s'explique par le très petit anneau : avec seulement deux survivants, le service de stabilisation doit explorer l'ensemble de la finger table avant de trouver un remplaçant joignable, ce qui nécessite plusieurs cycles de 2 secondes.
+
+        Pour les clusters plus grands, le temps à 5-8 ms montre que la réparation de l'anneau est une opération locale dans Chord. Seul le nœud dont le successeur est mort doit agir, en consultant simplement le premier candidat valide de sa liste de successeurs de secours. La durée ne dépend donc pas de la taille du cluster.
+    \end{minipage}
+\end{figure}
+
+
+\newpage 
+\subsubsection{Distribution des clés avant et après crash}
+
+\begin{figure}[!ht]
+    \centering
+    \begin{minipage}[t]{0.52\textwidth}
+        \vspace{0pt}
+        La Figure~\ref{fig:chord_metrics_skew} illustre la distribution des clés dans un cluster de 15 nœuds avant et après le crash du nœud bootstrap. Avant le crash, la distribution est fortement hétérogène : les nœuds 34 et 7 concentrent respectivement 1757 et environ 2150 clés, tandis que la majorité des nœuds stockent entre 36 et 131 clés seulement. Cela révèle une limite du \textit{consistent hashing} à petite échelle : avec seulement 15 nœuds sur un anneau de 64 positions, les identifiants ne sont pas régulièrement espacés et certains nœuds héritent de plages de responsabilité beaucoup plus larges.
+
+        Après le crash, les nœuds survivants conservent exactement le même nombre de clés qu'avant. Le total passe de 4993 à 4953 clés, soit une perte de 40 clés. Ce résultat met en évidence la limite l'architecture sans réplication : en cas de panne brutale, les données du nœud mort sont définitivement perdues.
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.44\textwidth}
+        \vspace{0pt}
+        \centering
+        \includegraphics[width=0.95\textwidth]{prism-uploads/compare_skew_chord.png}
+        \caption{Distribution des clés avant et après crash pour Chord.}
+        \label{fig:chord_metrics_skew}
+    \end{minipage}
+\end{figure}

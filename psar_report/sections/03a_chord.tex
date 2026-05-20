@@ -41,6 +41,13 @@ Lorsqu'un n\oe ud re\c{c}oit une requ\^ete \texttt{PUT} pour une paire \((key, v
 
 La lecture suit exactement la m\^eme logique que le \texttt{PUT}. Le n\oe ud recevant la requ\^ete \texttt{GET} calcule le \emph{hash} de la cl\'e et identifie le \emph{successor} responsable via \emph{lookup}. Si c'est lui-m\^eme, il retourne la valeur depuis son \emph{store} local, ou \texttt{NOT\_FOUND} si la cl\'e est absente. Sinon, la requ\^ete est rout\'ee vers le n\oe ud responsable, qui r\'epond directement \`a l'\'emetteur original.
 
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.6\textwidth,height=0.45\textheight,keepaspectratio]{prism-uploads/GetCHORD.drawio.pdf}
+    \caption{D\'eroulement d'une op\'eration \texttt{GET} dans l'architecture Chord.}
+    \label{fig:chord_get}
+\end{figure}
+
 \textbf{Nombre total de messages \'echang\'es :} \(O(\log N)\)
 
 

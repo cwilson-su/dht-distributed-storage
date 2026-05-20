@@ -1,0 +1,33 @@
+\section{Conclusion}
+
+\subsection{Usages réels et intérêts pratiques des trois implémentations}
+
+Les trois générations étudiées ne correspondent pas seulement à des étapes expérimentales du projet. Elles représentent aussi trois familles d'architectures que l'on retrouve, sous des formes plus ou moins directes, dans des systèmes réels. Leur intérêt pratique dépend surtout du compromis recherché entre simplicité, contrôle centralisé, robustesse décentralisée et passage à l'échelle.
+
+\subsubsection{Version centralisée}
+
+L'architecture centralisée inspirée de \textit{Napster} reste pertinente lorsqu'un point de coordination unique simplifie fortement le système. Un serveur central peut maintenir un index global, authentifier les clients, appliquer des politiques d'accès et fournir une vue cohérente des ressources disponibles. Ce modèle est facile à développer, à superviser et à déboguer, ce qui explique pourquoi il reste très présent dans les services modernes.
+
+On retrouve cette logique dans de nombreuses infrastructures de type client-serveur ou plateforme centralisée. Des services comme \textit{Google Drive}, \textit{Dropbox} ou \textit{OneDrive} reposent sur une forte coordination côté serveur pour gérer les comptes, les métadonnées, les droits d'accès et la synchronisation. De même, des plateformes comme \textit{GitHub} ou \textit{GitLab} utilisent une architecture centralisée pour fournir un point d'accès unique aux dépôts, aux permissions et aux opérations collaboratives. Le principal avantage est donc la maîtrise du système ; la limite est l'existence d'un point critique, qui doit être rendu hautement disponible par réplication, équilibrage de charge et redondance.
+
+\subsubsection{Version DHT non structurée}
+
+Il serait toutefois réducteur de conclure que ce type d'architecture n'a aucun intérêt pratique. Sous sa forme brute, un réseau entièrement de type Gnutella passe mal à l'échelle pour un stockage distribué global, précisément à cause du coût du flooding et de l'instabilité du placement. En revanche, ses idées restent très utiles dans des contextes où la simplicité, la robustesse et la découverte rapide priment sur l'optimalité asymptotique.
+
+On retrouve aujourd'hui ces idées dans des briques très concrètes.
+
+Sur un réseau local, \textbf{mDNS} (\textit{multicast DNS}) est un mécanisme de découverte sans infrastructure (\url{https://datatracker.ietf.org/doc/html/rfc6762}). Son rôle est simple : permettre à des machines présentes sur le même réseau de s'annoncer mutuellement et de découvrir rapidement leurs voisins sans passer par un serveur central. L'idée est très proche de notre approche naïve : on privilégie la simplicité, la visibilité rapide et l'absence de coordination centrale.
+
+Dans l'écosystème \textbf{libp2p}, on retrouve également cette logique pour la découverte locale des pairs (\url{https://libp2p.io/docs/mdns/}). Un n\oe ud peut ainsi détecter d'autres participants proches et établir rapidement ses premières connexions. À un autre niveau, les protocoles \textit{Floodsub} puis surtout \textit{Gossipsub} servent à diffuser des messages dans le réseau pair-à-pair (\url{https://libp2p.io/docs/pubsub/}). Ils reprennent l'intuition du flooding, mais sous une forme mieux contrôlée afin de limiter le trafic inutile.
+
+Dans les \textbf{blockchains modernes}, la couche réseau pair-à-pair conserve elle aussi cette idée de propagation rapide (\url{https://ethereum.org/developers/docs/networking-layer/}). Concrètement, les n\oe uds commencent par découvrir d'autres pairs, puis utilisent un mécanisme de type gossip pour transmettre transactions et blocs à travers le réseau. L'objectif n'est pas de stocker les données via une DHT naïve, mais de propager vite et sans point central une information qui doit atteindre un grand nombre de participants.
+
+Autrement dit, l'approche naïve inspirée de Gnutella reste pertinente comme brique de base pour des tâches bien ciblées : trouver rapidement des voisins, diffuser une information à grande vitesse, ou maintenir une connectivité décentralisée sans coordinateur central. Ce ne sont pas les mêmes objectifs qu'une DHT structurée ; c'est précisément pourquoi, dans les systèmes réels, ces mécanismes coexistent souvent avec des structures plus élaborées au lieu de les remplacer entièrement.
+
+\subsubsection{Version DHT structurée inspirée de Chord}
+
+La troisième génération, fondée sur une DHT structurée, correspond à une famille de systèmes utilisée lorsque le routage doit rester décentralisé tout en offrant de meilleures garanties que le simple flooding. L'intérêt principal est de remplacer une recherche aveugle par un espace d'identifiants stable et par des tables de routage locales permettant d'atteindre le n\oe ud responsable en un nombre logarithmique de sauts.
+
+Dans les systèmes réels, cette logique apparaît dans plusieurs infrastructures distribuées. \textit{Amazon Dynamo} a popularisé l'usage du \textit{consistent hashing} pour répartir les données entre n\oe uds et limiter les déplacements lors des changements de topologie. Des bases de données distribuées comme \textit{Apache Cassandra} ou \textit{Riak} reprennent aussi des idées proches : partitionnement par hachage cohérent, réplication sur plusieurs n\oe uds et routage vers les responsables des clés. Dans les réseaux pair-à-pair, \textit{BitTorrent Mainline DHT} et certains mécanismes de découverte utilisés dans \textit{IPFS} s'appuient plutôt sur des variantes de \textit{Kademlia}, mais l'objectif reste similaire : localiser efficacement des pairs ou des ressources sans serveur central.
+
+Ainsi, même si \textit{Chord} lui-même est surtout un protocole de référence académique, les principes qu'il illustre sont largement présents dans les infrastructures modernes : distribution stable des clés, routage déterministe, tolérance au churn et absence de coordinateur unique. Cette famille d'approches est donc mieux adaptée que les deux premières générations lorsque le système doit croître, rester disponible malgré les pannes et éviter qu'un serveur central ou une inondation réseau ne devienne le facteur limitant.
